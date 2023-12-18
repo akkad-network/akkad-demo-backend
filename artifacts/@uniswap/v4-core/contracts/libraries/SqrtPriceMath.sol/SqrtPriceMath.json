@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "SqrtPriceMath",
+  "sourceName": "@uniswap/v4-core/contracts/libraries/SqrtPriceMath.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea2646970667358221220a4a08d79af90d820c6351002b879b3095484e514cb7e6e5622e583ad5034bc3264736f6c63430008150033",
+  "deployedBytecode": "0x600080fdfea2646970667358221220a4a08d79af90d820c6351002b879b3095484e514cb7e6e5622e583ad5034bc3264736f6c63430008150033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

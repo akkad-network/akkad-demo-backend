@@ -1,0 +1,54 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "MockUniswapV3Pool",
+  "sourceName": "contracts/test/MockUniswapV3Pool.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "slot0",
+      "outputs": [
+        {
+          "internalType": "uint160",
+          "name": "sqrtPriceX96",
+          "type": "uint160"
+        },
+        {
+          "internalType": "int24",
+          "name": "tick",
+          "type": "int24"
+        },
+        {
+          "internalType": "uint16",
+          "name": "observationIndex",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "observationCardinality",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint16",
+          "name": "observationCardinalityNext",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint8",
+          "name": "feeProtocol",
+          "type": "uint8"
+        },
+        {
+          "internalType": "bool",
+          "name": "unlocked",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608080604052346100155760e8908161001b8239f35b600080fdfe6080806040526004361015601257600080fd5b600090813560e01c633850c7bd14602857600080fd5b3460ae57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260ae5760e0916b028f53d88fcc5a5ada622f1582527ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe98336020830152806040830152600160608301526001608083015260a0820152600160c0820152f35b5080fdfea26469706673582212209273a8b597160ea6edcacc4f04e136c1a05156ed00523d350eba88cc37be4a8264736f6c63430008150033",
+  "deployedBytecode": "0x6080806040526004361015601257600080fd5b600090813560e01c633850c7bd14602857600080fd5b3460ae57817ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011260ae5760e0916b028f53d88fcc5a5ada622f1582527ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe98336020830152806040830152600160608301526001608083015260a0820152600160c0820152f35b5080fdfea26469706673582212209273a8b597160ea6edcacc4f04e136c1a05156ed00523d350eba88cc37be4a8264736f6c63430008150033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

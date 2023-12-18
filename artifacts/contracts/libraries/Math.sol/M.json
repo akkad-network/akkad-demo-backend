@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "M",
+  "sourceName": "contracts/libraries/Math.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea26469706673582212208fb3830f94aae66afddc6e9c3f3e25007051ac087b429a08669b1376beff32f164736f6c63430008150033",
+  "deployedBytecode": "0x600080fdfea26469706673582212208fb3830f94aae66afddc6e9c3f3e25007051ac087b429a08669b1376beff32f164736f6c63430008150033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

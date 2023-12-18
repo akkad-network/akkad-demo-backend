@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Counters",
+  "sourceName": "@openzeppelin/contracts/utils/Counters.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea2646970667358221220c6f5f3c962a8c56193f5e64cf81379c0db2f0d6614e55cd83bdf0a14820f4a7364736f6c63430008150033",
+  "deployedBytecode": "0x600080fdfea2646970667358221220c6f5f3c962a8c56193f5e64cf81379c0db2f0d6614e55cd83bdf0a14820f4a7364736f6c63430008150033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

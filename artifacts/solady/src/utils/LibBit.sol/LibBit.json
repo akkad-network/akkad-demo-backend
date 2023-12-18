@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "LibBit",
+  "sourceName": "solady/src/utils/LibBit.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea2646970667358221220ae74838c8e32e45a0a2e55bc432e17d51a0fcecf2f450bfd04fece4651dcb59464736f6c63430008150033",
+  "deployedBytecode": "0x600080fdfea2646970667358221220ae74838c8e32e45a0a2e55bc432e17d51a0fcecf2f450bfd04fece4651dcb59464736f6c63430008150033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

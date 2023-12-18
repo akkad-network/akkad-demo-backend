@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "UnsafeMath",
+  "sourceName": "@uniswap/v4-core/contracts/libraries/UnsafeMath.sol",
+  "abi": [],
+  "bytecode": "0x60808060405234601757603a9081601d823930815050f35b600080fdfe600080fdfea26469706673582212201e319d04bc5cd5d33cb399a621bb9aa06a53860fabf0c4f4a7d0556ee267fd1c64736f6c63430008150033",
+  "deployedBytecode": "0x600080fdfea26469706673582212201e319d04bc5cd5d33cb399a621bb9aa06a53860fabf0c4f4a7d0556ee267fd1c64736f6c63430008150033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
