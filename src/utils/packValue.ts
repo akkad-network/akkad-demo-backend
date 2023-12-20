@@ -21,25 +21,25 @@ export function packPoolIndexes(poolIndexes: number[]) {
   return packedValue;
 }
 
+export function packTokenPrice(
+  tokenIndex: number,
+  priceX96: string,
+  pricePosition: number,
+): BigNumber {
+  const packedTokenIndex = BigNumber.from(tokenIndex);
+  const packedPriceX96 = ethers.utils.parseEther(priceX96).shl(pricePosition);
+
+  return packedPriceX96.or(packedTokenIndex);
+}
+
 export function packPrice(tokenIndex: number, price: string) {
-  console.log('tokenIndex ', tokenIndex);
-  console.log('price ', price);
-
-  let packedValue = BigNumber.from(0);
-
   if (tokenIndex < 0 || tokenIndex >= Math.pow(2, tokenIndex)) {
     throw new Error(`Pool index out of range at position ${tokenIndex}`);
   }
 
-  const tokenIndexBN = BigNumber.from(tokenIndex);
+  const packedValue = packTokenPrice(tokenIndex, price, 24);
 
-  packedValue = packedValue.or(tokenIndexBN);
   console.log('packedValue ', packedValue);
-  const poolCountValueRaw = ethers.utils.parseEther(price);
-  console.log('poolCountValueRaw ', poolCountValueRaw);
-  const poolCountValue = poolCountValueRaw.shl(183);
-  console.log('poolCountValue ', poolCountValue);
-  packedValue = packedValue.or(poolCountValue);
 
   return packedValue;
 }

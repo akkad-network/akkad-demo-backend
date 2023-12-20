@@ -67,16 +67,16 @@ export class ChainExecutorService {
 
   async getExecutorAssistantQueryResult(): Promise<void> {
     // async getExecutorAssistantQueryResult(): Promise<CalculateMulticallResponseDto> {
-    // const [pools, indexPerOperations] =
-    //   await this.executorAssistantContract.calculateNextMulticall(1);
+    const [pools, indexPerOperations] =
+      await this.executorAssistantContract.calculateNextMulticall(1);
 
-    // pools.forEach((poolAddress, index) => {
-    //   console.log(`Pool ${index}: ${poolAddress}`);
-    // });
+    pools.forEach((poolAddress, index) => {
+      console.log(`Pool ${index}: ${poolAddress}`);
+    });
 
-    // const poolsIndexes = packPoolIndexes(
-    //   pools.map((pool) => TOKEN_INDEX_INFO[pool]),
-    // );
+    const poolsIndexes = packPoolIndexes(
+      pools.map((pool) => TOKEN_INDEX_INFO[pool]),
+    );
 
     // console.log('poolsIndexes', poolsIndexes);
     const { data }: { data: Record<string, string> } =
@@ -99,6 +99,21 @@ export class ChainExecutorService {
     console.log('priceInfo ', priceInfo);
 
     const packedPrices = packPrices(priceInfo);
+
+    console.log('packedPrices ', packedPrices);
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const setPricesCalls = [
+      this.executorContract.interface.encodeFunctionData('setPriceX96s', [
+        packedPrices,
+        timestamp,
+      ]),
+    ];
+
+    const setPricesResult = await this.executorContract.multicall(
+      setPricesCalls,
+    );
+
+    console.log('setPricesResult ', setPricesResult);
 
     // const calls = [
     //   this.executorContract.interface.encodeFunctionData(
@@ -141,6 +156,7 @@ export class ChainExecutorService {
     //       [indexOperation],
     //     ),
     //   ];
+    // }
 
     //   const currentCallsResult = await this.executorContract.multicall(
     //     currentCalls,
