@@ -9,13 +9,13 @@ import { packPoolIndexes, packPrices } from '../utils/packValue';
 import { PriceService } from 'src/price/price.service';
 
 enum TokenAsset {
-  BTC = '0x3099c1313B7de49193773c278bb4a487FA6e42b1',
+  BTC = '0x9d08Fb37Be74e0542E3C2bb881158850f2f5d270',
   ETH = '0xc7f646814e08697F94e7194B41824405E131f0A0',
-  ORDI = '0x8fBE025c1EdF5c4a9EcF1a2ED5DaDCc49686daa6',
+  ORDI = '0x774DE4eBb56Ef661133cfDc30F1ed735e6baceB5',
 }
 
 const TOKEN_INDEX_INFO = {
-  [TokenAsset.BTC]: 0,
+  [TokenAsset.BTC]: 1,
   [TokenAsset.ETH]: 2,
   [TokenAsset.ORDI]: 3,
 };
@@ -70,15 +70,57 @@ export class ChainExecutorService {
     const [pools, indexPerOperations] =
       await this.executorAssistantContract.calculateNextMulticall(1);
 
-    pools.forEach((poolAddress, index) => {
-      console.log(`Pool ${index}: ${poolAddress}`);
-    });
+    const packIndexes = packPoolIndexes(pools);
 
-    const poolsIndexes = packPoolIndexes(
-      pools.map((pool) => TOKEN_INDEX_INFO[pool]),
-    );
+    for (let index = 0; index < indexPerOperations.length; index++) {
+      const indexOperation = indexPerOperations[index]?.indexEnd;
 
-    // console.log('poolsIndexes', poolsIndexes);
+      const positionCalls = [
+        this.executorContract.interface.encodeFunctionData('setPriceX96s', [
+          packedPrices,
+          timestamp,
+        ]),
+        this.executorContract.interface.encodeFunctionData(
+          'sampleAndAdjustFundingRateBatch',
+          [packIndexes],
+        ),
+        this.executorContract.interface.encodeFunctionData(
+          'executeOpenLiquidityPositions',
+          [indexOperation],
+        ),
+        this.executorContract.interface.encodeFunctionData(
+          'executeCloseLiquidityPositions',
+          [indexOperation],
+        ),
+        this.executorContract.interface.encodeFunctionData(
+          'executeAdjustLiquidityPositionMargins',
+          [indexOperation],
+        ),
+        this.executorContract.interface.encodeFunctionData(
+          'executeIncreaseRiskBufferFundPositions',
+          [indexOperation],
+        ),
+        this.executorContract.interface.encodeFunctionData(
+          'executeDecreaseRiskBufferFundPositions',
+          [indexOperation],
+        ),
+        this.executorContract.interface.encodeFunctionData(
+          'executeIncreasePositions',
+          [indexOperation],
+        ),
+        this.executorContract.interface.encodeFunctionData(
+          'executeDecreasePositions',
+          [indexOperation],
+        ),
+      ];
+
+      const positionCallsResult = await this.executorContract.multicall(
+        positionCalls,
+      );
+
+      console.log('positionCallsResult ', positionCallsResult);
+    }
+
     const { data }: { data: Record<string, string> } =
       await this.priceService.getOraclePrice();
 
@@ -86,100 +128,32 @@ export class ChainExecutorService {
 
     const priceInfo = tokens
       .map((token) => {
-        const tokenAddr = TokenAsset[token];
-        const tokenPrice = data[token];
-        const tokenIndex = TOKEN_INDEX_INFO[tokenAddr];
-        console.log('tokenAddr ', tokenAddr);
-        console.log('tokenPrice ', tokenPrice);
-        console.log('tokenIndex ', tokenIndex);
         return [TOKEN_INDEX_INFO[TokenAsset[token]], data[token]];
       })
       .filter((item) => typeof item[0] === 'number') as any;
 
-    console.log('priceInfo ', priceInfo);
-
     const packedPrices = packPrices(priceInfo);
 
-    console.log('packedPrices ', packedPrices);
     const timestamp = Math.floor(Date.now() / 1000).toString();
-    const setPricesCalls = [
+
+    const batchCalls = [
       this.executorContract.interface.encodeFunctionData('setPriceX96s', [
         packedPrices,
         timestamp,
       ]),
+      this.executorContract.interface.encodeFunctionData(
+        'sampleAndAdjustFundingRateBatch',
+        [packIndexes],
+      ),
+      this.executorContract.interface.encodeFunctionData(
+        'collectProtocolFeeBatch',
+        [packIndexes],
+      ),
     ];
 
-    const setPricesResult = await this.executorContract.multicall(
-      setPricesCalls,
-    );
+    const batchCallsResult = await this.executorContract.multicall(batchCalls);
 
-    console.log('setPricesResult ', setPricesResult);
-
-    // const calls = [
-    //   this.executorContract.interface.encodeFunctionData(
-    //     'sampleAndAdjustFundingRateBatch',
-    //     [poolsIndexes],
-    //   ),
-    // ];
-
-    // for (let index = 0; index < indexPerOperations.length; index++) {
-    //   const indexOperation = indexPerOperations[index]?.indexEnd;
-
-    //   console.log('indexOperation ', indexOperation);
-    //   const currentCalls = [
-    //     this.executorContract.interface.encodeFunctionData(
-    //       'executeOpenLiquidityPositions',
-    //       [indexOperation],
-    //     ),
-    //     this.executorContract.interface.encodeFunctionData(
-    //       'executeCloseLiquidityPositions',
-    //       [indexOperation],
-    //     ),
-    //     this.executorContract.interface.encodeFunctionData(
-    //       'executeAdjustLiquidityPositionMargins',
-    //       [indexOperation],
-    //     ),
-    //     this.executorContract.interface.encodeFunctionData(
-    //       'executeIncreaseRiskBufferFundPositions',
-    //       [indexOperation],
-    //     ),
-    //     this.executorContract.interface.encodeFunctionData(
-    //       'executeDecreaseRiskBufferFundPositions',
-    //       [indexOperation],
-    //     ),
-    //     this.executorContract.interface.encodeFunctionData(
-    //       'executeIncreasePositions',
-    //       [indexOperation],
-    //     ),
-    //     this.executorContract.interface.encodeFunctionData(
-    //       'executeDecreasePositions',
-    //       [indexOperation],
-    //     ),
-    //   ];
-    // }
-
-    //   const currentCallsResult = await this.executorContract.multicall(
-    //     currentCalls,
-    //   );
-
-    //   console.log('currentCallsResult ', currentCallsResult);
-    // }
-
-    // indexPerOperations.forEach((operation, opIndex) => {
-    //   console.log(`Operation ${opIndex}:`);
-    //   console.log(`  - Start Index: ${operation.index}`);
-    //   console.log(`  - Next Index: ${operation.indexNext}`);
-    //   console.log(`  - End Index: ${operation.indexEnd}`);
-    // });
-
-    // return {
-    //   pools: pools.map((pool) => pool.toString()),
-    //   indexPerOperations: indexPerOperations.map((op) => ({
-    //     index: op.index.toNumber(),
-    //     indexNext: op.indexNext.toNumber(),
-    //     indexEnd: op.indexEnd.toNumber(),
-    //   })),
-    // };
+    console.log('batchCallsResult ', batchCallsResult);
   }
 
   async executorHandler(): Promise<any> {
