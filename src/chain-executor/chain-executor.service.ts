@@ -1,23 +1,28 @@
+import { RedisService } from 'src/redis/redis.service';
 import { Injectable } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { abi as executorAssistantABI } from 'artifacts/contracts/misc/ExecutorAssistant.sol/ExecutorAssistant.json';
 import { abi as executorABI } from 'artifacts/contracts/misc/MixedExecutorV2.sol/MixedExecutorV2.json';
 import { abi as poolABI } from 'artifacts/contracts/core/Pool.sol/Pool.json';
-import { abi as poolIndexerABI } from 'artifacts/contracts/core/PoolIndexer.sol/PoolIndexer.json';
-import { CalculateMulticallResponseDto } from './chain-executor.dto';
 import { packPoolIndexes, packPrices } from '../utils/packValue';
 import { PriceService } from 'src/price/price.service';
 
-enum TokenAsset {
+export enum TokenAsset {
   BTC = '0x9d08Fb37Be74e0542E3C2bb881158850f2f5d270',
   ETH = '0xc7f646814e08697F94e7194B41824405E131f0A0',
   ORDI = '0x774DE4eBb56Ef661133cfDc30F1ed735e6baceB5',
 }
 
+export enum TokenPool {
+  BTC = '0x3099c1313B7de49193773c278bb4a487FA6e42b1',
+  ETH = '0xfb7DD22Dbb9FEC2832E7c05de9AfF53D426b603B',
+  ORDI = '0x774DE4eBb56Ef661133cfDc30F1ed735e6baceB5',
+}
+
 const TOKEN_INDEX_INFO = {
-  [TokenAsset.BTC]: 1,
-  [TokenAsset.ETH]: 2,
-  [TokenAsset.ORDI]: 3,
+  [TokenPool.BTC]: 1,
+  [TokenPool.ETH]: 2,
+  [TokenPool.ORDI]: 3,
 };
 
 @Injectable()
@@ -25,13 +30,12 @@ export class ChainExecutorService {
   private provider: ethers.providers.JsonRpcProvider;
   private executorAssistantContract: ethers.Contract;
   private executorContract: ethers.Contract;
-  private poolContract: ethers.Contract;
-  private poolIndexerContract: ethers.Contract;
+  private btcPoolContract: ethers.Contract;
+  private ethPoolContract: ethers.Contract;
+  private ordiPoolContract: ethers.Contract;
   private signer: ethers.Signer;
-  private priceService: PriceService;
 
-  constructor(private _priceService: PriceService) {
-    this.priceService = _priceService;
+  constructor(private priceService: PriceService) {
     this.provider = new ethers.providers.JsonRpcProvider(
       'https://arb-sepolia.g.alchemy.com/v2/RCtmHaPSrWs8prthWD31jNbk_0wEwp0j',
     );
@@ -40,17 +44,27 @@ export class ChainExecutorService {
       this.provider,
     );
 
-    this.poolContract = new ethers.Contract(
+    this.btcPoolContract = new ethers.Contract(
       '0x3099c1313B7de49193773c278bb4a487FA6e42b1',
       poolABI,
       this.signer,
     );
-
-    this.poolIndexerContract = new ethers.Contract(
-      '0xeF7a1CCB7f6370Bd7275e9968aaF53fcF91Ae449',
-      poolIndexerABI,
+    this.ethPoolContract = new ethers.Contract(
+      '0xfb7DD22Dbb9FEC2832E7c05de9AfF53D426b603B',
+      poolABI,
       this.signer,
     );
+    this.ordiPoolContract = new ethers.Contract(
+      '0x774DE4eBb56Ef661133cfDc30F1ed735e6baceB5',
+      poolABI,
+      this.signer,
+    );
+
+    // this.poolIndexerContract = new ethers.Contract(
+    //   '0xeF7a1CCB7f6370Bd7275e9968aaF53fcF91Ae449',
+    //   poolIndexerABI,
+    //   this.signer,
+    // );
 
     this.executorAssistantContract = new ethers.Contract(
       '0x93f3758e4DD91a9f0Ffc6474D6621d704a91C6d9',
@@ -66,20 +80,32 @@ export class ChainExecutorService {
   }
 
   async getExecutorAssistantQueryResult(): Promise<void> {
-    // async getExecutorAssistantQueryResult(): Promise<CalculateMulticallResponseDto> {
     const [pools, indexPerOperations] =
       await this.executorAssistantContract.calculateNextMulticall(1);
+    const poolIndexes = pools.map((pool) => TOKEN_INDEX_INFO[pool]);
 
-    const packIndexes = packPoolIndexes(pools);
+    console.log('poolIndexes ', poolIndexes);
+    console.log('poolIndexes ', poolIndexes);
+
+    const packIndexes = packPoolIndexes(poolIndexes);
 
     for (let index = 0; index < indexPerOperations.length; index++) {
       const indexOperation = indexPerOperations[index]?.indexEnd;
 
+      const markPrices = (await this.priceService.getPrices()).markPrices;
+      const tokens = Object.keys(markPrices);
+
+      const priceInfo = tokens
+        .map((token) => {
+          return [TOKEN_INDEX_INFO[TokenAsset[token]], markPrices[token]];
+        })
+        .filter((item) => typeof item[0] === 'number') as any;
+
+      const packedPrices = packPrices(priceInfo);
+
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+
       const positionCalls = [
-        this.executorContract.interface.encodeFunctionData('setPriceX96s', [
-          packedPrices,
-          timestamp,
-        ]),
         this.executorContract.interface.encodeFunctionData(
           'sampleAndAdjustFundingRateBatch',
           [packIndexes],
@@ -112,6 +138,18 @@ export class ChainExecutorService {
           'executeDecreasePositions',
           [indexOperation],
         ),
+        this.executorContract.interface.encodeFunctionData('setPriceX96s', [
+          packedPrices,
+          timestamp,
+        ]),
+        this.executorContract.interface.encodeFunctionData(
+          'sampleAndAdjustFundingRateBatch',
+          [packIndexes],
+        ),
+        this.executorContract.interface.encodeFunctionData(
+          'collectProtocolFeeBatch',
+          [packIndexes],
+        ),
       ];
 
       const positionCallsResult = await this.executorContract.multicall(
@@ -120,161 +158,5 @@ export class ChainExecutorService {
 
       console.log('positionCallsResult ', positionCallsResult);
     }
-
-    const { data }: { data: Record<string, string> } =
-      await this.priceService.getOraclePrice();
-
-    const tokens = Object.keys(data);
-
-    const priceInfo = tokens
-      .map((token) => {
-        return [TOKEN_INDEX_INFO[TokenAsset[token]], data[token]];
-      })
-      .filter((item) => typeof item[0] === 'number') as any;
-
-    const packedPrices = packPrices(priceInfo);
-
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-
-    const batchCalls = [
-      this.executorContract.interface.encodeFunctionData('setPriceX96s', [
-        packedPrices,
-        timestamp,
-      ]),
-      this.executorContract.interface.encodeFunctionData(
-        'sampleAndAdjustFundingRateBatch',
-        [packIndexes],
-      ),
-      this.executorContract.interface.encodeFunctionData(
-        'collectProtocolFeeBatch',
-        [packIndexes],
-      ),
-    ];
-
-    const batchCallsResult = await this.executorContract.multicall(batchCalls);
-
-    console.log('batchCallsResult ', batchCallsResult);
-  }
-
-  async executorHandler(): Promise<any> {
-    const calls = [
-      this.executorContract.encodeFunctionData('setPriceX96s', []),
-      this.executorContract.encodeFunctionData(
-        'executeOpenLiquidityPositions',
-        [],
-      ),
-      this.executorContract.encodeFunctionData(
-        'executeCloseLiquidityPositions',
-        [],
-      ),
-      this.executorContract.encodeFunctionData(
-        'executeAdjustLiquidityPositionMargins',
-        [],
-      ),
-      this.executorContract.encodeFunctionData(
-        'executeIncreaseRiskBufferFundPositions',
-        [],
-      ),
-      this.executorContract.encodeFunctionData(
-        'executeDecreaseRiskBufferFundPositions',
-        [],
-      ),
-      this.executorContract.encodeFunctionData('executeIncreasePositions', []),
-      this.executorContract.encodeFunctionData('executeDecreasePositions', []),
-      this.executorContract.encodeFunctionData(
-        'sampleAndAdjustFundingRateBatch',
-        [],
-      ),
-      this.executorContract.encodeFunctionData('collectProtocolFeeBatch', []),
-      this.executorContract.encodeFunctionData('executeIncreaseOrder', []),
-      this.executorContract.encodeFunctionData('executeDecreaseOrder', []),
-      this.executorContract.encodeFunctionData(
-        'liquidateLiquidityPosition',
-        [],
-      ),
-      this.executorContract.encodeFunctionData('liquidatePosition', []),
-    ];
-
-    const result = await this.executorContract.multicall(calls);
-
-    const decodedResult1 = this.executorContract.interface.decodeFunctionResult(
-      'setPriceX96s',
-      result.returnData[0],
-    );
-    const decodedResult2 = this.executorContract.interface.decodeFunctionResult(
-      'executeOpenLiquidityPositions',
-      result.returnData[1],
-    );
-    const decodedResult3 = this.executorContract.interface.decodeFunctionResult(
-      'executeCloseLiquidityPositions',
-      result.returnData[0],
-    );
-    const decodedResult4 = this.executorContract.interface.decodeFunctionResult(
-      'executeAdjustLiquidityPositionMargins',
-      result.returnData[1],
-    );
-    const decodedResult5 = this.executorContract.interface.decodeFunctionResult(
-      'executeIncreaseRiskBufferFundPositions',
-      result.returnData[0],
-    );
-    const decodedResult6 = this.executorContract.interface.decodeFunctionResult(
-      'executeDecreaseRiskBufferFundPositions',
-      result.returnData[1],
-    );
-    const decodedResult7 = this.executorContract.interface.decodeFunctionResult(
-      'executeIncreasePositions',
-      result.returnData[0],
-    );
-    const decodedResult8 = this.executorContract.interface.decodeFunctionResult(
-      'executeDecreasePositions',
-      result.returnData[1],
-    );
-    const decodedResult9 = this.executorContract.interface.decodeFunctionResult(
-      'sampleAndAdjustFundingRateBatch',
-      result.returnData[0],
-    );
-    const decodedResult10 =
-      this.executorContract.interface.decodeFunctionResult(
-        'collectProtocolFeeBatch',
-        result.returnData[1],
-      );
-    const decodedResult11 =
-      this.executorContract.interface.decodeFunctionResult(
-        'executeIncreaseOrder',
-        result.returnData[0],
-      );
-    const decodedResult12 =
-      this.executorContract.interface.decodeFunctionResult(
-        'executeDecreaseOrder',
-        result.returnData[1],
-      );
-    const decodedResult13 =
-      this.executorContract.interface.decodeFunctionResult(
-        'liquidateLiquidityPosition',
-        result.returnData[0],
-      );
-    const decodedResult14 =
-      this.executorContract.interface.decodeFunctionResult(
-        'liquidatePosition',
-        result.returnData[1],
-      );
-    // Decode other function results...
-
-    return {
-      result1: decodedResult1,
-      result2: decodedResult2,
-      result3: decodedResult3,
-      result4: decodedResult4,
-      result5: decodedResult5,
-      result6: decodedResult6,
-      result7: decodedResult7,
-      result8: decodedResult8,
-      result9: decodedResult9,
-      result10: decodedResult10,
-      result11: decodedResult11,
-      result12: decodedResult12,
-      result13: decodedResult13,
-      result14: decodedResult14,
-    };
   }
 }

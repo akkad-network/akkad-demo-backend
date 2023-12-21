@@ -6,6 +6,7 @@ export function packPoolIndexes(poolIndexes: number[]) {
 
   // 打包每个资金池索引
   poolIndexes.forEach((index, i) => {
+    console.log('Pool index: ', index);
     if (index < 0 || index >= Math.pow(2, bitsPerPoolIndex)) {
       throw new Error(`Pool index out of range at position ${i}`);
     }
@@ -17,6 +18,50 @@ export function packPoolIndexes(poolIndexes: number[]) {
   const poolCount = poolIndexes.length;
   const poolCountValue = BigNumber.from(poolCount).shl(240);
   packedValue = packedValue.or(poolCountValue);
+
+  return packedValue;
+}
+
+export function packLiquidateLiquidityPoolValue(
+  poolIndex: number,
+  positionId: BigNumber,
+  requiredSuccess = false,
+) {
+  let packedValue = BigNumber.from(0);
+
+  const shiftedIndex = BigNumber.from(poolIndex).shl(0);
+  packedValue = packedValue.or(shiftedIndex);
+
+  const positionIdShl = positionId.shl(24);
+  packedValue = packedValue.or(positionIdShl);
+
+  const poolCountValue = BigNumber.from(Number(requiredSuccess)).shl(120);
+  packedValue = packedValue.or(poolCountValue);
+
+  return packedValue;
+}
+
+export function packLiquidatePoolValue(
+  poolIndex: number,
+  account: BigNumber,
+  side: BigNumber,
+  requiredSuccess = false,
+) {
+  let packedValue = BigNumber.from(0);
+
+  const shiftedIndex = BigNumber.from(poolIndex).shl(0);
+  packedValue = packedValue.or(shiftedIndex);
+
+  const accountShl = account.shl(24);
+  packedValue = packedValue.or(accountShl);
+
+  const packedSideValue = BigNumber.from(Number(side)).shl(184);
+  packedValue = packedValue.or(packedSideValue);
+
+  const packedValueSuccessValue = BigNumber.from(Number(requiredSuccess)).shl(
+    192,
+  );
+  packedValue = packedValue.or(packedValueSuccessValue);
 
   return packedValue;
 }
