@@ -1,5 +1,5 @@
 import { RedisService } from 'src/redis/redis.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 import { abi as executorAssistantABI } from 'artifacts/contracts/misc/ExecutorAssistant.sol/ExecutorAssistant.json';
 import { abi as executorABI } from 'artifacts/contracts/misc/MixedExecutorV2.sol/MixedExecutorV2.json';
@@ -34,6 +34,7 @@ export class ChainExecutorService {
   private ethPoolContract: ethers.Contract;
   private ordiPoolContract: ethers.Contract;
   private signer: ethers.Signer;
+  private readonly logger = new Logger(ChainExecutorService.name);
 
   constructor(private priceService: PriceService) {
     this.provider = new ethers.providers.JsonRpcProvider(
@@ -80,83 +81,83 @@ export class ChainExecutorService {
   }
 
   async getExecutorAssistantQueryResult(): Promise<void> {
-    const [pools, indexPerOperations] =
-      await this.executorAssistantContract.calculateNextMulticall(1);
-    const poolIndexes = pools.map((pool) => TOKEN_INDEX_INFO[pool]);
+    try {
+      const [pools, indexPerOperations] =
+        await this.executorAssistantContract.calculateNextMulticall(1);
+      const poolIndexes = pools.map((pool) => TOKEN_INDEX_INFO[pool]);
 
-    console.log('poolIndexes ', poolIndexes);
-    console.log('poolIndexes ', poolIndexes);
+      const packIndexes = packPoolIndexes(poolIndexes);
 
-    const packIndexes = packPoolIndexes(poolIndexes);
+      for (let index = 0; index < indexPerOperations.length; index++) {
+        this.logger.log(
+          `indexPerOperations ${indexPerOperations} start multicall`,
+        );
+        const indexOperation = indexPerOperations[index]?.indexEnd;
 
-    for (let index = 0; index < indexPerOperations.length; index++) {
-      const indexOperation = indexPerOperations[index]?.indexEnd;
+        const markPrices = (await this.priceService.getPrices()).markPrices;
+        const tokens = Object.keys(markPrices);
 
-      const markPrices = (await this.priceService.getPrices()).markPrices;
-      const tokens = Object.keys(markPrices);
+        const priceInfo = tokens
+          .map((token) => {
+            return [TOKEN_INDEX_INFO[TokenAsset[token]], markPrices[token]];
+          })
+          .filter((item) => typeof item[0] === 'number') as any;
 
-      const priceInfo = tokens
-        .map((token) => {
-          return [TOKEN_INDEX_INFO[TokenAsset[token]], markPrices[token]];
-        })
-        .filter((item) => typeof item[0] === 'number') as any;
+        const packedPrices = packPrices(priceInfo);
 
-      const packedPrices = packPrices(priceInfo);
+        const timestamp = Math.floor(Date.now() / 1000).toString();
 
-      const timestamp = Math.floor(Date.now() / 1000).toString();
+        const positionCalls = [
+          this.executorContract.interface.encodeFunctionData(
+            'sampleAndAdjustFundingRateBatch',
+            [packIndexes],
+          ),
+          this.executorContract.interface.encodeFunctionData(
+            'executeOpenLiquidityPositions',
+            [indexOperation],
+          ),
+          this.executorContract.interface.encodeFunctionData(
+            'executeCloseLiquidityPositions',
+            [indexOperation],
+          ),
+          this.executorContract.interface.encodeFunctionData(
+            'executeAdjustLiquidityPositionMargins',
+            [indexOperation],
+          ),
+          this.executorContract.interface.encodeFunctionData(
+            'executeIncreaseRiskBufferFundPositions',
+            [indexOperation],
+          ),
+          this.executorContract.interface.encodeFunctionData(
+            'executeDecreaseRiskBufferFundPositions',
+            [indexOperation],
+          ),
+          this.executorContract.interface.encodeFunctionData(
+            'executeIncreasePositions',
+            [indexOperation],
+          ),
+          this.executorContract.interface.encodeFunctionData(
+            'executeDecreasePositions',
+            [indexOperation],
+          ),
+          this.executorContract.interface.encodeFunctionData('setPriceX96s', [
+            packedPrices,
+            timestamp,
+          ]),
+          this.executorContract.interface.encodeFunctionData(
+            'sampleAndAdjustFundingRateBatch',
+            [packIndexes],
+          ),
+          this.executorContract.interface.encodeFunctionData(
+            'collectProtocolFeeBatch',
+            [packIndexes],
+          ),
+        ];
 
-      const positionCalls = [
-        this.executorContract.interface.encodeFunctionData(
-          'sampleAndAdjustFundingRateBatch',
-          [packIndexes],
-        ),
-        this.executorContract.interface.encodeFunctionData(
-          'executeOpenLiquidityPositions',
-          [indexOperation],
-        ),
-        this.executorContract.interface.encodeFunctionData(
-          'executeCloseLiquidityPositions',
-          [indexOperation],
-        ),
-        this.executorContract.interface.encodeFunctionData(
-          'executeAdjustLiquidityPositionMargins',
-          [indexOperation],
-        ),
-        this.executorContract.interface.encodeFunctionData(
-          'executeIncreaseRiskBufferFundPositions',
-          [indexOperation],
-        ),
-        this.executorContract.interface.encodeFunctionData(
-          'executeDecreaseRiskBufferFundPositions',
-          [indexOperation],
-        ),
-        this.executorContract.interface.encodeFunctionData(
-          'executeIncreasePositions',
-          [indexOperation],
-        ),
-        this.executorContract.interface.encodeFunctionData(
-          'executeDecreasePositions',
-          [indexOperation],
-        ),
-        this.executorContract.interface.encodeFunctionData('setPriceX96s', [
-          packedPrices,
-          timestamp,
-        ]),
-        this.executorContract.interface.encodeFunctionData(
-          'sampleAndAdjustFundingRateBatch',
-          [packIndexes],
-        ),
-        this.executorContract.interface.encodeFunctionData(
-          'collectProtocolFeeBatch',
-          [packIndexes],
-        ),
-      ];
-
-      const positionCallsResult = await this.executorContract.multicall(
-        positionCalls,
-      );
-
-      console.log('positionCallsResult ', positionCallsResult);
+        await this.executorContract.multicall(positionCalls);
+      }
+    } catch (error) {
+      this.logger.error('Error occurred in getExecutorAssistantQueryResult');
     }
   }
 }
