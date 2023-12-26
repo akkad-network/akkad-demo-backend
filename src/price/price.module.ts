@@ -10,4 +10,5 @@ import { RedisModule } from 'src/redis/redis.module';
   exports: [PriceService],
   controllers: [PriceController],
 })
-export class PriceModule {}
+// eslint-disable-next-line prettier/prettier
+export class PriceModule { }

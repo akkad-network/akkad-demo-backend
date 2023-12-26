@@ -3,7 +3,8 @@ import { PriceService } from './price.service';
 
 @Controller('price')
 export class PriceController {
-  constructor(private readonly priceService: PriceService) {}
+  // eslint-disable-next-line prettier/prettier
+  constructor(private readonly priceService: PriceService) { }
 
   @Get('prices')
   async addressBalance() {

@@ -84,6 +84,7 @@ export class ChainExecutorService {
     try {
       const [pools, indexPerOperations] =
         await this.executorAssistantContract.calculateNextMulticall(1);
+
       const poolIndexes = pools.map((pool) => TOKEN_INDEX_INFO[pool]);
 
       const packIndexes = packPoolIndexes(poolIndexes);
@@ -153,6 +154,8 @@ export class ChainExecutorService {
             [packIndexes],
           ),
         ];
+
+        console.log('check positionCalls => ', positionCalls);
 
         await this.executorContract.multicall(positionCalls);
       }
