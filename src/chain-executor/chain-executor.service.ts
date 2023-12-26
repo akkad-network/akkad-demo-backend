@@ -109,30 +109,30 @@ export class ChainExecutorService {
         const timestamp = Math.floor(Date.now() / 1000).toString();
 
         const positionCalls = [
-          this.executorContract.interface.encodeFunctionData(
-            'sampleAndAdjustFundingRateBatch',
-            [packIndexes],
-          ),
-          this.executorContract.interface.encodeFunctionData(
-            'executeOpenLiquidityPositions',
-            [indexOperation],
-          ),
-          this.executorContract.interface.encodeFunctionData(
-            'executeCloseLiquidityPositions',
-            [indexOperation],
-          ),
-          this.executorContract.interface.encodeFunctionData(
-            'executeAdjustLiquidityPositionMargins',
-            [indexOperation],
-          ),
-          this.executorContract.interface.encodeFunctionData(
-            'executeIncreaseRiskBufferFundPositions',
-            [indexOperation],
-          ),
-          this.executorContract.interface.encodeFunctionData(
-            'executeDecreaseRiskBufferFundPositions',
-            [indexOperation],
-          ),
+          // this.executorContract.interface.encodeFunctionData(
+          //   'sampleAndAdjustFundingRateBatch',
+          //   [packIndexes],
+          // ),
+          // this.executorContract.interface.encodeFunctionData(
+          //   'executeOpenLiquidityPositions',
+          //   [indexOperation],
+          // ),
+          // this.executorContract.interface.encodeFunctionData(
+          //   'executeCloseLiquidityPositions',
+          //   [indexOperation],
+          // ),
+          // this.executorContract.interface.encodeFunctionData(
+          //   'executeAdjustLiquidityPositionMargins',
+          //   [indexOperation],
+          // ),
+          // this.executorContract.interface.encodeFunctionData(
+          //   'executeIncreaseRiskBufferFundPositions',
+          //   [indexOperation],
+          // ),
+          // this.executorContract.interface.encodeFunctionData(
+          //   'executeDecreaseRiskBufferFundPositions',
+          //   [indexOperation],
+          // ),
           this.executorContract.interface.encodeFunctionData(
             'executeIncreasePositions',
             [indexOperation],
@@ -145,14 +145,14 @@ export class ChainExecutorService {
             packedPrices,
             timestamp,
           ]),
-          this.executorContract.interface.encodeFunctionData(
-            'sampleAndAdjustFundingRateBatch',
-            [packIndexes],
-          ),
-          this.executorContract.interface.encodeFunctionData(
-            'collectProtocolFeeBatch',
-            [packIndexes],
-          ),
+          // this.executorContract.interface.encodeFunctionData(
+          //   'sampleAndAdjustFundingRateBatch',
+          //   [packIndexes],
+          // ),
+          // this.executorContract.interface.encodeFunctionData(
+          //   'collectProtocolFeeBatch',
+          //   [packIndexes],
+          // ),
         ];
 
         console.log('check positionCalls => ', positionCalls);
