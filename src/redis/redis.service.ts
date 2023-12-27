@@ -12,7 +12,6 @@ export class RedisService {
     });
   }
 
-  // 示例方法
   async get(key: string): Promise<string> {
     return this.redisClient.get(key);
   }

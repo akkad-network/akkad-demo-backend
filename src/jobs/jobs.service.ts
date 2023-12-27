@@ -11,9 +11,9 @@ export class JobsService {
   constructor(
     private priceService: PriceService,
     private chainExecutorService: ChainExecutorService,
-  ) {}
+  ) { }
 
-  @Cron('0 * * * * *', {
+  @Cron('* * * * * *', {
     name: 'executor',
   })
   async handleExecutor() {
@@ -23,7 +23,7 @@ export class JobsService {
     await this.chainExecutorService.getExecutorAssistantQueryResult();
   }
 
-  @Cron('*/15 * * * * *', {
+  @Cron('* * * * * *', {
     name: 'marketPricePositionRequests',
   })
   async handleMarketPricePositionRequests() {

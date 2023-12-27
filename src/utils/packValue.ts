@@ -1,4 +1,5 @@
 import { BigNumber, ethers } from 'ethers';
+import Decimal from 'decimal.js';
 
 export function packPoolIndexes(poolIndexes: number[]) {
   let packedValue = BigNumber.from(0);
@@ -72,9 +73,26 @@ export function packTokenPrice(
   pricePosition: number,
 ): BigNumber {
   const packedTokenIndex = BigNumber.from(tokenIndex);
-  const packedPriceX96 = ethers.utils.parseEther(priceX96).shl(pricePosition);
+  // const packedPriceX96 = ethers.utils.parseEther(priceX96).shl(pricePosition);
+  const packedPriceX96 = BigNumber.from(toPriceX96(priceX96, 18, 6)).shl(
+    pricePosition,
+  );
 
   return packedPriceX96.or(packedTokenIndex);
+}
+
+export function toPriceX96(
+  price: string,
+  tokenDecimals: number,
+  usdDecimals: number,
+): bigint {
+  return BigInt(
+    new Decimal(price)
+      .mul(new Decimal(10).pow(usdDecimals))
+      .div(new Decimal(10).pow(tokenDecimals))
+      .mul(new Decimal(2).pow(96))
+      .toFixed(0),
+  );
 }
 
 export function packPrice(tokenIndex: number, price: string) {
@@ -84,7 +102,7 @@ export function packPrice(tokenIndex: number, price: string) {
 
   const packedValue = packTokenPrice(tokenIndex, price, 24);
 
-  console.log('packedValue ', packedValue);
+  // console.log('packedValue ', packedValue);
 
   return packedValue;
 }

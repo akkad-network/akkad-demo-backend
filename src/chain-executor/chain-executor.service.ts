@@ -90,24 +90,23 @@ export class ChainExecutorService {
       const packIndexes = packPoolIndexes(poolIndexes);
 
       for (let index = 0; index < indexPerOperations.length; index++) {
-        this.logger.log(
-          `indexPerOperations ${indexPerOperations} start multicall`,
-        );
         const indexOperation = indexPerOperations[index]?.indexEnd;
-
-        const markPrices = (await this.priceService.getPrices()).markPrices;
-        const tokens = Object.keys(markPrices);
-
+        this.logger.debug(`index operation => ${indexOperation} execute !`);
+        const markPricesData = (await this.priceService.getPrices()).markPrices;
+        const tokens = Object.keys(markPricesData.data);
+        const markPrices = markPricesData.data;
         const priceInfo = tokens
           .map((token) => {
-            return [TOKEN_INDEX_INFO[TokenAsset[token]], markPrices[token]];
+            return [
+              TOKEN_INDEX_INFO[TokenPool[token]],
+              markPrices[token].markPrice,
+            ];
           })
           .filter((item) => typeof item[0] === 'number') as any;
-
         const packedPrices = packPrices(priceInfo);
-
+        // this.logger.log(`priceInfo  raw data => ${ priceInfo } `);
         const timestamp = Math.floor(Date.now() / 1000).toString();
-
+        // this.logger.log(`packedPrices after => ${ packedPrices } `);
         const positionCalls = [
           // this.executorContract.interface.encodeFunctionData(
           //   'sampleAndAdjustFundingRateBatch',
@@ -133,6 +132,10 @@ export class ChainExecutorService {
           //   'executeDecreaseRiskBufferFundPositions',
           //   [indexOperation],
           // ),
+          this.executorContract.interface.encodeFunctionData('setPriceX96s', [
+            packedPrices,
+            timestamp,
+          ]),
           this.executorContract.interface.encodeFunctionData(
             'executeIncreasePositions',
             [indexOperation],
@@ -141,10 +144,6 @@ export class ChainExecutorService {
             'executeDecreasePositions',
             [indexOperation],
           ),
-          this.executorContract.interface.encodeFunctionData('setPriceX96s', [
-            packedPrices,
-            timestamp,
-          ]),
           // this.executorContract.interface.encodeFunctionData(
           //   'sampleAndAdjustFundingRateBatch',
           //   [packIndexes],
@@ -155,12 +154,13 @@ export class ChainExecutorService {
           // ),
         ];
 
-        console.log('check positionCalls => ', positionCalls);
+        // console.log('check positionCalls => ', positionCalls);
 
         await this.executorContract.multicall(positionCalls);
       }
     } catch (error) {
       this.logger.error('Error occurred in getExecutorAssistantQueryResult');
+      this.logger.error(error);
     }
   }
 }
