@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { ChainExecutorService } from 'src/chain-executor/chain-executor.service';
@@ -13,17 +14,17 @@ export class JobsService {
     private chainExecutorService: ChainExecutorService,
   ) { }
 
-  @Cron('* * * * * *', {
-    name: 'executor',
-  })
-  async handleExecutor() {
-    this.counter = ++this.counter;
-    this.logger.log(`Execute executor call: ${this.counter} time`);
-    await this.priceService.getOraclePrice();
-    await this.chainExecutorService.getExecutorAssistantQueryResult();
-  }
+  // @Cron('*/15 * * * * *', {
+  //   name: 'executor',
+  // })
+  // async handleExecutor() {
+  //   this.counter = ++this.counter;
+  //   this.logger.log(`Execute executor call: ${this.counter} time`);
+  //   await this.priceService.getOraclePrice();
+  //   await this.chainExecutorService.getExecutorAssistantQueryResult();
+  // }
 
-  @Cron('* * * * * *', {
+  @Cron('*/15 * * * * *', {
     name: 'marketPricePositionRequests',
   })
   async handleMarketPricePositionRequests() {
