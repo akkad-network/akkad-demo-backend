@@ -1,63 +1,96 @@
 import { RedisService } from 'src/redis/redis.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
-import { abi as executorAssistantABI } from 'artifacts/contracts/misc/ExecutorAssistant.sol/ExecutorAssistant.json';
-import { abi as executorABI } from 'artifacts/contracts/misc/MixedExecutorV2.sol/MixedExecutorV2.json';
-import { abi as poolABI } from 'artifacts/contracts/core/Pool.sol/Pool.json';
-import { packPoolIndexes, packPrices } from '../utils/packValue';
+import { packPoolIndexes, packPrices, toPriceX96 } from '../utils/packValue';
 import { PriceService } from 'src/price/price.service';
 
+import { marketABI } from 'artifacts/v2ABI/marketABI';
+import { executorAssisABI } from 'artifacts/v2ABI/executorAssisABI';
+import { mixedExecutorABI } from 'artifacts/v2ABI/mixedExecutorABI';
 export enum TokenAsset {
-  BTC = '0x9d08Fb37Be74e0542E3C2bb881158850f2f5d270',
-  ETH = '0xc7f646814e08697F94e7194B41824405E131f0A0',
-  ORDI = '0x774DE4eBb56Ef661133cfDc30F1ed735e6baceB5',
+  ETH = '0x07ad9146a879361330C46611b642F0e3BFeB7492',
+  BTC = '0x45f966fecf6A91155f97c22116D5d4B57Bb7c0a9',
+  ARB = '0x401A3cE493cfB0C4D9B6dA2ba8bCbe92FCCF7079',
+  LINK = '0x5Dd24e226AD3d78F70071466015b3e1f3E85C37F',
 }
 
 export enum TokenPool {
-  BTC = '0x3099c1313B7de49193773c278bb4a487FA6e42b1',
-  ETH = '0xfb7DD22Dbb9FEC2832E7c05de9AfF53D426b603B',
-  ORDI = '0x774DE4eBb56Ef661133cfDc30F1ed735e6baceB5',
+  ETH = '0x07ad9146a879361330C46611b642F0e3BFeB7492',
+  BTC = '0x45f966fecf6A91155f97c22116D5d4B57Bb7c0a9',
+  ARB = '0x401A3cE493cfB0C4D9B6dA2ba8bCbe92FCCF7079',
+  LINK = '0x5Dd24e226AD3d78F70071466015b3e1f3E85C37F',
 }
 
 const TOKEN_INDEX_INFO = {
-  [TokenPool.BTC]: 1,
-  [TokenPool.ETH]: 2,
-  [TokenPool.ORDI]: 3,
+  [TokenPool.ETH]: 1,
+  [TokenPool.BTC]: 2,
+  [TokenPool.ARB]: 3,
+  [TokenPool.LINK]: 4,
 };
 
 @Injectable()
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class ChainExecutorService {
   private provider: ethers.providers.JsonRpcProvider;
   private executorAssistantContract: ethers.Contract;
   private executorContract: ethers.Contract;
-  private btcPoolContract: ethers.Contract;
-  private ethPoolContract: ethers.Contract;
-  private ordiPoolContract: ethers.Contract;
+
+  private ethMarket: ethers.Contract;
+  private btcMarket: ethers.Contract;
+  private arbMarket: ethers.Contract;
+  private linkMarket: ethers.Contract;
   private signer: ethers.Signer;
   private readonly logger = new Logger(ChainExecutorService.name);
 
   constructor(private priceService: PriceService) {
-    this.provider = new ethers.providers.JsonRpcProvider(
-      'https://arb-sepolia.g.alchemy.com/v2/RCtmHaPSrWs8prthWD31jNbk_0wEwp0j',
-    );
-    this.signer = new ethers.Wallet(
-      '97e53b63fb1f732009434486808692aceffe2deea5ab31c649a02ffafcf2106d',
-      this.provider,
+    const rpc_url =
+      'https://arb-sepolia.g.alchemy.com/v2/RCtmHaPSrWs8prthWD31jNbk_0wEwp0j';
+
+    const singer_pk =
+      '97e53b63fb1f732009434486808692aceffe2deea5ab31c649a02ffafcf2106d';
+
+    const ethMarketAddress = '0x07ad9146a879361330C46611b642F0e3BFeB7492';
+    const btcMarketAddress = '0x45f966fecf6A91155f97c22116D5d4B57Bb7c0a9';
+    const arbMarketAddress = '0x401A3cE493cfB0C4D9B6dA2ba8bCbe92FCCF7079';
+    const linkMarketAddress = '0x5Dd24e226AD3d78F70071466015b3e1f3E85C37F';
+    const executorAssisAddress = '0x80B50708F8818Ea0e5968305b165676A8c252904';
+    const executorAddress = '0x6bBdFc629D0337593e5d32cC56104D35f13ac72E';
+    this.provider = new ethers.providers.JsonRpcProvider(rpc_url);
+    this.signer = new ethers.Wallet(singer_pk, this.provider);
+
+    this.ethMarket = new ethers.Contract(
+      ethMarketAddress,
+      marketABI,
+      this.signer,
     );
 
-    this.btcPoolContract = new ethers.Contract(
-      '0x3099c1313B7de49193773c278bb4a487FA6e42b1',
-      poolABI,
+    this.btcMarket = new ethers.Contract(
+      btcMarketAddress,
+      marketABI,
       this.signer,
     );
-    this.ethPoolContract = new ethers.Contract(
-      '0xfb7DD22Dbb9FEC2832E7c05de9AfF53D426b603B',
-      poolABI,
+
+    this.arbMarket = new ethers.Contract(
+      arbMarketAddress,
+      marketABI,
       this.signer,
     );
-    this.ordiPoolContract = new ethers.Contract(
-      '0x774DE4eBb56Ef661133cfDc30F1ed735e6baceB5',
-      poolABI,
+
+    this.linkMarket = new ethers.Contract(
+      linkMarketAddress,
+      marketABI,
+      this.signer,
+    );
+
+    this.executorAssistantContract = new ethers.Contract(
+      executorAssisAddress,
+      executorAssisABI,
+      this.signer,
+    );
+
+    this.executorContract = new ethers.Contract(
+      executorAddress,
+      mixedExecutorABI,
       this.signer,
     );
 
@@ -66,101 +99,145 @@ export class ChainExecutorService {
     //   poolIndexerABI,
     //   this.signer,
     // );
-
-    this.executorAssistantContract = new ethers.Contract(
-      '0x93f3758e4DD91a9f0Ffc6474D6621d704a91C6d9',
-      executorAssistantABI,
-      this.signer,
-    );
-
-    this.executorContract = new ethers.Contract(
-      '0x18e4010f21edbEfB2F13885926E4339abaB5691F',
-      executorABI,
-      this.signer,
-    );
   }
 
   async getExecutorAssistantQueryResult(): Promise<void> {
     try {
       const [pools, indexPerOperations] =
-        await this.executorAssistantContract.calculateNextMulticall(1);
+        await this.executorAssistantContract.calculateNextMulticall(10);
 
-      const poolIndexes = pools.map((pool) => TOKEN_INDEX_INFO[pool]);
+      pools.forEach((pool) => {
+        this.logger.debug(`pools => ${pool} `);
+      });
+      indexPerOperations.forEach((indexPerOperation, index) => {
+        let descTemp = '';
+        switch (index) {
+          case 0:
+            descTemp = 'increaseLiquidityPostion';
+            break;
+          case 1:
+            descTemp = 'decreaseLiquidityPosition';
+            break;
+          case 2:
+            descTemp = 'increasePosition';
+            break;
+          case 3:
+            descTemp = 'decreasePosition';
+            break;
+        }
+        this.logger.debug(
+          `indexPerOperation => ${descTemp}  => [${indexPerOperation}]`,
+        );
+      });
 
-      const packIndexes = packPoolIndexes(poolIndexes);
+      // const poolIndexes = pools.map((pool) => TOKEN_INDEX_INFO[pool]);
 
-      for (let index = 0; index < indexPerOperations.length; index++) {
-        const indexOperation = indexPerOperations[index]?.indexEnd;
-        this.logger.debug(`index operation => ${indexOperation} execute !`);
-        const markPricesData = (await this.priceService.getPrices()).markPrices;
-        const tokens = Object.keys(markPricesData.data);
-        const markPrices = markPricesData.data;
-        const priceInfo = tokens
-          .map((token) => {
-            return [
-              TOKEN_INDEX_INFO[TokenPool[token]],
-              markPrices[token].markPrice,
-            ];
-          })
-          .filter((item) => typeof item[0] === 'number') as any;
-        const packedPrices = packPrices(priceInfo);
-        // this.logger.log(`priceInfo  raw data => ${ priceInfo } `);
-        const timestamp = Math.floor(Date.now() / 1000).toString();
-        // this.logger.log(`packedPrices after => ${ packedPrices } `);
-        const positionCalls = [
-          // this.executorContract.interface.encodeFunctionData(
-          //   'sampleAndAdjustFundingRateBatch',
-          //   [packIndexes],
-          // ),
-          // this.executorContract.interface.encodeFunctionData(
-          //   'executeOpenLiquidityPositions',
-          //   [indexOperation],
-          // ),
-          // this.executorContract.interface.encodeFunctionData(
-          //   'executeCloseLiquidityPositions',
-          //   [indexOperation],
-          // ),
-          // this.executorContract.interface.encodeFunctionData(
-          //   'executeAdjustLiquidityPositionMargins',
-          //   [indexOperation],
-          // ),
-          // this.executorContract.interface.encodeFunctionData(
-          //   'executeIncreaseRiskBufferFundPositions',
-          //   [indexOperation],
-          // ),
-          // this.executorContract.interface.encodeFunctionData(
-          //   'executeDecreaseRiskBufferFundPositions',
-          //   [indexOperation],
-          // ),
-          this.executorContract.interface.encodeFunctionData('setPriceX96s', [
-            packedPrices,
-            timestamp,
-          ]),
+      // const packIndexes = packPoolIndexes(poolIndexes);
+
+      /*//////////////////////////////////////////////////////////////
+                            MARKET PRICE INFO
+      //////////////////////////////////////////////////////////////*/
+      const markPricesData = (await this.priceService.getPrices()).markPrices;
+      const tokens = Object.keys(markPricesData.data);
+      const markPrices = markPricesData.data;
+
+      const priceInfo = tokens
+        .map((token) => {
+          return [
+            TOKEN_INDEX_INFO[TokenPool[token]],
+            markPrices[token].markPrice,
+          ];
+        })
+        .filter((item) => typeof item[0] === 'number') as any;
+      const packedPrices = packPrices(priceInfo);
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+
+      /*//////////////////////////////////////////////////////////////
+                           MUTI CALL REQUEST BUILD
+      //////////////////////////////////////////////////////////////*/
+      const positionCalls: Array<any> = [];
+      if (indexPerOperations.length === 0) {
+        return;
+      }
+
+      positionCalls.push(
+        this.executorContract.interface.encodeFunctionData('setPriceX96s', [
+          packedPrices,
+          timestamp,
+        ]),
+      );
+
+      const incLiqPositionEnd = indexPerOperations[0]?.indexEnd;
+      if (incLiqPositionEnd !== 0) {
+        positionCalls.push(
+          this.executorContract.interface.encodeFunctionData(
+            'executeIncreaseLiquidityPositions',
+            [incLiqPositionEnd],
+          ),
+        );
+      }
+
+      const decLiqPositionEnd = indexPerOperations[1]?.indexEnd;
+      if (decLiqPositionEnd !== 0) {
+        positionCalls.push(
+          this.executorContract.interface.encodeFunctionData(
+            'executeDecreaseLiquidityPositions',
+            [decLiqPositionEnd],
+          ),
+        );
+      }
+
+      const incPositionEnd = indexPerOperations[2]?.indexEnd;
+      if (incPositionEnd !== 0) {
+        positionCalls.push(
           this.executorContract.interface.encodeFunctionData(
             'executeIncreasePositions',
-            [indexOperation],
+            [incPositionEnd],
           ),
+        );
+      }
+
+      const decPositionEnd = indexPerOperations[3]?.indexEnd;
+      if (decPositionEnd !== 0) {
+        positionCalls.push(
           this.executorContract.interface.encodeFunctionData(
             'executeDecreasePositions',
-            [indexOperation],
+            [decPositionEnd],
           ),
-          // this.executorContract.interface.encodeFunctionData(
-          //   'sampleAndAdjustFundingRateBatch',
-          //   [packIndexes],
-          // ),
-          // this.executorContract.interface.encodeFunctionData(
-          //   'collectProtocolFeeBatch',
-          //   [packIndexes],
-          // ),
-        ];
-
-        // console.log('check positionCalls => ', positionCalls);
-
-        await this.executorContract.multicall(positionCalls);
+        );
       }
+
+      // positionCalls.push(
+      //   this.executorContract.interface.encodeFunctionData(
+      //     'sampleAndAdjustFundingRateBatch',
+      //     [packIndexes],
+      //   )
+      // );
+      // positionCalls = [
+      //   this.executorContract.interface.encodeFunctionData(
+      //     'sampleAndAdjustFundingRateBatch',
+      //     [packIndexes],
+      //   ),
+      //   this.executorContract.interface.encodeFunctionData(
+      //     'collectProtocolFeeBatch',
+      //     [packIndexes],
+      //   ),
+      // ];
+
+      console.log('check positionCalls => execute ', positionCalls);
+      await this.executorContract.multicall(positionCalls);
     } catch (error) {
       this.logger.error('Error occurred in getExecutorAssistantQueryResult');
       this.logger.error(error);
     }
   }
 }
+
+// this.executorContract.interface.encodeFunctionData(
+//   'executeCloseLiquidityPositions',
+//   [indexOperation],
+// ),
+// this.executorContract.interface.encodeFunctionData(
+//   'executeAdjustLiquidityPositionMargins',
+//   [indexOperation],
+// )

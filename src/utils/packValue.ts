@@ -117,7 +117,7 @@ export function unpackUint8FromPackedValue(
   packedValue: BigNumber,
   position: number,
 ) {
-  const mask = BigNumber.from(0xff); // 8 位掩码
+  const mask = BigNumber.from(0xff);
   const unpackedValue = packedValue.shr(position).and(mask);
   return unpackedValue.toNumber();
 }
