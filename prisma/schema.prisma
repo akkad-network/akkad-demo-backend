@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model kline_data {
+  id        Int      @id @default(autoincrement())
+  symbol    String?  @db.VarChar(20)
+  open      Decimal? @db.Decimal(10, 2)
+  close     Decimal? @db.Decimal(10, 2)
+  high      Decimal? @db.Decimal(10, 2)
+  low       Decimal? @db.Decimal(10, 2)
+  timestamp Int
+}
+
+model raw_data {
+  id             Int       @id @unique(map: "id") @default(autoincrement())
+  market_price   Decimal?  @db.Decimal(10, 2)
+  index_price    Decimal?  @db.Decimal(10, 2)
+  price_24h_pcnt Decimal?  @db.Decimal(10, 2)
+  symbol         String?   @db.VarChar(20)
+  create_date    DateTime? @default(now()) @db.Timestamp(0)
+}

@@ -7,10 +7,11 @@ import { PriceModule } from './price/price.module';
 import { JobsModule } from './jobs/jobs.module';
 import { RedisModule } from './redis/redis.module';
 import { ChainExecutorModule } from './chain-executor/chain-executor.module';
+import { PrismaService } from './prisma/prisma.service';
 
 @Module({
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, PrismaService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,

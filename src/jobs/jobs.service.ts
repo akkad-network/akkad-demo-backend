@@ -14,20 +14,28 @@ export class JobsService {
     private chainExecutorService: ChainExecutorService,
   ) { }
 
-  @Cron('*/20 * * * * *', {
-    name: 'executor',
-  })
-  async handleExecutor() {
-    this.counter = ++this.counter;
-    this.logger.log(`Execute executor call: ${this.counter} time`);
-    await this.priceService.getOraclePrice();
-    await this.chainExecutorService.getExecutorAssistantQueryResult();
-  }
+  // @Cron('*/30 * * * * *', {
+  //   name: 'executor',
+  // })
+  // async handleExecutor() {
+  //   this.counter = ++this.counter;
+  //   this.logger.log(`Execute executor call: ${this.counter} time`);
+  //   await this.priceService.getOraclePrice();
+  //   await this.chainExecutorService.getExecutorAssistantQueryResult();
+  // }
 
-  @Cron('*/15 * * * * *', {
-    name: 'marketPricePositionRequests',
+  // @Cron('*/15 * * * * *', {
+  //   name: 'marketPricePositionRequests',
+  // })
+  // async handleMarketPricePositionRequests() {
+  //   await this.priceService.setPrices();
+  // }
+
+  @Cron('*/10 * * * * *', {
+    name: 'saveMarkedPrice',
   })
-  async handleMarketPricePositionRequests() {
-    await this.priceService.setPrices();
+  async handleSaveMarkedPrice() {
+    this.logger.log('Fetching and saving marked price...');
+    await this.priceService.saveMarkedPrice();
   }
 }

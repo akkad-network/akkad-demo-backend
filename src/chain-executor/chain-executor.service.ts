@@ -103,11 +103,11 @@ export class ChainExecutorService {
 
   async getExecutorAssistantQueryResult(): Promise<void> {
     try {
-      const [pools, indexPerOperations] =
+      const [markets, indexPerOperations] =
         await this.executorAssistantContract.calculateNextMulticall(10);
 
-      pools.forEach((pool) => {
-        this.logger.debug(`pools => ${pool} `);
+      markets.forEach((market) => {
+        this.logger.debug(`markets => ${market} `);
       });
       indexPerOperations.forEach((indexPerOperation, index) => {
         let descTemp = '';
@@ -130,9 +130,9 @@ export class ChainExecutorService {
         );
       });
 
-      // const poolIndexes = pools.map((pool) => TOKEN_INDEX_INFO[pool]);
-
-      // const packIndexes = packPoolIndexes(poolIndexes);
+      let poolIndexes = markets.map((market) => TOKEN_INDEX_INFO[market]);
+      poolIndexes = [1, 2, 3, 4];
+      const packIndexes = packPoolIndexes(poolIndexes);
 
       /*//////////////////////////////////////////////////////////////
                             MARKET PRICE INFO
@@ -207,17 +207,14 @@ export class ChainExecutorService {
         );
       }
 
-      // positionCalls.push(
-      //   this.executorContract.interface.encodeFunctionData(
-      //     'sampleAndAdjustFundingRateBatch',
-      //     [packIndexes],
-      //   )
-      // );
+      positionCalls.push(
+        this.executorContract.interface.encodeFunctionData(
+          'sampleAndAdjustFundingRateBatch',
+          [packIndexes],
+        ),
+      );
+
       // positionCalls = [
-      //   this.executorContract.interface.encodeFunctionData(
-      //     'sampleAndAdjustFundingRateBatch',
-      //     [packIndexes],
-      //   ),
       //   this.executorContract.interface.encodeFunctionData(
       //     'collectProtocolFeeBatch',
       //     [packIndexes],
