@@ -161,6 +161,13 @@ export class ChainExecutorService {
       }
 
       positionCalls.push(
+        this.executorContract.interface.encodeFunctionData(
+          'sampleAndAdjustFundingRateBatch',
+          [packIndexes],
+        ),
+      );
+
+      positionCalls.push(
         this.executorContract.interface.encodeFunctionData('setPriceX96s', [
           packedPrices,
           timestamp,
@@ -207,21 +214,33 @@ export class ChainExecutorService {
         );
       }
 
-      positionCalls.push(
-        this.executorContract.interface.encodeFunctionData(
-          'sampleAndAdjustFundingRateBatch',
-          [packIndexes],
-        ),
-      );
+      // positionCalls.push(
+      //   this.executorContract.interface.encodeFunctionData(
+      //     'sampleAndAdjustFundingRateBatch',
+      //     [packIndexes],
+      //   ),
+      // );
 
-      // positionCalls = [
+      // positionCalls.push(
       //   this.executorContract.interface.encodeFunctionData(
       //     'collectProtocolFeeBatch',
       //     [packIndexes],
       //   ),
-      // ];
+      // );
 
       console.log('check positionCalls => execute ', positionCalls);
+      // const estimatedGas = await this.executorContract.estimateGas.multicall(
+      //   positionCalls,
+      // );
+
+      // console.log(`Estimated Gas:`, estimatedGas.toString());
+
+      const gasPrice = await this.signer.getGasPrice();
+      const adjustedGasPrice = gasPrice.mul(130).div(100);
+      // const tx = await this.executorContract.multicall(positionCalls, {
+      //   gasLimit: 20000000,
+      //   gasPrice: adjustedGasPrice,
+      // });
       await this.executorContract.multicall(positionCalls);
     } catch (error) {
       this.logger.error('Error occurred in getExecutorAssistantQueryResult');
