@@ -1,27 +1,45 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-model kline_data {
-  id        Int      @id @default(autoincrement())
-  symbol    String?  @db.VarChar(20)
-  open      Decimal? @db.Decimal(10, 2)
-  close     Decimal? @db.Decimal(10, 2)
-  high      Decimal? @db.Decimal(10, 2)
-  low       Decimal? @db.Decimal(10, 2)
-  timestamp Int
+generator client {
+  provider = "prisma-client-js"
 }
 
-model raw_data {
-  id             Int       @id @unique(map: "id") @default(autoincrement())
-  market_price   Decimal?  @db.Decimal(10, 2)
-  index_price    Decimal?  @db.Decimal(10, 2)
-  price_24h_pcnt Decimal?  @db.Decimal(10, 2)
-  symbol         String?   @db.VarChar(20)
-  create_date    DateTime? @default(now()) @db.Timestamp(0)
+model OrderRecord {
+  id                         Int      @id @default(autoincrement())
+  decoded_id                 Int
+  decoded_key                String
+  fee                        String
+  executed                   Boolean
+  created_at                 DateTime
+  take_profit                Boolean
+  open_amount                String
+  decrease_amount            String
+  reserve_amount             String
+  limited_index_price        String
+  limited_index_precision    String
+  collateral                 String
+  collateral_price_threshold String
+  key                        String
+  table_handle               String
+  transaction_version        String
+  write_set_change_index     Int
+  createdAt                  DateTime @default(now())
+}
+
+model UserReferralCode {
+  id             Int      @id @default(autoincrement())
+  wallet_address String
+  referral_code  String
+  createdAt      DateTime @default(now())
+}
+
+model ReferralRecords {
+  id                    Int      @id @default(autoincrement())
+  referrer_address      String
+  referrer_code         String
+  referral_user_address String
+  createdAt             DateTime @default(now())
 }

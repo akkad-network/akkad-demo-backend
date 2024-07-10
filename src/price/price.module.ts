@@ -4,6 +4,8 @@ import { HttpModule } from '@nestjs/axios';
 import { PriceController } from './price.controller';
 import { RedisModule } from 'src/redis/redis.module';
 import { PrismaModule } from '../prisma/prisma.module';
+
+
 @Module({
   imports: [HttpModule, RedisModule, PrismaModule],
   providers: [PriceService],

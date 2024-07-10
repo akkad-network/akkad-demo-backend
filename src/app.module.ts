@@ -8,7 +8,8 @@ import { JobsModule } from './jobs/jobs.module';
 import { RedisModule } from './redis/redis.module';
 import { ChainExecutorModule } from './chain-executor/chain-executor.module';
 import { PrismaService } from './prisma/prisma.service';
-
+import { ScannerModule } from './scanner/scanner.module';
+import { ReferralModule } from './referral/referral.module';
 @Module({
   controllers: [AppController],
   providers: [AppService, PrismaService],
@@ -21,6 +22,8 @@ import { PrismaService } from './prisma/prisma.service';
     PriceModule,
     JobsModule,
     ChainExecutorModule,
+    ScannerModule,
+    ReferralModule
   ],
 })
-export class AppModule {}
+export class AppModule { }
