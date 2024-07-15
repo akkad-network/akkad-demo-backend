@@ -10,9 +10,12 @@ import { ChainExecutorModule } from './chain-executor/chain-executor.module';
 import { PrismaService } from './prisma/prisma.service';
 import { ScannerModule } from './scanner/scanner.module';
 import { ReferralModule } from './referral/referral.module';
+import { OrderOrPositionService } from './order-or-position/order-or-position.service';
+import { OrderOrPositionController } from './order-or-position/order-or-position.controller';
+import { OrderOrPositionModule } from './order-or-position/order-or-position.module';
 @Module({
-  controllers: [AppController],
-  providers: [AppService, PrismaService],
+  controllers: [AppController, OrderOrPositionController],
+  providers: [AppService, PrismaService, OrderOrPositionService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -23,7 +26,8 @@ import { ReferralModule } from './referral/referral.module';
     JobsModule,
     ChainExecutorModule,
     ScannerModule,
-    ReferralModule
+    ReferralModule,
+    OrderOrPositionModule
   ],
 })
 export class AppModule { }

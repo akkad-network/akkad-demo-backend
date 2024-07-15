@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { Account, Aptos, AptosConfig, Ed25519Account, Ed25519PrivateKey, EntryFunction, Network, TransactionPayload } from '@aptos-labs/ts-sdk';
 import axios from 'axios';
-import { APTOS_ADDRESS, getTableHandle, moduleAddress, ORDER_RECORD_PAIR_LIST } from 'src/utils/helper';
+import { APTOS_ADDRESS, ETH_COINSTORE, getTableHandle, moduleAddress, ORDER_RECORD_PAIR_LIST, ORDER_RECORD_TABLE_HANDLE, POSITION_RECORDS_TABLE_HANDLE, SIDE_LONG, SIDE_SHORT, USDC_COINSTORE } from 'src/utils/helper';
 import { aptos, singer } from 'src/main';
 
 @Injectable()
@@ -19,6 +19,7 @@ export class ScannerService {
         "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6"
     ];
 
+
     constructor(private readonly prisma: PrismaService) {
 
     }
@@ -29,8 +30,13 @@ export class ScannerService {
     }
 
     @Cron(CronExpression.EVERY_10_SECONDS)
-    async handleCron() {
-        // await this.syncAptosBlockchain();
+    async handleSyncOrderRecords() {
+        await this.syncOnChainOrderRecords();
+    }
+
+    @Cron(CronExpression.EVERY_10_SECONDS)
+    async handleSyncPositionData() {
+        await this.syncOnChainPositionRecords();
     }
 
     async updateFeed(): Promise<void> {
@@ -63,93 +69,140 @@ export class ScannerService {
         }
     }
 
-    async syncAptosBlockchain() {
-        try {
-            const wrapperTableHandles = await Promise.all(ORDER_RECORD_PAIR_LIST.map(pair => this.fetchOrderRecordHandles(pair)))
+    async syncOnChainPositionRecords() {
+        const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
 
-            if (wrapperTableHandles && wrapperTableHandles.length > 0) {
-                const result = await Promise.all(wrapperTableHandles.map(table =>
-                    this.fetchOrderRecordTable(table)
-                ))
-            }
+        try {
+            const result = await Promise.all(POSITION_RECORDS_TABLE_HANDLE.map(async pair => {
+                await this.fetchPositionRecords(pair, pHeight);
+            }));
         } catch (error) {
-            this.logger.error(error)
+            this.logger.error(error);
         }
     }
 
-    async fetchOrderRecordHandles(resource: any) {
+    async syncOnChainOrderRecords() {
+        const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
+
         try {
-            const { result } = await getTableHandle(
-                moduleAddress,
-                resource.address as APTOS_ADDRESS
-            )
-            return { ...result, ...resource }
-        } catch (error: any) {
-            this.logger.error(111, error)
+            const result = await Promise.all(ORDER_RECORD_TABLE_HANDLE.map(async pair => {
+                await this.fetchOrderRecordTableIncrease(pair, iHeight);
+                await this.fetchOrderRecordTableDecrease(pair, dHeight);
+            }));
+        } catch (error) {
+            this.logger.error(error);
         }
     }
 
-    async fetchOrderRecordTable(tableEntity: any) {
-        const creation_num = tableEntity.creation_num
-        const increase_handle = tableEntity.open_orders.handle
-        const decrease_handle = tableEntity.decrease_orders.handle
-        if (creation_num > 0) {
-            const inc_response = await aptos.getTableItemsData({
-                options: {
-                    where: {
-                        table_handle: { _eq: increase_handle },
-                    },
-                    orderBy: [{ transaction_version: 'desc' }],
-                    limit: 10
+    async fetchPositionRecords(pair: any, pHeight: string) {
+        const result = await aptos.getTableItemsData({
+            minimumLedgerVersion: Number(pHeight),
+            options: {
+                where: {
+                    table_handle: { _eq: pair.tableHandle },
                 },
-            });
-            const dec_response = await aptos.getTableItemsData({
-                options: {
-                    where: {
-                        table_handle: { _eq: decrease_handle },
-                    },
-                    orderBy: [{ transaction_version: 'desc' }],
-                    limit: 10
-                },
-            });
-            inc_response.map(item => ({
-                ...item,
-                direction: tableEntity.direction,
-                type: 'INC'
-            }))
-            dec_response.map(item => ({
-                ...item,
-                direction: tableEntity.direction,
-                type: 'DEC'
-            }))
-            const combinedData = [
-                ...inc_response,
-                ...dec_response
-            ]
-            const sortedData: any[] = combinedData.sort((a, b) => {
-                const dateA = new Date(a.transaction_version).getTime()
-                const dateB = new Date(b.transaction_version).getTime()
-                return dateB - dateA
-            })
-            this.prisma.saveOrderRecord(sortedData)
+                orderBy: [{ transaction_version: 'desc' }],
+            },
+        });
+        const updatedDecResponse = result.map(item => ({
+            ...item,
+            vault: pair.vault,
+            symbol: pair.symbol,
+            direction: pair.direction,
+        }))
+        const sortedData: any[] = updatedDecResponse.sort((a, b) => {
+            const dateA = new Date(a.transaction_version).getTime()
+            const dateB = new Date(b.transaction_version).getTime()
+            return dateB - dateA
+        })
+        if (sortedData.length > 0) {
+            await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'POSITION_RECORD')
         }
+        this.prisma.savePositionRecords(sortedData)
+
     }
+
+    async fetchOrderRecordTableIncrease(pair: any, iHeight: string) {
+        const increase_handle = pair.open_orders
+        const inc_response = await aptos.getTableItemsData({
+            minimumLedgerVersion: Number(iHeight),
+            options: {
+                where: {
+                    table_handle: { _eq: increase_handle },
+                },
+                orderBy: [{ transaction_version: 'desc' }],
+            },
+        });
+
+        const updatedIncResponse = inc_response.map(item => ({
+            ...item,
+            order_type: 'increase',
+            vault: pair.vault,
+            symbol: pair.symbol,
+            direction: pair.direction,
+        }))
+
+        const nullList = updatedIncResponse.filter((item) => item.decoded_value === null)
+
+        if (nullList.length > 0) {
+            this.prisma.updateIncCancelOrderRecords(nullList)
+        }
+
+        const notNullList = updatedIncResponse.filter((item) => item.decoded_value !== null)
+
+        const sortedData: any[] = notNullList.sort((a, b) => {
+            const dateA = new Date(a.transaction_version).getTime()
+            const dateB = new Date(b.transaction_version).getTime()
+            return dateB - dateA
+        })
+        if (sortedData.length > 0) {
+            await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'INCREASE_ORDER_RECORD')
+        }
+        this.prisma.saveIncreaseOrderRecord(sortedData)
+    }
+
+    async fetchOrderRecordTableDecrease(pair: any, dHeight: string) {
+        const decrease_handle = pair.decrease_orders
+        const dec_response = await aptos.getTableItemsData({
+            minimumLedgerVersion: Number(dHeight),
+            options: {
+                where: {
+                    table_handle: { _eq: decrease_handle },
+                },
+                orderBy: [{ transaction_version: 'desc' }],
+            },
+        });
+        const updatedDecResponse = dec_response.map(item => ({
+            ...item,
+            order_type: 'decrease',
+            vault: pair.vault,
+            symbol: pair.symbol,
+            direction: pair.direction,
+        }));
+
+        const nullList = updatedDecResponse.filter((item) => item.decoded_value === null)
+
+        if (nullList.length > 0) {
+            this.prisma.updateDecCancelOrderRecords(nullList)
+        }
+
+        const notNullList = updatedDecResponse.filter((item) => item.decoded_value !== null)
+
+        const sortedData: any[] = notNullList.sort((a, b) => {
+            const dateA = new Date(a.transaction_version).getTime()
+            const dateB = new Date(b.transaction_version).getTime()
+            return dateB - dateA
+        })
+
+        if (sortedData.length > 0) {
+            await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'DECREASE_ORDER_RECORD')
+        }
+        this.prisma.saveDecreaseOrderRecord(sortedData)
+    }
+
 
     async manualSync() {
-        await this.syncAptosBlockchain();
+        await this.syncOnChainOrderRecords();
     }
 }
 
-// {
-//     creation_num: '0',
-//     decrease_orders: {
-//       handle: '0xa18f80c2798b9a90f1ae3dbaee03a097659e2e8900495c221ae4a4da2ac9bba7'
-//     },
-//     open_orders: {
-//       handle: '0xe6b52c74205adb5a906d8f0b5d7ce004e35c15e5e30f76fc2d0a7dbc07f5d654'
-//     },
-//     address: '0x87e95448bc9088569ed1f9b724a1ec679a187a1c80ff49b52c305318956c4bb7::market::OrderRecord<0x1::aptos_coin::AptosCoin,0x1::aptos_coin::AptosCoin,0x87e95448bc9088569ed1f9b724a1ec679a187a1c80ff49b52c305318956c4bb7::pool::SHORT,0x1::aptos_coin::AptosCoin>',
-//     direction: 'SHORT',
-//     vault: 'APTOS',
-//     symbol: 'APTOS'
-//   }

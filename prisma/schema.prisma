@@ -7,26 +7,75 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model OrderRecord {
+model DecreaseOrderRecord {
   id                         Int      @id @default(autoincrement())
-  decoded_id                 Int
-  decoded_key                String
+  order_id                   Int
+  owner                      String
+  order_type                 String
+  vault                      String
+  symbol                     String
+  direction                  String
   fee                        String
   executed                   Boolean
   created_at                 DateTime
   take_profit                Boolean
-  open_amount                String
   decrease_amount            String
-  reserve_amount             String
   limited_index_price        String
-  limited_index_precision    String
-  collateral                 String
   collateral_price_threshold String
   key                        String
   table_handle               String
   transaction_version        String
   write_set_change_index     Int
+  status                     String?  @default("NORMAL")
   createdAt                  DateTime @default(now())
+}
+
+model IncreaseOrderRecord {
+  id                         Int      @id @default(autoincrement())
+  order_id                   Int
+  owner                      String
+  order_type                 String
+  vault                      String
+  symbol                     String
+  direction                  String
+  fee                        String
+  executed                   Boolean
+  created_at                 DateTime
+  open_amount                String
+  reserve_amount             String
+  limited_index_price        String
+  collateral_price_threshold String
+  key                        String
+  table_handle               String
+  transaction_version        String
+  write_set_change_index     Int
+  status                     String?  @default("NORMAL")
+  createdAt                  DateTime @default(now())
+}
+
+model PositionRecord {
+  id                     Int      @id @default(autoincrement())
+  order_id               Int
+  owner                  String
+  vault                  String
+  symbol                 String
+  direction              String
+  closed                 Boolean
+  reserved               String
+  collateral             String
+  position_size          String
+  open_timestamp         String
+  position_amount        String
+  funding_fee_value      String
+  last_funding_rate      String
+  is_positive            Boolean
+  last_reserving_rate    String
+  reserving_fee_amount   String
+  key                    String
+  table_handle           String
+  transaction_version    String
+  write_set_change_index Int
+  createdAt              DateTime @default(now())
 }
 
 model UserReferralCode {
@@ -42,4 +91,11 @@ model ReferralRecords {
   referrer_code         String
   referral_user_address String
   createdAt             DateTime @default(now())
+}
+
+model GlobalSyncController {
+  id                             Int      @id @default(autoincrement())
+  last_sync_transaction_verision String
+  sync_type                      String
+  createdAt                      DateTime @default(now())
 }
