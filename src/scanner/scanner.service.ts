@@ -51,7 +51,7 @@ export class ScannerService {
         const payload: InputViewFunctionData = {
             function: CHECK_LIQUIDATION_FUNC_PATH,
             typeArguments: [],
-            functionArguments: [temp,]
+            // functionArguments: [temp,]
         };
 
         const chainId = (await aptos.view({ payload }))[0];
