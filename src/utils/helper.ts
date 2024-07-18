@@ -15,6 +15,7 @@ export const APTOS_COIN_STORE = "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin
 export const MOCK_USDC_COIN_STORE = `0x1::coin::CoinStore<${coinAddress}::usdc::USDC>`
 export const MOCK_USDT_COIN_STORE = `0x1::coin::CoinStore<${coinAddress}::usdt::USDT>`
 
+export const CHECK_LIQUIDATION_FUNC_PATH = `${moduleAddress}::positions::check_liquidation`
 export type SymbolInfo = {
     name: string
     tokenName: string
@@ -226,10 +227,10 @@ export const ORDER_RECORD_TABLE_HANDLE = [
     // APTOS_APTOS_SHORT_ORDER,
     // APTOS_ETH_SHORT_ORDER,
     // APTOS_BTC_SHORT_ORDER,
-    USDC_APTOS_LONG_ORDER,
-    USDC_APTOS_SHORT_ORDER,
-    // USDC_ETH_LONG_ORDER,
-    // USDC_ETH_SHORT_ORDER,
+    // USDC_APTOS_LONG_ORDER,
+    // USDC_APTOS_SHORT_ORDER,
+    USDC_ETH_LONG_ORDER,
+    USDC_ETH_SHORT_ORDER,
     // USDC_BTC_LONG_ORDER,
     // USDC_BTC_SHORT_ORDER,
     // USDT_APTOS_LONG_ORDER,
@@ -343,19 +344,19 @@ export const USDT_BTC_LONG = {
 }
 
 export const POSITION_RECORDS_TABLE_HANDLE = [
-    APTOS_APTOS_SHORT,
-    APTOS_ETH_SHORT,
-    APTOS_BTC_SHORT,
-    USDC_APTOS_LONG,
-    USDC_APTOS_SHORT,
+    // APTOS_APTOS_SHORT,
+    // APTOS_ETH_SHORT,
+    // APTOS_BTC_SHORT,
+    // USDC_APTOS_LONG,
+    // USDC_APTOS_SHORT,
     USDC_ETH_LONG,
     USDC_ETH_SHORT,
     USDC_BTC_LONG,
     USDC_BTC_SHORT,
-    USDT_APTOS_LONG,
-    USDT_APTOS_SHORT,
-    USDT_ETH_LONG,
-    USDT_BTC_LONG,
+    // USDT_APTOS_LONG,
+    // USDT_APTOS_SHORT,
+    // USDT_ETH_LONG,
+    // USDT_BTC_LONG,
 ]
 
 
@@ -370,4 +371,130 @@ export const getTableHandle = async (address: string, resourceType: `${string}::
 
 export const getOrderRecordResources = (coinType: `${string}::${string}::${string}`, index: `${string}::${string}::${string}`, direction: string, fee: `${string}::${string}::${string}`) => {
     return `${moduleAddress}::market::OrderRecord<${coinType},${index},${moduleAddress}::pool::${direction},${fee}>` as `${string}::${string}::${string}`
+}
+
+export const APTOS_LONG_WrappedPositionConfig = {
+    decrease_fee_bps: {
+        value: "1000000000000000"
+    },
+    liquidation_bonus: {
+        value: "10000000000000000"
+    },
+    liquidation_threshold: {
+        value: "980000000000000000"
+    },
+    max_leverage: "100",
+    max_reserved_multiplier: "20",
+    min_collateral_value: {
+        value: "500000000000000"
+    },
+    min_holding_duration: "20",
+    open_fee_bps: {
+        value: "1000000000000000"
+    },
+}
+
+export const APTOS_SHORT_WrappedPositionConfig = {
+    decrease_fee_bps: {
+        value: "1000000000000000"
+    },
+    liquidation_bonus: {
+        value: "10000000000000000"
+    },
+    liquidation_threshold: {
+        value: "980000000000000000"
+    },
+    max_leverage: "100",
+    max_reserved_multiplier: "20",
+    min_collateral_value: {
+        value: "500000000000000"
+    },
+    min_holding_duration: "20",
+    open_fee_bps: {
+        value: "1000000000000000"
+    },
+}
+
+export const ETH_LONG_WrapperPositionConfig = {
+    decrease_fee_bps: {
+        value: "1000000000000000"
+    },
+    liquidation_bonus: {
+        value: "10000000000000000"
+    },
+    liquidation_threshold: {
+        value: "980000000000000000"
+    },
+    max_leverage: "100",
+    max_reserved_multiplier: "20",
+    min_collateral_value: {
+        value: "500000000000000"
+    },
+    min_holding_duration: "20",
+    open_fee_bps: {
+        value: "1000000000000000"
+    }
+}
+
+export const ETH_SHORT_WrapperPositionConfig = {
+    decrease_fee_bps: {
+        value: "1000000000000000"
+    },
+    liquidation_bonus: {
+        value: "10000000000000000"
+    },
+    liquidation_threshold: {
+        value: "980000000000000000"
+    },
+    max_leverage: "100",
+    max_reserved_multiplier: "20",
+    min_collateral_value: {
+        value: "500000000000000"
+    },
+    min_holding_duration: "20",
+    open_fee_bps: {
+        value: "1000000000000000"
+    }
+}
+
+export const BTC_LONG_WrapperPositionConfig = {
+    decrease_fee_bps: {
+        value: "1000000000000000"
+    },
+    liquidation_bonus: {
+        value: "10000000000000000"
+    },
+    liquidation_threshold: {
+        value: "980000000000000000"
+    },
+    max_leverage: "100",
+    max_reserved_multiplier: "20",
+    min_collateral_value: {
+        value: "500000000000000"
+    },
+    min_holding_duration: "20",
+    open_fee_bps: {
+        value: "1000000000000000"
+    },
+}
+
+export const BTC_SHORT_WrappedPositionConfig = {
+    decrease_fee_bps: {
+        value: "1000000000000000"
+    },
+    liquidation_bonus: {
+        value: "10000000000000000"
+    },
+    liquidation_threshold: {
+        value: "980000000000000000"
+    },
+    max_leverage: "100",
+    max_reserved_multiplier: "20",
+    min_collateral_value: {
+        value: "500000000000000"
+    },
+    min_holding_duration: "20",
+    open_fee_bps: {
+        value: "1000000000000000"
+    },
 }

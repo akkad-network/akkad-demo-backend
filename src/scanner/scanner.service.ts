@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
-import { Account, Aptos, AptosConfig, Ed25519Account, Ed25519PrivateKey, EntryFunction, Network, TransactionPayload } from '@aptos-labs/ts-sdk';
+import { Account, Aptos, AptosConfig, Ed25519Account, Ed25519PrivateKey, EntryFunction, InputViewFunctionData, Network, TransactionPayload } from '@aptos-labs/ts-sdk';
 import axios from 'axios';
-import { APTOS_ADDRESS, ETH_COINSTORE, getTableHandle, moduleAddress, ORDER_RECORD_PAIR_LIST, ORDER_RECORD_TABLE_HANDLE, POSITION_RECORDS_TABLE_HANDLE, SIDE_LONG, SIDE_SHORT, USDC_COINSTORE } from 'src/utils/helper';
+import { APTOS_ADDRESS, CHECK_LIQUIDATION_FUNC_PATH, ETH_COINSTORE, ETH_LONG_WrapperPositionConfig, getTableHandle, moduleAddress, ORDER_RECORD_PAIR_LIST, ORDER_RECORD_TABLE_HANDLE, POSITION_RECORDS_TABLE_HANDLE, SIDE_LONG, SIDE_SHORT, USDC_COINSTORE } from 'src/utils/helper';
 import { aptos, singer } from 'src/main';
 
 @Injectable()
@@ -31,12 +31,30 @@ export class ScannerService {
 
     @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncOrderRecords() {
-        await this.syncOnChainOrderRecords();
+        // await this.syncOnChainOrderRecords();
     }
 
     @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncPositionData() {
-        await this.syncOnChainPositionRecords();
+        // await this.syncOnChainPositionRecords();
+    }
+
+    @Cron(CronExpression.EVERY_5_SECONDS)
+    async handleCheckLiquidation() {
+        await this.checkLiquidation();
+    }
+
+    async checkLiquidation() {
+        const temp = {
+            liquidation_threshold: ETH_LONG_WrapperPositionConfig.liquidation_threshold
+        }
+        const payload: InputViewFunctionData = {
+            function: CHECK_LIQUIDATION_FUNC_PATH,
+            typeArguments: [],
+            functionArguments: [temp,]
+        };
+
+        const chainId = (await aptos.view({ payload }))[0];
     }
 
     async updateFeed(): Promise<void> {
@@ -100,10 +118,13 @@ export class ScannerService {
             options: {
                 where: {
                     table_handle: { _eq: pair.tableHandle },
+                    transaction_version: { _gt: pHeight }
                 },
                 orderBy: [{ transaction_version: 'desc' }],
             },
         });
+        console.log("🚀 ~ ScannerService ~ fetchPositionRecords ~ tableHandle:", pair.tableHandle)
+        console.log("🚀 ~ ScannerService ~ fetchPositionRecords ~ result:", result)
         const updatedDecResponse = result.map(item => ({
             ...item,
             vault: pair.vault,
@@ -129,6 +150,7 @@ export class ScannerService {
             options: {
                 where: {
                     table_handle: { _eq: increase_handle },
+                    transaction_version: { _gte: iHeight }
                 },
                 orderBy: [{ transaction_version: 'desc' }],
             },
