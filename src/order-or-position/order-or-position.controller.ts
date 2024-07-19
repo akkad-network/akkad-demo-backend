@@ -1,5 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { OrderOrPositionService } from './order-or-position.service';
+import { AggregatePositionRecord } from '@prisma/client';
 
 @Controller('orderposition')
 export class OrderOrPositionController {
@@ -31,5 +32,13 @@ export class OrderOrPositionController {
         @Query('symbol') symbol: string,
     ) {
         return this.orderOrPositionService.findIncreaseOrders(owner, vault, symbol);
+    }
+
+    @Get('averageFeeRate')
+    async getLatestAggregate(
+        @Query('vault') vault: string,
+        @Query('symbol') symbol: string,
+    ) {
+        return this.orderOrPositionService.getLatestAggregateData(vault, symbol);
     }
 }

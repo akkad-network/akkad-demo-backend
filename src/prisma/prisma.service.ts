@@ -30,13 +30,16 @@ export class PrismaService
                     open_timestamp: item.decoded_value.open_timestamp,
                     position_amount: item.decoded_value.position_amount,
                     funding_fee_value: item.decoded_value.funding_fee_value.value.value,
+                    funding_fee_is_positive: item.decoded_value.funding_fee_value.is_positive,
                     last_funding_rate: item.decoded_value.last_funding_rate.value.value,
+                    last_funding_is_positive: item.decoded_value.last_funding_rate.is_positive,
                     is_positive: item.decoded_value.last_funding_rate.is_positive,
                     last_reserving_rate: item.decoded_value.last_reserving_rate.value,
                     reserving_fee_amount: item.decoded_value.reserving_fee_amount.value,
                     key: item.key,
                     table_handle: item.table_handle,
                     transaction_version: item.transaction_version.toString(),
+                    leverage_number: (BigInt(item.decoded_value.reserved.value) / BigInt(item.decoded_value.collateral.value)).toString(),
                     write_set_change_index: item.write_set_change_index,
                 };
             });

@@ -498,3 +498,7 @@ export const BTC_SHORT_WrappedPositionConfig = {
         value: "1000000000000000"
     },
 }
+
+export const AllPositionConfig = [
+
+]

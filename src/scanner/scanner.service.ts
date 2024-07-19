@@ -1,3 +1,4 @@
+import { OrderOrPositionService } from './../order-or-position/order-or-position.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
@@ -20,7 +21,7 @@ export class ScannerService {
     ];
 
 
-    constructor(private readonly prisma: PrismaService) {
+    constructor(private readonly prisma: PrismaService, private readonly orderOrPositionService: OrderOrPositionService) {
 
     }
 
@@ -41,20 +42,26 @@ export class ScannerService {
 
     @Cron(CronExpression.EVERY_5_SECONDS)
     async handleCheckLiquidation() {
-        await this.checkLiquidation();
+        // await this.checkLiquidation();
     }
+
+    @Cron(CronExpression.EVERY_HOUR)
+    async handleAggregateFeeData() {
+        await this.aggregateFeeData();
+    }
+
 
     async checkLiquidation() {
         const temp = {
             liquidation_threshold: ETH_LONG_WrapperPositionConfig.liquidation_threshold
         }
-        const payload: InputViewFunctionData = {
-            function: CHECK_LIQUIDATION_FUNC_PATH,
-            typeArguments: [],
-            // functionArguments: [temp,]
-        };
+        // const payload: InputViewFunctionData = {
+        //     function: CHECK_LIQUIDATION_FUNC_PATH,
+        //     typeArguments: [],
+        //     // functionArguments: [temp,]
+        // };
 
-        const chainId = (await aptos.view({ payload }))[0];
+        // const chainId = (await aptos.view({ payload }))[0];
     }
 
     async updateFeed(): Promise<void> {
@@ -118,13 +125,13 @@ export class ScannerService {
             options: {
                 where: {
                     table_handle: { _eq: pair.tableHandle },
-                    transaction_version: { _gt: pHeight }
+                    // transaction_version: { _gt: pHeight }
                 },
                 orderBy: [{ transaction_version: 'desc' }],
             },
         });
         console.log("🚀 ~ ScannerService ~ fetchPositionRecords ~ tableHandle:", pair.tableHandle)
-        console.log("🚀 ~ ScannerService ~ fetchPositionRecords ~ result:", result)
+        console.log("🚀 ~ ScannerService ~ fetchPositionRecords ~ result:", result[0].decoded_value)
         const updatedDecResponse = result.map(item => ({
             ...item,
             vault: pair.vault,
@@ -226,5 +233,11 @@ export class ScannerService {
     async manualSync() {
         await this.syncOnChainOrderRecords();
     }
-}
 
+    async aggregateFeeData() {
+        const result = Promise.all(POSITION_RECORDS_TABLE_HANDLE.map((positionConfig: any) => {
+            this.orderOrPositionService.getAggregateData(positionConfig.vault, positionConfig.symbol, positionConfig.direction)
+        }))
+    }
+
+}
