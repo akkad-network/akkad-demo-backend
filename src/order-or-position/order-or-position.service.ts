@@ -16,6 +16,9 @@ export class OrderOrPositionService {
                 vault,
                 symbol,
             },
+            orderBy: {
+                transaction_version: 'desc',
+            },
         });
     }
 

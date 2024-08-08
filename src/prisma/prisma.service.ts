@@ -14,6 +14,7 @@ export class PrismaService
     }
 
     async savePositionRecords(positionRecords: any) {
+        console.log("🚀 ~ savePositionRecords ~ positionRecords:", positionRecords)
         let parsedList: any;
         if (positionRecords && positionRecords.length > 0) {
             parsedList = positionRecords.map((item: any) => {
@@ -39,7 +40,6 @@ export class PrismaService
                     key: item.key,
                     table_handle: item.table_handle,
                     transaction_version: item.transaction_version.toString(),
-                    leverage_number: (BigInt(item.decoded_value.reserved.value) / BigInt(item.decoded_value.collateral.value)).toString(),
                     write_set_change_index: item.write_set_change_index,
                 };
             });
@@ -135,13 +135,13 @@ export class PrismaService
                     key,
                 },
                 data: {
-                    fee: '',
+                    fee: "0",
                     executed: true,
                     created_at: new Date(0),
                     open_amount: transaction_version.toString(),
-                    reserve_amount: '',
-                    limited_index_price: '',
-                    collateral_price_threshold: '',
+                    reserve_amount: "0",
+                    limited_index_price: "0",
+                    collateral_price_threshold: "0",
                     write_set_change_index: 0,
                     status: 'CANCEL',
                     createdAt: new Date(0),
@@ -162,7 +162,7 @@ export class PrismaService
                     symbol: item.symbol,
                     direction: item.direction,
                     fee: item.decoded_value?.fee?.value || "CANCEL",
-                    executed: item.decoded_value?.executed || true,
+                    executed: item.decoded_value?.executed,
                     created_at: new Date(parseInt(item.decoded_value?.created_at || 0, 10) * 1000),
                     open_amount: item.decoded_value?.open_amount || "CANCEL",
                     reserve_amount: item.decoded_value?.reserve_amount || "CANCEL",
@@ -180,26 +180,46 @@ export class PrismaService
             return null;
         }
 
-        const existingRecords = await this.increaseOrderRecord.findMany({
-            where: {
-                transaction_version: {
-                    in: parsedList.map((item: any) => item.transaction_version),
-                },
-            },
-        });
-
-        const nonNullParsedList = parsedList.filter((item: any) => item.decoded_value !== null)
-
-        const newRecords = nonNullParsedList.filter(
-            (item: any) =>
-                !existingRecords.some((existingRecord: any) => existingRecord.transaction_version === item.transaction_version),
-        );
-
-        if (newRecords.length === 0) {
-            return null;
+        for (const record of parsedList) {
+            if (Number(record.executed) === 1 && Number(record.fee) === 0) {
+                const existingOrder = await this.increaseOrderRecord.findFirst({
+                    where: {
+                        order_id: record.order_id,
+                        owner: record.owner,
+                        vault: record.vault,
+                        symbol: record.symbol,
+                        direction: record.direction
+                    }
+                })
+                if (existingOrder) {
+                    const updatedRecords = await this.increaseOrderRecord.updateMany({
+                        data: {
+                            executed: true,
+                            fee: "0",
+                            transaction_version: record.transaction_version,
+                            created_transaction_version: existingOrder.transaction_version
+                        },
+                        where: {
+                            order_id: existingOrder.order_id,
+                        }
+                    })
+                }
+            } else {
+                const existingOrder = await this.increaseOrderRecord.findFirst({
+                    where: {
+                        OR: [
+                            { transaction_version: record.transaction_version },
+                            { created_transaction_version: record.transaction_version }
+                        ]
+                    }
+                })
+                if (!existingOrder) {
+                    await this.increaseOrderRecord.create({
+                        data: record
+                    })
+                }
+            }
         }
-
-        return this.increaseOrderRecord.createMany({ data: newRecords });
     }
 
     async updateDecCancelOrderRecords(orderRecords: any[]) {

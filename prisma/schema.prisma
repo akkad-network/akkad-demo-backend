@@ -31,54 +31,55 @@ model DecreaseOrderRecord {
 }
 
 model IncreaseOrderRecord {
-  id                         Int      @id @default(autoincrement())
-  order_id                   Int
-  owner                      String
-  order_type                 String
-  vault                      String
-  symbol                     String
-  direction                  String
-  fee                        String
-  executed                   Boolean
-  created_at                 DateTime
-  open_amount                String
-  reserve_amount             String
-  limited_index_price        String
-  collateral_price_threshold String
-  key                        String
-  table_handle               String
-  transaction_version        String
-  write_set_change_index     Int
-  status                     String?  @default("NORMAL")
-  createdAt                  DateTime @default(now())
+  id                          Int      @id @default(autoincrement())
+  order_id                    Int
+  owner                       String
+  order_type                  String
+  vault                       String
+  symbol                      String
+  direction                   String
+  fee                         String
+  executed                    Boolean
+  created_at                  DateTime
+  open_amount                 String
+  reserve_amount              String
+  limited_index_price         String
+  collateral_price_threshold  String
+  key                         String
+  table_handle                String
+  transaction_version         String
+  created_transaction_version String?
+  write_set_change_index      Int
+  status                      String?  @default("NORMAL")
+  createdAt                   DateTime @default(now())
 }
 
 model PositionRecord {
-  id                       Int      @id @default(autoincrement())
-  order_id                 Int
-  owner                    String
-  vault                    String
-  symbol                   String
-  direction                String
-  closed                   Boolean
-  reserved                 String
-  collateral               String
-  position_size            String
-  open_timestamp           String
-  position_amount          String
-  funding_fee_value        String
-  funding_fee_is_positive  Boolean?
-  last_funding_rate        String
-  last_funding_is_positive Boolean?
-  is_positive              Boolean
-  last_reserving_rate      String
-  reserving_fee_amount     String
-  key                      String
-  table_handle             String
-  transaction_version      String
-  write_set_change_index   Int
-  leverage_number          String?
-  createdAt                DateTime @default(now())
+  id                          Int      @id @default(autoincrement())
+  order_id                    Int
+  owner                       String
+  vault                       String
+  symbol                      String
+  direction                   String
+  closed                      Boolean
+  reserved                    String
+  collateral                  String
+  position_size               String
+  open_timestamp              String
+  position_amount             String
+  funding_fee_value           String
+  funding_fee_is_positive     Boolean?
+  last_funding_rate           String
+  last_funding_is_positive    Boolean?
+  is_positive                 Boolean
+  last_reserving_rate         String
+  reserving_fee_amount        String
+  key                         String
+  table_handle                String
+  transaction_version         String
+  created_transaction_version String?
+  write_set_change_index      Int
+  createdAt                   DateTime @default(now())
 }
 
 model AggregatePositionRecord {

@@ -351,12 +351,43 @@ export const POSITION_RECORDS_TABLE_HANDLE = [
     // USDC_APTOS_SHORT,
     USDC_ETH_LONG,
     USDC_ETH_SHORT,
-    USDC_BTC_LONG,
-    USDC_BTC_SHORT,
+    // USDC_BTC_LONG,
+    // USDC_BTC_SHORT,
     // USDT_APTOS_LONG,
     // USDT_APTOS_SHORT,
     // USDT_ETH_LONG,
     // USDT_BTC_LONG,
+]
+
+export const ORDER_RECORDS_PAIR = [
+    // { vault: 'APTOS', symbol: 'APTOS', direction: 'LONG' },
+    // { vault: 'APTOS', symbol: 'APTOS', direction: 'SHORT' },
+
+    // { vault: 'APTOS', symbol: 'ETH', direction: 'LONG' },
+    // { vault: 'APTOS', symbol: 'ETH', direction: 'SHORT' },
+
+    // { vault: 'APTOS', symbol: 'BTC', direction: 'LONG' },
+    // { vault: 'APTOS', symbol: 'BTC', direction: 'SHORT' },
+
+    // { vault: 'USDT', symbol: 'APTOS', direction: 'LONG' },
+    // { vault: 'USDT', symbol: 'APTOS', direction: 'SHORT' },
+
+    // { vault: 'USDT', symbol: 'ETH', direction: 'LONG' },
+    // { vault: 'USDT', symbol: 'ETH', direction: 'SHORT' },
+
+    // { vault: 'USDT', symbol: 'BTC', direction: 'LONG' },
+    // { vault: 'USDT', symbol: 'BTC', direction: 'SHORT' },
+
+    // { vault: 'USDC', symbol: 'APTOS', direction: 'LONG' },
+    // { vault: 'USDC', symbol: 'APTOS', direction: 'SHORT' },
+
+    { vault: 'USDC', symbol: 'ETH', direction: 'LONG' },
+    { vault: 'USDC', symbol: 'ETH', direction: 'SHORT' },
+
+    // { vault: 'USDC', symbol: 'BTC', direction: 'LONG' },
+    // { vault: 'USDC', symbol: 'BTC', direction: 'SHORT' },
+
+
 ]
 
 
@@ -373,7 +404,11 @@ export const getOrderRecordResources = (coinType: `${string}::${string}::${strin
     return `${moduleAddress}::market::OrderRecord<${coinType},${index},${moduleAddress}::pool::${direction},${fee}>` as `${string}::${string}::${string}`
 }
 
+
+
 export const APTOS_LONG_WrappedPositionConfig = {
+    symbol_name: 'APTOS',
+    direction: 'LONG',
     decrease_fee_bps: {
         value: "1000000000000000"
     },
@@ -395,6 +430,8 @@ export const APTOS_LONG_WrappedPositionConfig = {
 }
 
 export const APTOS_SHORT_WrappedPositionConfig = {
+    symbol_name: 'APTOS',
+    direction: 'SHORT',
     decrease_fee_bps: {
         value: "1000000000000000"
     },
@@ -416,6 +453,8 @@ export const APTOS_SHORT_WrappedPositionConfig = {
 }
 
 export const ETH_LONG_WrapperPositionConfig = {
+    symbol_name: 'ETH',
+    direction: 'LONG',
     decrease_fee_bps: {
         value: "1000000000000000"
     },
@@ -437,6 +476,8 @@ export const ETH_LONG_WrapperPositionConfig = {
 }
 
 export const ETH_SHORT_WrapperPositionConfig = {
+    symbol_name: 'ETH',
+    direction: 'SHORT',
     decrease_fee_bps: {
         value: "1000000000000000"
     },
@@ -458,6 +499,8 @@ export const ETH_SHORT_WrapperPositionConfig = {
 }
 
 export const BTC_LONG_WrapperPositionConfig = {
+    symbol_name: 'BTC',
+    direction: 'LONG',
     decrease_fee_bps: {
         value: "1000000000000000"
     },
@@ -479,6 +522,8 @@ export const BTC_LONG_WrapperPositionConfig = {
 }
 
 export const BTC_SHORT_WrappedPositionConfig = {
+    symbol_name: 'BTC',
+    direction: 'SHORT',
     decrease_fee_bps: {
         value: "1000000000000000"
     },
@@ -499,6 +544,39 @@ export const BTC_SHORT_WrappedPositionConfig = {
     },
 }
 
-export const AllPositionConfig = [
-
+export const WrappedTokenConfigList = [
+    // APTOS_APTOS_ORDER_RECORD_LONG,
+    // APTOS_APTOS_ORDER_RECORD_SHORT,
+    ETH_LONG_WrapperPositionConfig,
+    ETH_SHORT_WrapperPositionConfig,
+    BTC_LONG_WrapperPositionConfig,
+    BTC_SHORT_WrappedPositionConfig
 ]
+
+
+export const convertDecimal = (value: number, fromDecimals: number = 8, toDecimals: number = 18) => {
+    if (toDecimals < fromDecimals) {
+        throw new Error("Target decimals must be greater than or equal to source decimals");
+    }
+    const factor = Math.pow(10, toDecimals - fromDecimals);
+    return value * factor;
+}
+
+export const convertBackDecimal = (value: number | string | bigint, decimal: number = 8): bigint => {
+    const bigIntValue = BigInt(value);
+    const factor = BigInt(10 ** decimal);
+
+    return bigIntValue / factor;
+}
+
+export const parseAptosDecimal = (value: number, decimals: number = 8) => {
+    return value / Math.pow(10, decimals);
+}
+
+export const formatAptosDecimal = (value: number, decimals: number = 8) => {
+    return Number((value * Math.pow(10, decimals)).toFixed(0));
+}
+
+export const getSideAddress = (side: string) => {
+    return `${moduleAddress}::pool::${side}`
+}
