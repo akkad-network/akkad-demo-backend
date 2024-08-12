@@ -14,7 +14,6 @@ export class PrismaService
     }
 
     async savePositionRecords(positionRecords: any) {
-        console.log("🚀 ~ savePositionRecords ~ positionRecords:", positionRecords)
         let parsedList: any;
         if (positionRecords && positionRecords.length > 0) {
             parsedList = positionRecords.map((item: any) => {
@@ -201,10 +200,15 @@ export class PrismaService
                         },
                         where: {
                             order_id: existingOrder.order_id,
+                            owner: record.owner,
+                            vault: record.vault,
+                            symbol: record.symbol,
+                            direction: record.direction
                         }
                     })
                 }
             } else {
+
                 const existingOrder = await this.increaseOrderRecord.findFirst({
                     where: {
                         OR: [
@@ -255,17 +259,18 @@ export class PrismaService
                 return {
                     order_id: parseInt(item.decoded_key.id, 10),
                     owner: item.decoded_key.owner,
+                    position_num: parseInt(item.decoded_value.position_num, 10),
                     order_type: item.order_type,
                     vault: item.vault,
                     symbol: item.symbol,
                     direction: item.direction,
-                    fee: item.decoded_value.fee?.value,
+                    fee: item.decoded_value.fee?.value || "CANCEL",
                     executed: item.decoded_value.executed,
                     created_at: new Date(parseInt(item.decoded_value.created_at, 10) * 1000),
                     take_profit: item.decoded_value.take_profit || false,
-                    decrease_amount: item.decoded_value.decrease_amount || '',
-                    limited_index_price: item.decoded_value.limited_index_price.price.value,
-                    collateral_price_threshold: item.decoded_value.collateral_price_threshold?.value,
+                    decrease_amount: item.decoded_value.decrease_amount || 'CANCEL',
+                    limited_index_price: item.decoded_value.limited_index_price.price.value || 'CANCEL',
+                    collateral_price_threshold: item.decoded_value.collateral_price_threshold?.value || 'CANCEL',
                     key: item.key,
                     table_handle: item.table_handle,
                     transaction_version: item.transaction_version.toString(),
@@ -278,23 +283,49 @@ export class PrismaService
             return null;
         }
 
-        const existingRecords = await this.decreaseOrderRecord.findMany({
-            where: {
-                transaction_version: {
-                    in: parsedList.map((item: any) => item.transaction_version),
-                },
-            },
-        });
-
-        const newRecords = parsedList.filter(
-            (item: any) =>
-                !existingRecords.some((existingRecord: any) => existingRecord.transaction_version === item.transaction_version),
-        );
-
-        if (newRecords.length === 0) {
-            return null;
+        for (const record of parsedList) {
+            if (Number(record.executed) === 1 && Number(record.fee) === 0) {
+                const existingOrder = await this.decreaseOrderRecord.findFirst({
+                    where: {
+                        order_id: record.order_id,
+                        owner: record.owner,
+                        vault: record.vault,
+                        symbol: record.symbol,
+                        direction: record.direction
+                    }
+                })
+                if (existingOrder) {
+                    const updatedRecords = await this.decreaseOrderRecord.updateMany({
+                        data: {
+                            executed: true,
+                            fee: "0",
+                            transaction_version: record.transaction_version,
+                            created_transaction_version: existingOrder.transaction_version
+                        },
+                        where: {
+                            order_id: existingOrder.order_id,
+                            owner: record.owner,
+                            vault: record.vault,
+                            symbol: record.symbol,
+                            direction: record.direction
+                        }
+                    })
+                }
+            } else {
+                const existingOrder = await this.decreaseOrderRecord.findFirst({
+                    where: {
+                        OR: [
+                            { transaction_version: record.transaction_version },
+                            { created_transaction_version: record.transaction_version }
+                        ]
+                    }
+                })
+                if (!existingOrder) {
+                    await this.decreaseOrderRecord.create({
+                        data: record
+                    })
+                }
+            }
         }
-
-        return this.decreaseOrderRecord.createMany({ data: newRecords });
     }
 }

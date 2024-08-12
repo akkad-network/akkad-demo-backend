@@ -1,6 +1,9 @@
+import { APTOS_COIN } from '@aptos-labs/ts-sdk';
 import { Injectable } from '@nestjs/common';
 import { AggregatePositionRecord } from '@prisma/client';
+import { aptos } from 'src/main';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { DIRECTION, moduleAddress, SymbolList, TYPES, VaultList } from 'src/utils/helper';
 
 @Injectable()
 export class OrderOrPositionService {
@@ -8,6 +11,82 @@ export class OrderOrPositionService {
     constructor(private readonly prisma: PrismaService) {
 
     }
+
+    async syncHandles() {
+        for (const type of TYPES) {
+            for (const vault of VaultList) {
+                for (const symbol of SymbolList) {
+                    for (const direction of DIRECTION) {
+                        let orderAddtional = type === 'PositionRecord' ? '' : `,${APTOS_COIN}`
+                        const result = await aptos.getAccountResource({
+                            accountAddress: moduleAddress,
+                            resourceType: `${moduleAddress}::market::${type}<${vault.tokenAddress},${symbol.tokenAddress},${direction.address}${orderAddtional}>`
+                        })
+                        const record = await this.prisma.positionOrderHandle.findFirst({
+                            where: {
+                                vault: vault.name,
+                                symbol: symbol.tokenName,
+                                direction: direction.name
+                            }
+                        })
+                        if (type === 'PositionRecord') {
+                            let handle = result?.positions?.handle
+                            if (record) {
+                                await this.prisma.positionOrderHandle.update({
+                                    data: {
+                                        vault: vault.name,
+                                        symbol: symbol.tokenName,
+                                        direction: direction.name,
+                                        position_handle: handle
+                                    },
+                                    where: { id: record.id }
+                                })
+                            } else {//create
+                                await this.prisma.positionOrderHandle.create({
+                                    data: {
+                                        vault: vault.name,
+                                        symbol: symbol.tokenName,
+                                        direction: direction.name,
+                                        position_handle: handle
+                                    }
+                                })
+                            }
+                            console.log(`🚀 ~ syncHandles position ~ ${vault.name} ${symbol.tokenName} ${direction.name} ${handle}`)
+
+                        } else { // order record
+                            let increase_order_handle = result?.open_orders?.handle
+                            let decrease_order_handle = result?.decrease_orders?.handle
+                            if (record) {
+                                await this.prisma.positionOrderHandle.update({
+                                    data: {
+                                        vault: vault.name,
+                                        symbol: symbol.tokenName,
+                                        direction: direction.name,
+                                        increase_order_handle,
+                                        decrease_order_handle
+                                    },
+                                    where: { id: record.id }
+                                })
+                            } else {//create
+                                await this.prisma.positionOrderHandle.create({
+                                    data: {
+                                        vault: vault.name,
+                                        symbol: symbol.tokenName,
+                                        direction: direction.name,
+                                        increase_order_handle,
+                                        decrease_order_handle
+                                    }
+                                })
+                            }
+                            console.log(`🚀 ~ syncHandles order ~ ${vault.name} ${symbol.tokenName} ${direction.name} ${increase_order_handle} ${decrease_order_handle}`)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
 
     async findAllUserPositions(owner: string, vault: string, symbol: string) {
         return this.prisma.positionRecord.findMany({

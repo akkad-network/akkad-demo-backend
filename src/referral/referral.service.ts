@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReferralRecords, UserReferralCode } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
-import { aptos, moduleAddress, singer } from 'src/main';
+import { aptos, singer } from 'src/main';
 import { APTOS_COIN } from '@aptos-labs/ts-sdk';
+import { moduleAddress } from 'src/utils/helper';
 
 @Injectable()
 export class ReferralService {

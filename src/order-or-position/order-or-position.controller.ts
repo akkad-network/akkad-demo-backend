@@ -41,4 +41,10 @@ export class OrderOrPositionController {
     ) {
         return this.orderOrPositionService.getLatestAggregateData(vault, symbol);
     }
+
+    @Get('syncHandles')
+    async syncHandles() {
+        return this.orderOrPositionService.syncHandles()
+    }
+
 }

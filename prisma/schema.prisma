@@ -8,26 +8,28 @@ generator client {
 }
 
 model DecreaseOrderRecord {
-  id                         Int      @id @default(autoincrement())
-  order_id                   Int
-  owner                      String
-  order_type                 String
-  vault                      String
-  symbol                     String
-  direction                  String
-  fee                        String
-  executed                   Boolean
-  created_at                 DateTime
-  take_profit                Boolean
-  decrease_amount            String
-  limited_index_price        String
-  collateral_price_threshold String
-  key                        String
-  table_handle               String
-  transaction_version        String
-  write_set_change_index     Int
-  status                     String?  @default("NORMAL")
-  createdAt                  DateTime @default(now())
+  id                          Int      @id @default(autoincrement())
+  order_id                    Int
+  position_num                Int
+  owner                       String
+  order_type                  String
+  vault                       String
+  symbol                      String
+  direction                   String
+  fee                         String
+  executed                    Boolean
+  created_at                  DateTime
+  take_profit                 Boolean
+  decrease_amount             String
+  limited_index_price         String
+  collateral_price_threshold  String
+  key                         String
+  table_handle                String
+  transaction_version         String
+  created_transaction_version String?
+  write_set_change_index      Int
+  status                      String?  @default("NORMAL")
+  createdAt                   DateTime @default(now())
 }
 
 model IncreaseOrderRecord {
@@ -113,4 +115,16 @@ model GlobalSyncController {
   last_sync_transaction_verision String
   sync_type                      String
   createdAt                      DateTime @default(now())
+}
+
+model PositionOrderHandle {
+  id                    Int      @id @default(autoincrement())
+  vault                 String
+  symbol                String
+  direction             String
+  position_handle       String?
+  increase_order_handle String?
+  decrease_order_handle String?
+  version_number        Int      @default(1)
+  createAt              DateTime @default(now())
 }
