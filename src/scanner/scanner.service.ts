@@ -13,7 +13,7 @@ export class ScannerService {
     private readonly aptos: Aptos
     private readonly logger = new Logger(ScannerService.name)
     private readonly priceFeedAddress: string = FEERDER_ADDRESS
-    private readonly contractAddress: string = MODULE_ADDRESS
+    private readonly moduleAddress: string = MODULE_ADDRESS
     private readonly priceIds: any[] = [
         { name: "APTOS", address: AptFeeder },
         { name: "USDT", address: UsdtFeeder },
@@ -181,7 +181,7 @@ export class ScannerService {
         const transaction = await aptos.transaction.build.simple({
             sender: executerSigner.accountAddress,
             data: {
-                function: `${this.contractAddress}::market::execute_open_position_order`,
+                function: `${this.moduleAddress}::market::execute_open_position_order`,
                 typeArguments: [
                     VaultList.find(vault => vault.name === order.vault).tokenAddress,
                     SymbolList.find(symbol => symbol.tokenName === order.symbol).tokenAddress,
@@ -230,7 +230,7 @@ export class ScannerService {
         const transaction = await aptos.transaction.build.simple({
             sender: executerSigner.accountAddress,
             data: {
-                function: `${this.contractAddress}::market::execute_decrease_position_order`,
+                function: `${this.moduleAddress}::market::execute_decrease_position_order`,
                 typeArguments: [
                     VaultList.find(vault => vault.name === order.vault).tokenAddress,
                     SymbolList.find(symbol => symbol.tokenName === order.symbol).tokenAddress,
@@ -476,7 +476,7 @@ export class ScannerService {
         const transaction = await aptos.transaction.build.simple({
             sender: liquidatorSigner.accountAddress,
             data: {
-                function: `${this.contractAddress}::market::liquidate_position`,
+                function: `${this.moduleAddress}::market::liquidate_position`,
                 typeArguments: [
                     VaultList.find(vault => vault.name === position.vault).tokenAddress,
                     SymbolList.find(symbol => symbol.tokenName === position.symbol).tokenAddress,

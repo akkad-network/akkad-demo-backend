@@ -80,15 +80,24 @@ export class PrismaService
             }
         })
 
-        const devRecord = await this.globalSyncController.findFirst({
+        const decRecord = await this.globalSyncController.findFirst({
             where: {
                 sync_type: 'DECREASE_ORDER_RECORD'
             }
         })
+        let pHeight = '5653799813'
+        let iHeight = '5653799813'
+        let dHeight = '5653799813'
 
-        const pHeight = positionRecord.last_sync_transaction_verision
-        const iHeight = incRecord.last_sync_transaction_verision
-        const dHeight = devRecord.last_sync_transaction_verision
+        if (positionRecord) {
+            pHeight = positionRecord.last_sync_transaction_verision
+        }
+        if (incRecord) {
+            iHeight = incRecord.last_sync_transaction_verision
+        }
+        if (decRecord) {
+            dHeight = decRecord.last_sync_transaction_verision
+        }
 
         return { pHeight, iHeight, dHeight }
     }

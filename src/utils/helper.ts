@@ -1,5 +1,10 @@
 import { APTOS_COIN } from "@aptos-labs/ts-sdk"
-import { aptos, COIN_ADDRESS, MODULE_ADDRESS } from "src/main"
+import { aptos } from "src/main"
+import * as dotenv from 'dotenv'
+dotenv.config()
+
+export const MODULE_ADDRESS = process.env.MODULE_ADDRESS
+export const COIN_ADDRESS = process.env.COIN_ADDRESS
 
 export const USDC_COINSTORE = `${COIN_ADDRESS}::usdc::USDC`
 export const ETH_COINSTORE = `${COIN_ADDRESS}::ETH::ETH`
