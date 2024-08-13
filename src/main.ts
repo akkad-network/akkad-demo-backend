@@ -29,6 +29,7 @@ export const EthFeeder = process.env.ETH_FEEDER_ADDRESS
 
 export const MODULE_ADDRESS = process.env.MODULE_ADDRESS
 export const FEERDER_ADDRESS = process.env.PRICE_FEEDER_ADDRESS
+export const COIN_ADDRESS = process.env.COIN_ADDRESS
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

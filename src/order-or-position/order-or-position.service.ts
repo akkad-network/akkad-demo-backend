@@ -1,9 +1,9 @@
 import { APTOS_COIN } from '@aptos-labs/ts-sdk';
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { aptos } from 'src/main';
+import { aptos, MODULE_ADDRESS } from 'src/main';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { DIRECTION, moduleAddress, PAIRS, SymbolList, TYPES, VaultList } from 'src/utils/helper';
+import { DIRECTION, PAIRS, SymbolList, TYPES, VaultList } from 'src/utils/helper';
 
 @Injectable()
 export class OrderOrPositionService {
@@ -31,8 +31,8 @@ export class OrderOrPositionService {
                     for (const direction of DIRECTION) {
                         let orderAddtional = type === 'PositionRecord' ? '' : `,${APTOS_COIN}`
                         const result = await aptos.getAccountResource({
-                            accountAddress: moduleAddress,
-                            resourceType: `${moduleAddress}::market::${type}<${vault.tokenAddress},${symbol.tokenAddress},${direction.address}${orderAddtional}>`
+                            accountAddress: MODULE_ADDRESS,
+                            resourceType: `${MODULE_ADDRESS}::market::${type}<${vault.tokenAddress},${symbol.tokenAddress},${direction.address}${orderAddtional}>`
                         })
                         const record = await this.prisma.positionOrderHandle.findFirst({
                             where: {

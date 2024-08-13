@@ -4,8 +4,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { Aptos, APTOS_COIN } from '@aptos-labs/ts-sdk';
 import axios from 'axios';
-import { convertBackDecimal, convertDecimal, getSideAddress, getTableHandle, moduleAddress, PAIRS, SymbolList, VaultList } from 'src/utils/helper';
-import { AptFeeder, aptos, BtcFeeder, EthFeeder, executerSigner, FEERDER_ADDRESS, liquidatorSigner, priceFeederSyncerSigner, UsdcFeeder, UsdtFeeder } from 'src/main';
+import { convertBackDecimal, convertDecimal, getSideAddress, getTableHandle, PAIRS, SymbolList, VaultList } from 'src/utils/helper';
+import { AptFeeder, aptos, BtcFeeder, EthFeeder, executerSigner, FEERDER_ADDRESS, liquidatorSigner, MODULE_ADDRESS, priceFeederSyncerSigner, UsdcFeeder, UsdtFeeder } from 'src/main';
 import { DecreaseOrderRecord, IncreaseOrderRecord, PositionOrderHandle, PositionRecord } from '@prisma/client';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class ScannerService {
     private readonly aptos: Aptos
     private readonly logger = new Logger(ScannerService.name)
     private readonly priceFeedAddress: string = FEERDER_ADDRESS
-    private readonly contractAddress: string = moduleAddress
+    private readonly contractAddress: string = MODULE_ADDRESS
     private readonly priceIds: any[] = [
         { name: "APTOS", address: AptFeeder },
         { name: "USDT", address: UsdtFeeder },

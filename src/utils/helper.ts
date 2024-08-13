@@ -1,21 +1,16 @@
 import { APTOS_COIN } from "@aptos-labs/ts-sdk"
-import { aptos } from "src/main"
+import { aptos, COIN_ADDRESS, MODULE_ADDRESS } from "src/main"
 
-export const moduleAddress =
-    "0x8d07663376c920257ab9f2bd8ef0cc5ed5f2264109a3d29fc2b6f8aafc5e875d"
-export const coinAddress =
-    "0x6f60af74988c64cd3b7c1e214697e6949db39c061d8d4cf59a7e2bd1b66c8bf0"
-
-export const USDC_COINSTORE = `${coinAddress}::usdc::USDC`
-export const ETH_COINSTORE = `${coinAddress}::ETH::ETH`
-export const SIDE_LONG = `${moduleAddress}::pool::LONG`
-export const SIDE_SHORT = `${moduleAddress}::pool::SHORT`
+export const USDC_COINSTORE = `${COIN_ADDRESS}::usdc::USDC`
+export const ETH_COINSTORE = `${COIN_ADDRESS}::ETH::ETH`
+export const SIDE_LONG = `${MODULE_ADDRESS}::pool::LONG`
+export const SIDE_SHORT = `${MODULE_ADDRESS}::pool::SHORT`
 
 export const APTOS_COIN_STORE = "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>"
-export const MOCK_USDC_COIN_STORE = `0x1::coin::CoinStore<${coinAddress}::usdc::USDC>`
-export const MOCK_USDT_COIN_STORE = `0x1::coin::CoinStore<${coinAddress}::usdt::USDT>`
+export const MOCK_USDC_COIN_STORE = `0x1::coin::CoinStore<${COIN_ADDRESS}::usdc::USDC>`
+export const MOCK_USDT_COIN_STORE = `0x1::coin::CoinStore<${COIN_ADDRESS}::usdt::USDT>`
 
-export const CHECK_LIQUIDATION_FUNC_PATH = `${moduleAddress}::positions::check_liquidation`
+export const CHECK_LIQUIDATION_FUNC_PATH = `${MODULE_ADDRESS}::positions::check_liquidation`
 
 export type SymbolInfo = {
     name: string
@@ -53,14 +48,14 @@ export const VaultList: VaultInfo[] = [
     {
         name: 'USDT',
         symbol: 'USDT',
-        tokenAddress: `${coinAddress}::usdt::USDT`,
+        tokenAddress: `${COIN_ADDRESS}::usdt::USDT`,
         tokenStore: MOCK_USDT_COIN_STORE,
         decimal: 6
     },
     {
         name: 'USDC',
         symbol: 'USDC',
-        tokenAddress: `${coinAddress}::usdc::USDC`,
+        tokenAddress: `${COIN_ADDRESS}::usdc::USDC`,
         tokenStore: MOCK_USDC_COIN_STORE,
         decimal: 6
     }
@@ -79,7 +74,7 @@ export const SymbolList: SymbolInfo[] = [
         name: "BTC/USD",
         tokenName: 'BTC',
         tokenSymbol: 'BTC',
-        tokenAddress: `${coinAddress}::btc::BTC`,
+        tokenAddress: `${COIN_ADDRESS}::btc::BTC`,
         pythFeederAddress: "0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b",
         decimal: 8
     },
@@ -87,7 +82,7 @@ export const SymbolList: SymbolInfo[] = [
         name: "ETH/USD",
         tokenName: 'ETH',
         tokenSymbol: 'ETH',
-        tokenAddress: `${coinAddress}::ETH::ETH`,
+        tokenAddress: `${COIN_ADDRESS}::ETH::ETH`,
         pythFeederAddress: "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6",
         decimal: 8
     }
@@ -129,7 +124,7 @@ export const getTableHandle = async (address: string, resourceType: `${string}::
 }
 
 export const getOrderRecordResources = (coinType: `${string}::${string}::${string}`, index: `${string}::${string}::${string}`, direction: string, fee: `${string}::${string}::${string}`) => {
-    return `${moduleAddress}::market::OrderRecord<${coinType},${index},${moduleAddress}::pool::${direction},${fee}>` as `${string}::${string}::${string}`
+    return `${MODULE_ADDRESS}::market::OrderRecord<${coinType},${index},${MODULE_ADDRESS}::pool::${direction},${fee}>` as `${string}::${string}::${string}`
 }
 
 export const convertDecimal = (value: number, fromDecimals: number = 8, toDecimals: number = 18) => {
@@ -156,5 +151,5 @@ export const formatAptosDecimal = (value: number, decimals: number = 8) => {
 }
 
 export const getSideAddress = (side: string) => {
-    return `${moduleAddress}::pool::${side}`
+    return `${MODULE_ADDRESS}::pool::${side}`
 }
