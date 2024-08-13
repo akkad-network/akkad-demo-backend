@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ReferralRecords, UserReferralCode } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
-import { aptos, singer } from 'src/main';
+import { aptos, priceFeederSyncerSigner } from 'src/main';
 import { APTOS_COIN } from '@aptos-labs/ts-sdk';
 import { moduleAddress } from 'src/utils/helper';
 
@@ -85,7 +85,7 @@ export class ReferralService {
             })
 
             const transaction = await aptos.transaction.build.simple({
-                sender: singer.accountAddress,
+                sender: priceFeederSyncerSigner.accountAddress,
                 data: {
                     function: `${moduleAddress}::market::add_new_referral`,
                     typeArguments: [APTOS_COIN],
@@ -94,7 +94,7 @@ export class ReferralService {
             });
 
             const committedTransaction = await aptos.signAndSubmitTransaction({
-                signer: singer,
+                signer: priceFeederSyncerSigner,
                 transaction,
             });
             console.log("🚀 ~ ReferralService ~ bindReferrer ~ committedTransaction:", committedTransaction)

@@ -1,15 +1,27 @@
 import { APTOS_COIN } from '@aptos-labs/ts-sdk';
 import { Injectable } from '@nestjs/common';
-import { AggregatePositionRecord } from '@prisma/client';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { aptos } from 'src/main';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { DIRECTION, moduleAddress, SymbolList, TYPES, VaultList } from 'src/utils/helper';
+import { DIRECTION, moduleAddress, PAIRS, SymbolList, TYPES, VaultList } from 'src/utils/helper';
 
 @Injectable()
 export class OrderOrPositionService {
 
     constructor(private readonly prisma: PrismaService) {
 
+    }
+
+
+    @Cron(CronExpression.EVERY_4_HOURS)
+    async handleAggregateFeeData() {
+        await this.aggregateFeeData();
+    }
+
+    async aggregateFeeData() {
+        const result = Promise.all(PAIRS.map((pair: any) => {
+            this.getAggregateData(pair.vault, pair.symbol, pair.direction)
+        }))
     }
 
     async syncHandles() {
@@ -86,8 +98,6 @@ export class OrderOrPositionService {
         }
     }
 
-
-
     async findAllUserPositions(owner: string, vault: string, symbol: string) {
         return this.prisma.positionRecord.findMany({
             where: {
@@ -100,7 +110,6 @@ export class OrderOrPositionService {
             },
         });
     }
-
 
     async findDecreaseOrders(owner: string, vault: string, symbol: string) {
         return this.prisma.decreaseOrderRecord.findMany({
@@ -127,7 +136,6 @@ export class OrderOrPositionService {
             },
         });
     }
-
 
     async getAggregateData(vault: string, symbol: string, direction: string) {
         const eightHoursAgo = Math.floor(Date.now() / 1000) - 8 * 60 * 60;
@@ -171,7 +179,6 @@ export class OrderOrPositionService {
             },
         });
     }
-
 
     private calculateAverage(records: any[], valueField: string, positiveField?: string): string {
         if (records.length === 0) return '0';

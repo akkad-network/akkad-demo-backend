@@ -2,29 +2,27 @@ import { OrderOrPositionService } from './../order-or-position/order-or-position
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
-import { Account, Aptos, APTOS_COIN, AptosConfig, Ed25519Account, Ed25519PrivateKey, EntryFunction, InputViewFunctionData, Network, TransactionPayload } from '@aptos-labs/ts-sdk';
+import { Aptos, APTOS_COIN } from '@aptos-labs/ts-sdk';
 import axios from 'axios';
-import { CHECK_LIQUIDATION_FUNC_PATH, convertBackDecimal, convertDecimal, ETH_COINSTORE, ETH_LONG_WrapperPositionConfig, formatAptosDecimal, getSideAddress, getTableHandle, moduleAddress, PAIRS, SIDE_LONG, SIDE_SHORT, SymbolList, USDC_COINSTORE, VaultList, WrappedTokenConfigList } from 'src/utils/helper';
-import { aptos, singer } from 'src/main';
+import { convertBackDecimal, convertDecimal, getSideAddress, getTableHandle, moduleAddress, PAIRS, SymbolList, VaultList } from 'src/utils/helper';
+import { AptFeeder, aptos, BtcFeeder, EthFeeder, executerSigner, FEERDER_ADDRESS, liquidatorSigner, priceFeederSyncerSigner, UsdcFeeder, UsdtFeeder } from 'src/main';
 import { DecreaseOrderRecord, IncreaseOrderRecord, PositionOrderHandle, PositionRecord } from '@prisma/client';
 
 @Injectable()
 export class ScannerService {
     private readonly aptos: Aptos
     private readonly logger = new Logger(ScannerService.name)
-    private readonly priceFeedAddress: string = "0x7e783b349d3e89cf5931af376ebeadbfab855b3fa239b7ada8f5a92fbea6b387";
-    private readonly contractAddress: string = "0x8d07663376c920257ab9f2bd8ef0cc5ed5f2264109a3d29fc2b6f8aafc5e875d";
+    private readonly priceFeedAddress: string = FEERDER_ADDRESS
+    private readonly contractAddress: string = moduleAddress
     private readonly priceIds: any[] = [
-        { name: "APTOS", address: "0x44a93dddd8effa54ea51076c4e851b6cbbfd938e82eb90197de38fe8876bb66e" },
-        { name: "USDT", address: "0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722" },
-        { name: "USDC", address: "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588" },
-        { name: "BTC", address: "0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b" },
-        { name: "ETH", address: "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6" }
+        { name: "APTOS", address: AptFeeder },
+        { name: "USDT", address: UsdtFeeder },
+        { name: "USDC", address: UsdcFeeder },
+        { name: "BTC", address: BtcFeeder },
+        { name: "ETH", address: EthFeeder }
     ];
 
-    constructor(private readonly prisma: PrismaService, private readonly orderOrPositionService: OrderOrPositionService) {
-
-    }
+    constructor(private readonly prisma: PrismaService, private readonly orderOrPositionService: OrderOrPositionService) { }
 
     @Cron(CronExpression.EVERY_30_SECONDS)
     async handlePriceFeeder() {
@@ -33,27 +31,21 @@ export class ScannerService {
 
     @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncOrderRecords() {
-        // await this.syncOnChainOrderRecords();
+        await this.syncOnChainOrderRecords();
     }
 
     @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncPositionData() {
-        // await this.syncOnChainPositionRecords();
+        await this.syncOnChainPositionRecords();
     }
-
-    @Cron(CronExpression.EVERY_4_HOURS)
-    async handleAggregateFeeData() {
-        await this.aggregateFeeData();
-    }
-
 
     async updateFeed(): Promise<void> {
         const vaas = await Promise.all(this.priceIds.map(pair => this.fetchVaa(pair.address)));
         const vasBytes = vaas.map(vaa => Array.from(Buffer.from(vaa.binary, 'hex')));
         const parsedPrices = vaas.map(vaa => vaa.parsed);
         await this.updateFeedToAptos(vasBytes)
-        // await this.scanOrderRecords(parsedPrices)
-        // await this.checkLiquidation(parsedPrices);
+        await this.scanOrderRecords(parsedPrices)
+        await this.checkLiquidation(parsedPrices);
     }
 
     async fetchVaa(priceId: string): Promise<any> {
@@ -68,7 +60,7 @@ export class ScannerService {
 
     async updateFeedToAptos(vasBytes: number[][]) {
         const transaction = await aptos.transaction.build.simple({
-            sender: singer.accountAddress,
+            sender: priceFeederSyncerSigner.accountAddress,
             data: {
                 function: `${this.priceFeedAddress}::pyth::update_price_feeds_with_funder`,
                 typeArguments: [],
@@ -77,7 +69,7 @@ export class ScannerService {
         });
 
         const committedTransaction = await aptos.signAndSubmitTransaction({
-            signer: singer,
+            signer: priceFeederSyncerSigner,
             transaction,
         });
 
@@ -184,10 +176,10 @@ export class ScannerService {
 
     async executeIncreaseOrderRecords(order: IncreaseOrderRecord) {
         console.log("🚀 ~ ScannerService ~ executeOrderRecords increase ~ order:", order)
-        const accountInfo = await aptos.account.getAccountInfo({ accountAddress: singer.accountAddress })
+        const accountInfo = await aptos.account.getAccountInfo({ accountAddress: executerSigner.accountAddress })
         const seqNumber = accountInfo.sequence_number
         const transaction = await aptos.transaction.build.simple({
-            sender: singer.accountAddress,
+            sender: executerSigner.accountAddress,
             data: {
                 function: `${this.contractAddress}::market::execute_open_position_order`,
                 typeArguments: [
@@ -208,7 +200,7 @@ export class ScannerService {
         });
 
         const committedTransaction = await aptos.signAndSubmitTransaction({
-            signer: singer,
+            signer: executerSigner,
             transaction,
         });
 
@@ -233,10 +225,10 @@ export class ScannerService {
 
     async executeDecreaseOrderRecords(order: DecreaseOrderRecord) {
         console.log("🚀 ~ ScannerService ~ executeOrderRecords decrease ~ order:", order)
-        const accountInfo = await aptos.account.getAccountInfo({ accountAddress: singer.accountAddress })
+        const accountInfo = await aptos.account.getAccountInfo({ accountAddress: executerSigner.accountAddress })
         const seqNumber = accountInfo.sequence_number
         const transaction = await aptos.transaction.build.simple({
-            sender: singer.accountAddress,
+            sender: executerSigner.accountAddress,
             data: {
                 function: `${this.contractAddress}::market::execute_decrease_position_order`,
                 typeArguments: [
@@ -258,7 +250,7 @@ export class ScannerService {
         });
 
         const committedTransaction = await aptos.signAndSubmitTransaction({
-            signer: singer,
+            signer: executerSigner,
             transaction,
         });
 
@@ -444,8 +436,8 @@ export class ScannerService {
             return { name: this.priceIds[index].name, price: convertDecimal(Number(price)) }
         })
 
-        for (const symbol of WrappedTokenConfigList) {
-            const symbolName = symbol.symbol_name
+        for (const symbol of SymbolList) {
+            const symbolName = symbol.tokenName
             const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName).price
             const positions = await this.prisma.positionRecord.findMany({
                 where: {
@@ -465,7 +457,7 @@ export class ScannerService {
                     deltaSize = BigInt(position.position_size) - BigInt(symbolPrice) * BigInt(position.position_amount);
                 }
 
-                const collMulRate = collateralValue * convertBackDecimal(Number(symbol.liquidation_threshold.value), 16) / BigInt(100);
+                const collMulRate = collateralValue * BigInt(98) / BigInt(100);
 
                 // Return true if the position is at risk of liquidation, otherwise false
                 return collMulRate < deltaSize;
@@ -478,9 +470,11 @@ export class ScannerService {
     }
 
     async executeLiquidation(position: PositionRecord) {
-        console.log("🚀 ~ executeLiquidation ~ position execute", `${position.owner} ${position.vault} ${position.symbol} ${position.direction}`)
+        console.log("🚀 ~ executeLiquidation ~ position execute", `${position.id} ${position.order_id} ${position.owner} ${position.vault} ${position.symbol} ${position.direction}`)
+        const accountInfo = await aptos.account.getAccountInfo({ accountAddress: liquidatorSigner.accountAddress })
+        const seqNumber = accountInfo.sequence_number
         const transaction = await aptos.transaction.build.simple({
-            sender: singer.accountAddress,
+            sender: liquidatorSigner.accountAddress,
             data: {
                 function: `${this.contractAddress}::market::liquidate_position`,
                 typeArguments: [
@@ -494,10 +488,12 @@ export class ScannerService {
                     []
                 ],
             },
+            options: {
+                // accountSequenceNumber: Number(seqNumber)
+            }
         });
-
         const committedTransaction = await aptos.signAndSubmitTransaction({
-            signer: singer,
+            signer: liquidatorSigner,
             transaction,
         });
 
@@ -506,12 +502,4 @@ export class ScannerService {
         })
         console.log("🚀 ~ ScannerService ~ executeOrderRecords ~ response:", response.success)
     }
-
-
-    async aggregateFeeData() {
-        const result = Promise.all(PAIRS.map((pair: any) => {
-            this.orderOrPositionService.getAggregateData(pair.vault, pair.symbol, pair.direction)
-        }))
-    }
-
 }
