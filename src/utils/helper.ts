@@ -140,11 +140,13 @@ export const convertDecimal = (value: number, fromDecimals: number = 8, toDecima
     return value * factor;
 }
 
-export const convertBackDecimal = (value: number | string | bigint, decimal: number = 8): bigint => {
+export const convertBackDecimal = (value: number | string | bigint, decimal: number = 8): number => {
     const bigIntValue = BigInt(value);
     const factor = BigInt(10 ** decimal);
 
-    return bigIntValue / factor;
+    const result = Number(bigIntValue) / Number(factor);
+
+    return result;
 }
 
 export const parseAptosDecimal = (value: number, decimals: number = 8) => {

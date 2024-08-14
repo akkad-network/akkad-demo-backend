@@ -502,19 +502,16 @@ export class ScannerService {
 
             const explodingPositions = positions.filter(position => {
                 const collateralPrice = pricesList.find((priceInfo) => priceInfo.name === position.vault).price;
-                const collateralValue = BigInt(position.collateral) * BigInt(collateralPrice);
-                let deltaSize = BigInt(0);
-
+                const vaultInfo = VaultList.find((vault) => vault.name === position.vault)
+                const collateralValue = convertBackDecimal(position.collateral, vaultInfo.decimal) * convertBackDecimal(collateralPrice, 18);
+                const collVauleMulRate = collateralValue * 98 / 100
+                const deltaSize = Number(convertBackDecimal(symbolPrice, 18)) * Number(convertBackDecimal(position.position_amount, symbol.decimal)) - Number(convertBackDecimal(position.position_size, 18));
                 if (position.direction === 'LONG') {
-                    deltaSize = BigInt(symbolPrice) * BigInt(position.position_amount) - BigInt(position.position_size);
+                    return collVauleMulRate + deltaSize < 0
                 } else {
-                    deltaSize = BigInt(position.position_size) - BigInt(symbolPrice) * BigInt(position.position_amount);
+                    return collVauleMulRate - deltaSize < 0
                 }
 
-                const collMulRate = collateralValue * BigInt(98) / BigInt(100);
-
-                // Return true if the position is at risk of liquidation, otherwise false
-                return collMulRate < deltaSize;
             });
 
             for (const position of explodingPositions) {

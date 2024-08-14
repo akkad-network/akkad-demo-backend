@@ -12,18 +12,59 @@ export class OrderOrPositionService {
 
     }
 
-
-    @Cron(CronExpression.EVERY_4_HOURS)
+    @Cron(CronExpression.EVERY_HOUR)
     async handleAggregateFeeData() {
         await this.aggregateFeeData();
     }
 
     async aggregateFeeData() {
-        const result = Promise.all(PAIRS.map((pair: any) => {
+        Promise.all(PAIRS.map((pair: any) => {
             this.getAggregateData(pair.vault, pair.symbol, pair.direction)
         }))
     }
 
+    async getAggregateData(vault: string, symbol: string, direction: string) {
+        const eightHoursAgo = Math.floor(Date.now() / 1000) - 8 * 60 * 60;
+
+        const records = await this.prisma.positionRecord.findMany({
+            where: {
+                vault,
+                symbol,
+                direction,
+                // open_timestamp: {
+                //     gte: eightHoursAgo.toString(),
+                // },
+            },
+        });
+
+        const averageFundingFee = this.calculateAverage(
+            records,
+            'funding_fee_value',
+            'funding_fee_is_positive',
+        );
+
+        const averageFundingRate = this.calculateAverage(
+            records,
+            'last_funding_rate',
+            'last_funding_is_positive',
+        );
+
+        const averageReservingRate = this.calculateAverage(
+            records,
+            'last_reserving_rate',
+        );
+
+        await this.prisma.aggregatePositionRecord.create({
+            data: {
+                vault,
+                symbol,
+                direction,
+                average_funding_fee: averageFundingFee.toString(),
+                average_funding_rate: averageFundingRate.toString(),
+                average_reserving_rate: averageReservingRate.toString(),
+            },
+        });
+    }
     async syncHandles() {
         for (const type of TYPES) {
             for (const vault of VaultList) {
@@ -137,48 +178,6 @@ export class OrderOrPositionService {
         });
     }
 
-    async getAggregateData(vault: string, symbol: string, direction: string) {
-        const eightHoursAgo = Math.floor(Date.now() / 1000) - 8 * 60 * 60;
-
-        const records = await this.prisma.positionRecord.findMany({
-            where: {
-                vault,
-                symbol,
-                direction,
-                // open_timestamp: {
-                //     gte: eightHoursAgo.toString(),
-                // },
-            },
-        });
-
-        const averageFundingFee = this.calculateAverage(
-            records,
-            'funding_fee_value',
-            'funding_fee_is_positive',
-        );
-
-        const averageFundingRate = this.calculateAverage(
-            records,
-            'last_funding_rate',
-            'last_funding_is_positive',
-        );
-
-        const averageReservingRate = this.calculateAverage(
-            records,
-            'last_reserving_rate',
-        );
-
-        await this.prisma.aggregatePositionRecord.create({
-            data: {
-                vault,
-                symbol,
-                direction,
-                average_funding_fee: averageFundingFee.toString(),
-                average_funding_rate: averageFundingRate.toString(),
-                average_reserving_rate: averageReservingRate.toString(),
-            },
-        });
-    }
 
     private calculateAverage(records: any[], valueField: string, positiveField?: string): string {
         if (records.length === 0) return '0';
