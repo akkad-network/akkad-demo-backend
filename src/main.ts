@@ -1,11 +1,11 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as dotenv from 'dotenv'
 import { Account, Aptos, AptosConfig, Ed25519PrivateKey, Network } from '@aptos-labs/ts-sdk';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 
-dotenv.config()
 const aptosConfig = new AptosConfig({ network: Network.TESTNET });
 
 const priceFeederSyncerPK = process.env.PRICE_FEED_AND_SYNCER_PK

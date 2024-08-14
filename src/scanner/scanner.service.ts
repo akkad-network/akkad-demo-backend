@@ -1,3 +1,5 @@
+import * as dotenv from 'dotenv'
+dotenv.config()
 import { OrderOrPositionService } from './../order-or-position/order-or-position.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -10,7 +12,6 @@ import { DecreaseOrderRecord, IncreaseOrderRecord, PositionOrderHandle, Position
 
 @Injectable()
 export class ScannerService {
-    private readonly aptos: Aptos
     private readonly logger = new Logger(ScannerService.name)
     private readonly priceFeedAddress: string = FEERDER_ADDRESS
     private readonly moduleAddress: string = MODULE_ADDRESS
@@ -21,31 +22,84 @@ export class ScannerService {
         { name: "BTC", address: BtcFeeder },
         { name: "ETH", address: EthFeeder }
     ];
+    private readonly SYNC_POSITIONS = process.env.SYNC_POSITIONS
+    private readonly SYNC_ORDERS = process.env.SYNC_ORDERS
 
-    constructor(private readonly prisma: PrismaService, private readonly orderOrPositionService: OrderOrPositionService) { }
+    private readonly UPDATE_PRICE_FEED = process.env.UPDATE_PRICE_FEED
+    private readonly EXECUTE_ORDERS = process.env.EXECUTE_ORDERS
+    private readonly EXECUTE_LIQUIDATION = process.env.EXECUTE_LIQUIDATION
 
-    @Cron(CronExpression.EVERY_30_SECONDS)
+    private readonly VAULT_APTOS = process.env.VAULT_APTOS
+    private readonly VAULT_USDC = process.env.VAULT_USDC
+    private readonly VAULT_USDT = process.env.VAULT_USDT
+
+    private FUNC_PAIRS: any[] = []
+
+    constructor(private readonly prisma: PrismaService, private readonly orderOrPositionService: OrderOrPositionService) {
+        PAIRS.map((pair) => {
+            if (this.isFunctionOn(this.VAULT_APTOS)) {
+                if (pair.vault === 'APTOS') {
+                    this.FUNC_PAIRS.push(pair)
+                }
+            }
+            if (this.isFunctionOn(this.VAULT_USDC)) {
+                if (pair.vault === 'USDC') {
+                    this.FUNC_PAIRS.push(pair)
+                }
+            }
+            if (this.isFunctionOn(this.VAULT_USDT)) {
+                if (pair.vault === 'USDT') {
+                    this.FUNC_PAIRS.push(pair)
+                }
+            }
+        })
+        console.log('start scanner : FUNC_PAIRS ', this.FUNC_PAIRS)
+
+        console.log('check scanner config => SYNC_POSITIONS', this.SYNC_POSITIONS)
+        console.log('check scanner config => SYNC_ORDERS', this.SYNC_ORDERS)
+
+        console.log('check scanner config => UPDATE_PRICE_FEED', this.UPDATE_PRICE_FEED)
+        console.log('check scanner config => EXECUTE_ORDERS', this.EXECUTE_ORDERS)
+        console.log('check scanner config => EXECUTE_LIQUIDATION', this.EXECUTE_LIQUIDATION)
+
+        console.log('check scanner config => VAULT_APTOS', this.VAULT_APTOS)
+        console.log('check scanner config => VAULT_USDC', this.VAULT_USDC)
+        console.log('check scanner config => VAULT_USDT', this.VAULT_USDT)
+    }
+
+    @Cron(CronExpression.EVERY_10_SECONDS)
     async handlePriceFeeder() {
-        await this.updateFeed();
+        await this.fetchPrice();
     }
 
     @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncOrderRecords() {
-        await this.syncOnChainOrderRecords();
+        if (this.isFunctionOn(this.SYNC_ORDERS)) {
+            await this.syncOnChainOrderRecords();
+        }
     }
 
     @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncPositionData() {
-        await this.syncOnChainPositionRecords();
+        if (this.isFunctionOn(this.SYNC_POSITIONS)) {
+            await this.syncOnChainPositionRecords();
+        }
     }
 
-    async updateFeed(): Promise<void> {
+    async fetchPrice(): Promise<void> {
         const vaas = await Promise.all(this.priceIds.map(pair => this.fetchVaa(pair.address)));
         const vasBytes = vaas.map(vaa => Array.from(Buffer.from(vaa.binary, 'hex')));
         const parsedPrices = vaas.map(vaa => vaa.parsed);
-        await this.updateFeedToAptos(vasBytes)
-        await this.scanOrderRecords(parsedPrices)
-        await this.checkLiquidation(parsedPrices);
+
+        if (this.isFunctionOn(this.UPDATE_PRICE_FEED)) {
+            await this.updateFeedToAptos(vasBytes)
+        }
+        if (this.isFunctionOn(this.EXECUTE_ORDERS)) {
+            await this.scanOrderRecords(parsedPrices)
+        }
+        if (this.isFunctionOn(this.EXECUTE_LIQUIDATION)) {
+            await this.checkLiquidation(parsedPrices);
+        }
     }
 
     async fetchVaa(priceId: string): Promise<any> {
@@ -80,7 +134,7 @@ export class ScannerService {
         const pricesList = prices.map((price, index) => {
             return { name: this.priceIds[index].name, price: convertDecimal(Number(price)) }
         })
-        for (const pair of PAIRS) {
+        for (const pair of this.FUNC_PAIRS) {
             const vaultName = pair.vault
             const symbolName = pair.symbol
             const direction = pair.direction
@@ -278,7 +332,7 @@ export class ScannerService {
         const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
 
         try {
-            await Promise.all(PAIRS.map(async pair => {
+            await Promise.all(this.FUNC_PAIRS.map(async pair => {
                 const pairEntity = await this.prisma.positionOrderHandle.findFirst({
                     where: {
                         vault: pair.vault,
@@ -381,7 +435,7 @@ export class ScannerService {
         const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
 
         try {
-            await Promise.all(PAIRS.map(async pair => {
+            await Promise.all(this.FUNC_PAIRS.map(async pair => {
                 const pairEntity = await this.prisma.positionOrderHandle.findFirst({
                     where: {
                         vault: pair.vault,
@@ -502,4 +556,9 @@ export class ScannerService {
         })
         console.log("🚀 ~ ScannerService ~ executeOrderRecords ~ response:", response.success)
     }
+
+    isFunctionOn(flag: string): boolean {
+        return flag === 'ON'
+    }
+
 }
