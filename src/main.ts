@@ -27,6 +27,8 @@ export const MODULE_ADDRESS = process.env.MODULE_ADDRESS
 export const FEERDER_ADDRESS = process.env.PRICE_FEEDER_ADDRESS
 export const COIN_ADDRESS = process.env.COIN_ADDRESS
 
+export const PORT = process.env.PORT
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -35,6 +37,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  await app.listen(3002);
+  await app.listen(PORT);
 }
 bootstrap();

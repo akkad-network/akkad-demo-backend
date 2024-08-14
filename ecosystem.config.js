@@ -5,6 +5,7 @@ module.exports = {
       script: "./dist/src/main.js",
       watch: true,
       env: {
+        PORT: 3001,
         DATABASE_URL:
           "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
         // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
@@ -56,6 +57,7 @@ module.exports = {
       script: "./dist/src/main.js",
       watch: true,
       env: {
+        PORT: 3002,
         DATABASE_URL:
           "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
         // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
@@ -107,6 +109,7 @@ module.exports = {
       script: "./dist/src/main.js",
       watch: true,
       env: {
+        PORT: 3003,
         DATABASE_URL:
           "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
         // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
@@ -158,6 +161,7 @@ module.exports = {
       script: "./dist/src/main.js",
       watch: true,
       env: {
+        PORT: 3004,
         DATABASE_URL:
           "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
         // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
