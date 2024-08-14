@@ -5,9 +5,9 @@ module.exports = {
       script: "./dist/src/main.js",
       watch: true,
       env: {
-        // DATABASE_URL:
-        //   "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
-        DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
+        DATABASE_URL:
+          "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
+        // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
         MODULE_ADDRESS:
           "0xe5c9f72f32b4125c08c4a5c25d6123c215be2a4ab22ee202debf973baf06ce7b",
@@ -56,9 +56,9 @@ module.exports = {
       script: "./dist/src/main.js",
       watch: true,
       env: {
-        // DATABASE_URL:
-        //   "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
-        DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
+        DATABASE_URL:
+          "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
+        // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
         MODULE_ADDRESS:
           "0xe5c9f72f32b4125c08c4a5c25d6123c215be2a4ab22ee202debf973baf06ce7b",
@@ -107,9 +107,9 @@ module.exports = {
       script: "./dist/src/main.js",
       watch: true,
       env: {
-        // DATABASE_URL:
-        //   "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
-        DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
+        DATABASE_URL:
+          "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
+        // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
         MODULE_ADDRESS:
           "0xe5c9f72f32b4125c08c4a5c25d6123c215be2a4ab22ee202debf973baf06ce7b",
@@ -158,9 +158,9 @@ module.exports = {
       script: "./dist/src/main.js",
       watch: true,
       env: {
-        // DATABASE_URL:
-        //   "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
-        DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
+        DATABASE_URL:
+          "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
+        // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
         MODULE_ADDRESS:
           "0xe5c9f72f32b4125c08c4a5c25d6123c215be2a4ab22ee202debf973baf06ce7b",
