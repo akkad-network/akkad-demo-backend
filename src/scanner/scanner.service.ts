@@ -29,7 +29,7 @@ export class ScannerService {
     private readonly EXECUTE_ORDERS = process.env.EXECUTE_ORDERS
     private readonly EXECUTE_LIQUIDATION = process.env.EXECUTE_LIQUIDATION
 
-    private readonly VAULT_APTOS = process.env.VAULT_APTOS
+    private readonly VAULT_APT = process.env.VAULT_APT
     private readonly VAULT_USDC = process.env.VAULT_USDC
     private readonly VAULT_USDT = process.env.VAULT_USDT
 
@@ -37,7 +37,7 @@ export class ScannerService {
 
     constructor(private readonly prisma: PrismaService, private readonly orderOrPositionService: OrderOrPositionService) {
         PAIRS.map((pair) => {
-            if (this.isFunctionOn(this.VAULT_APTOS)) {
+            if (this.isFunctionOn(this.VAULT_APT)) {
                 if (pair.vault === 'APTOS') {
                     this.FUNC_PAIRS.push(pair)
                 }
@@ -62,7 +62,7 @@ export class ScannerService {
         console.log('check scanner config => EXECUTE_ORDERS', this.EXECUTE_ORDERS)
         console.log('check scanner config => EXECUTE_LIQUIDATION', this.EXECUTE_LIQUIDATION)
 
-        console.log('check scanner config => VAULT_APTOS', this.VAULT_APTOS)
+        console.log('check scanner config => VAULT_APT', this.VAULT_APT)
         console.log('check scanner config => VAULT_USDC', this.VAULT_USDC)
         console.log('check scanner config => VAULT_USDT', this.VAULT_USDT)
     }
