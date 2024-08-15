@@ -11,7 +11,7 @@ module.exports = {
         // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
         MODULE_ADDRESS:
-          "0xe5c9f72f32b4125c08c4a5c25d6123c215be2a4ab22ee202debf973baf06ce7b",
+          "0x5820ab6b148870afb4ce70569df5dd4442050d7d501778bcc282d2d4c45e948c",
         COIN_ADDRESS:
           "0x6f60af74988c64cd3b7c1e214697e6949db39c061d8d4cf59a7e2bd1b66c8bf0",
 
@@ -63,7 +63,7 @@ module.exports = {
         // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
         MODULE_ADDRESS:
-          "0xe5c9f72f32b4125c08c4a5c25d6123c215be2a4ab22ee202debf973baf06ce7b",
+          "0x5820ab6b148870afb4ce70569df5dd4442050d7d501778bcc282d2d4c45e948c",
         COIN_ADDRESS:
           "0x6f60af74988c64cd3b7c1e214697e6949db39c061d8d4cf59a7e2bd1b66c8bf0",
 
@@ -115,7 +115,7 @@ module.exports = {
         // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
         MODULE_ADDRESS:
-          "0xe5c9f72f32b4125c08c4a5c25d6123c215be2a4ab22ee202debf973baf06ce7b",
+          "0x5820ab6b148870afb4ce70569df5dd4442050d7d501778bcc282d2d4c45e948c",
         COIN_ADDRESS:
           "0x6f60af74988c64cd3b7c1e214697e6949db39c061d8d4cf59a7e2bd1b66c8bf0",
 
@@ -167,7 +167,7 @@ module.exports = {
         // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
         MODULE_ADDRESS:
-          "0xe5c9f72f32b4125c08c4a5c25d6123c215be2a4ab22ee202debf973baf06ce7b",
+          "0x5820ab6b148870afb4ce70569df5dd4442050d7d501778bcc282d2d4c45e948c",
         COIN_ADDRESS:
           "0x6f60af74988c64cd3b7c1e214697e6949db39c061d8d4cf59a7e2bd1b66c8bf0",
 
