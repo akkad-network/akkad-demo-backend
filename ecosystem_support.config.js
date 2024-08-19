@@ -1,211 +1,187 @@
+const {
+  SCRIPT_SRC,
+  MAIN_DATABASE_URL,
+  SUPPORT_DATABASE_URL,
+  MODULE_ADDRESS,
+  COIN_ADDRESS,
+  PRICE_FEEDER_ADDRESS,
+  PRICE_FEED_AND_SYNCER_PK,
+  APT_FEEDER_ADDRESS,
+  USDT_FEEDER_ADDRESS,
+  USDC_FEEDER_ADDRESS,
+  BTC_FEEDER_ADDRESS,
+  ETH_FEEDER_ADDRESS,
+  BNB_FEEDER_ADDRESS,
+  SOL_FEEDER_ADDRESS,
+  AVAX_FEEDER_ADDRESS,
+  PEPE_FEEDER_ADDRESS,
+  DOGE_FEEDER_ADDRESS,
+  EXECUTER_PK_1,
+  EXECUTER_PK_2,
+  EXECUTER_PK_3,
+  LIQUIDATOR_PK,
+} = require("./ecosystem_base");
+
 module.exports = {
   apps: [
     {
-      name: "agdex-1-apt-executer",
-      script: "./dist/src/main.js",
+      name: "agdex-1-executer",
+      script: SCRIPT_SRC,
       watch: true,
       env: {
         PORT: 3001,
-        DATABASE_URL:
-          "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
-        // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
-        MODULE_ADDRESS:
-          "0x5820ab6b148870afb4ce70569df5dd4442050d7d501778bcc282d2d4c45e948c",
-        COIN_ADDRESS:
-          "0x6f60af74988c64cd3b7c1e214697e6949db39c061d8d4cf59a7e2bd1b66c8bf0",
+        DATABASE_URL: SUPPORT_DATABASE_URL,
+        MODULE_ADDRESS: MODULE_ADDRESS,
+        COIN_ADDRESS: COIN_ADDRESS,
 
-        PRICE_FEED_AND_SYNCER_PK:
-          "0x8dddb9887ed4d275536a05d47cbaf810dc8873f617080b3fdc6afd81ff73798d",
-        PRICE_FEEDER_ADDRESS:
-          "0x7e783b349d3e89cf5931af376ebeadbfab855b3fa239b7ada8f5a92fbea6b387",
-        APT_FEEDER_ADDRESS:
-          "0x44a93dddd8effa54ea51076c4e851b6cbbfd938e82eb90197de38fe8876bb66e",
-        USDT_FEEDER_ADDRESS:
-          "0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
-        USDC_FEEDER_ADDRESS:
-          "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",
-        BTC_FEEDER_ADDRESS:
-          "0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b",
-        ETH_FEEDER_ADDRESS:
-          "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6",
+        PRICE_FEEDER_ADDRESS: PRICE_FEEDER_ADDRESS,
+        APT_FEEDER_ADDRESS: APT_FEEDER_ADDRESS,
+        USDT_FEEDER_ADDRESS: USDT_FEEDER_ADDRESS,
+        USDC_FEEDER_ADDRESS: USDC_FEEDER_ADDRESS,
+        BTC_FEEDER_ADDRESS: BTC_FEEDER_ADDRESS,
+        ETH_FEEDER_ADDRESS: ETH_FEEDER_ADDRESS,
+        BNB_FEEDER_ADDRESS: BNB_FEEDER_ADDRESS,
+        SOL_FEEDER_ADDRESS: SOL_FEEDER_ADDRESS,
+        AVAX_FEEDER_ADDRESS: AVAX_FEEDER_ADDRESS,
+        PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
+        DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
+
+        PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
+        EXECUTER_PK: EXECUTER_PK_1,
+        LIQUIDATOR_PK: LIQUIDATOR_PK,
 
         UPDATE_PRICE_FEED: "OFF",
         SYNC_POSITIONS: "OFF",
         SYNC_ORDERS: "OFF",
-        EXECUTE_ORDERS: "ON", //ON
+        EXECUTE_ORDERS: "ON",
         EXECUTE_LIQUIDATION: "OFF",
 
-        LIQUIDATOR_PK:
-          "0xd7ff7eb426390042479b13393c0c3727f3790377d13bd28970639a7a787ee173",
-        //apt
-        EXECUTER_PK:
-          "0x1b197f5236783789dd354d6968a1e7b3728350bfe62ebaf803afb3402acb0662",
-        //usdc
-        // EXECUTER_PK:
-        //   "0xbd7f26f79f52b7248b89a8eac0abefc4b34bd615dc0a04ee7829b5dbad588a71",
-        //usdt
-        // EXECUTER_PK:
-        //   "0xca6545daf272ca7e95f741553003877c003511a0c047716eb1fef9e8bbeed037",
         VAULT_APT: "ON",
         VAULT_USDC: "OFF",
         VAULT_USDT: "OFF",
+        VAULT_BTC: "ON",
+        VAULT_ETH: "ON",
       },
     },
     {
-      name: "agdex-2-usdc-executer",
-      script: "./dist/src/main.js",
+      name: "agdex-2-executer",
+      script: SCRIPT_SRC,
       watch: true,
       env: {
         PORT: 3002,
-        DATABASE_URL:
-          "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
-        // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
-        MODULE_ADDRESS:
-          "0x5820ab6b148870afb4ce70569df5dd4442050d7d501778bcc282d2d4c45e948c",
-        COIN_ADDRESS:
-          "0x6f60af74988c64cd3b7c1e214697e6949db39c061d8d4cf59a7e2bd1b66c8bf0",
+        DATABASE_URL: SUPPORT_DATABASE_URL,
+        MODULE_ADDRESS: MODULE_ADDRESS,
+        COIN_ADDRESS: COIN_ADDRESS,
 
-        PRICE_FEED_AND_SYNCER_PK:
-          "0x8dddb9887ed4d275536a05d47cbaf810dc8873f617080b3fdc6afd81ff73798d",
-        PRICE_FEEDER_ADDRESS:
-          "0x7e783b349d3e89cf5931af376ebeadbfab855b3fa239b7ada8f5a92fbea6b387",
-        APT_FEEDER_ADDRESS:
-          "0x44a93dddd8effa54ea51076c4e851b6cbbfd938e82eb90197de38fe8876bb66e",
-        USDT_FEEDER_ADDRESS:
-          "0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
-        USDC_FEEDER_ADDRESS:
-          "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",
-        BTC_FEEDER_ADDRESS:
-          "0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b",
-        ETH_FEEDER_ADDRESS:
-          "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6",
+        PRICE_FEEDER_ADDRESS: PRICE_FEEDER_ADDRESS,
+        APT_FEEDER_ADDRESS: APT_FEEDER_ADDRESS,
+        USDT_FEEDER_ADDRESS: USDT_FEEDER_ADDRESS,
+        USDC_FEEDER_ADDRESS: USDC_FEEDER_ADDRESS,
+        BTC_FEEDER_ADDRESS: BTC_FEEDER_ADDRESS,
+        ETH_FEEDER_ADDRESS: ETH_FEEDER_ADDRESS,
+        BNB_FEEDER_ADDRESS: BNB_FEEDER_ADDRESS,
+        SOL_FEEDER_ADDRESS: SOL_FEEDER_ADDRESS,
+        AVAX_FEEDER_ADDRESS: AVAX_FEEDER_ADDRESS,
+        PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
+        DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
+
+        PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
+        EXECUTER_PK: EXECUTER_PK_2,
+        LIQUIDATOR_PK: LIQUIDATOR_PK,
 
         UPDATE_PRICE_FEED: "OFF",
         SYNC_POSITIONS: "OFF",
         SYNC_ORDERS: "OFF",
-        EXECUTE_ORDERS: "ON", //ON
+        EXECUTE_ORDERS: "ON",
         EXECUTE_LIQUIDATION: "OFF",
 
-        LIQUIDATOR_PK:
-          "0xd7ff7eb426390042479b13393c0c3727f3790377d13bd28970639a7a787ee173",
-        //apt
-        // EXECUTER_PK:
-        //   "0x1b197f5236783789dd354d6968a1e7b3728350bfe62ebaf803afb3402acb0662",
-        //usdc
-        EXECUTER_PK:
-          "0xbd7f26f79f52b7248b89a8eac0abefc4b34bd615dc0a04ee7829b5dbad588a71",
-        //usdt
-        // EXECUTER_PK:
-        //   "0xca6545daf272ca7e95f741553003877c003511a0c047716eb1fef9e8bbeed037",
         VAULT_APT: "OFF",
         VAULT_USDC: "ON",
         VAULT_USDT: "OFF",
+        VAULT_BTC: "OFF",
+        VAULT_ETH: "OFF",
       },
     },
     {
-      name: "agdex-3-usdt-executer",
-      script: "./dist/src/main.js",
+      name: "agdex-3-executer",
+      script: SCRIPT_SRC,
       watch: true,
       env: {
         PORT: 3003,
-        DATABASE_URL:
-          "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
-        // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
-        MODULE_ADDRESS:
-          "0x5820ab6b148870afb4ce70569df5dd4442050d7d501778bcc282d2d4c45e948c",
-        COIN_ADDRESS:
-          "0x6f60af74988c64cd3b7c1e214697e6949db39c061d8d4cf59a7e2bd1b66c8bf0",
+        DATABASE_URL: SUPPORT_DATABASE_URL,
+        MODULE_ADDRESS: MODULE_ADDRESS,
+        COIN_ADDRESS: COIN_ADDRESS,
 
-        PRICE_FEED_AND_SYNCER_PK:
-          "0x8dddb9887ed4d275536a05d47cbaf810dc8873f617080b3fdc6afd81ff73798d",
-        PRICE_FEEDER_ADDRESS:
-          "0x7e783b349d3e89cf5931af376ebeadbfab855b3fa239b7ada8f5a92fbea6b387",
-        APT_FEEDER_ADDRESS:
-          "0x44a93dddd8effa54ea51076c4e851b6cbbfd938e82eb90197de38fe8876bb66e",
-        USDT_FEEDER_ADDRESS:
-          "0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
-        USDC_FEEDER_ADDRESS:
-          "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",
-        BTC_FEEDER_ADDRESS:
-          "0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b",
-        ETH_FEEDER_ADDRESS:
-          "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6",
+        PRICE_FEEDER_ADDRESS: PRICE_FEEDER_ADDRESS,
+        APT_FEEDER_ADDRESS: APT_FEEDER_ADDRESS,
+        USDT_FEEDER_ADDRESS: USDT_FEEDER_ADDRESS,
+        USDC_FEEDER_ADDRESS: USDC_FEEDER_ADDRESS,
+        BTC_FEEDER_ADDRESS: BTC_FEEDER_ADDRESS,
+        ETH_FEEDER_ADDRESS: ETH_FEEDER_ADDRESS,
+        BNB_FEEDER_ADDRESS: BNB_FEEDER_ADDRESS,
+        SOL_FEEDER_ADDRESS: SOL_FEEDER_ADDRESS,
+        AVAX_FEEDER_ADDRESS: AVAX_FEEDER_ADDRESS,
+        PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
+        DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
+
+        PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
+        EXECUTER_PK: EXECUTER_PK_3,
+        LIQUIDATOR_PK: LIQUIDATOR_PK,
 
         UPDATE_PRICE_FEED: "OFF",
         SYNC_POSITIONS: "OFF",
         SYNC_ORDERS: "OFF",
-        EXECUTE_ORDERS: "ON", //ON
+        EXECUTE_ORDERS: "ON",
         EXECUTE_LIQUIDATION: "OFF",
 
-        LIQUIDATOR_PK:
-          "0xd7ff7eb426390042479b13393c0c3727f3790377d13bd28970639a7a787ee173",
-        //apt
-        // EXECUTER_PK:
-        //   "0x1b197f5236783789dd354d6968a1e7b3728350bfe62ebaf803afb3402acb0662",
-        //usdc
-        // EXECUTER_PK:
-        //   "0xbd7f26f79f52b7248b89a8eac0abefc4b34bd615dc0a04ee7829b5dbad588a71",
-        //usdt
-        EXECUTER_PK:
-          "0xca6545daf272ca7e95f741553003877c003511a0c047716eb1fef9e8bbeed037",
         VAULT_APT: "OFF",
         VAULT_USDC: "OFF",
         VAULT_USDT: "ON",
+        VAULT_BTC: "OFF",
+        VAULT_ETH: "OFF",
       },
     },
     {
-      name: "agdex-4-all-liquidator",
-      script: "./dist/src/main.js",
+      name: "agdex-4-liquidator",
+      script: SCRIPT_SRC,
       watch: true,
       env: {
         PORT: 3004,
-        DATABASE_URL:
-          "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
-        // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
 
-        MODULE_ADDRESS:
-          "0x5820ab6b148870afb4ce70569df5dd4442050d7d501778bcc282d2d4c45e948c",
-        COIN_ADDRESS:
-          "0x6f60af74988c64cd3b7c1e214697e6949db39c061d8d4cf59a7e2bd1b66c8bf0",
+        DATABASE_URL: SUPPORT_DATABASE_URL,
+        MODULE_ADDRESS: MODULE_ADDRESS,
+        COIN_ADDRESS: COIN_ADDRESS,
 
-        PRICE_FEED_AND_SYNCER_PK:
-          "0x8dddb9887ed4d275536a05d47cbaf810dc8873f617080b3fdc6afd81ff73798d",
-        PRICE_FEEDER_ADDRESS:
-          "0x7e783b349d3e89cf5931af376ebeadbfab855b3fa239b7ada8f5a92fbea6b387",
-        APT_FEEDER_ADDRESS:
-          "0x44a93dddd8effa54ea51076c4e851b6cbbfd938e82eb90197de38fe8876bb66e",
-        USDT_FEEDER_ADDRESS:
-          "0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722",
-        USDC_FEEDER_ADDRESS:
-          "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588",
-        BTC_FEEDER_ADDRESS:
-          "0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b",
-        ETH_FEEDER_ADDRESS:
-          "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6",
+        PRICE_FEEDER_ADDRESS: PRICE_FEEDER_ADDRESS,
+        APT_FEEDER_ADDRESS: APT_FEEDER_ADDRESS,
+        USDT_FEEDER_ADDRESS: USDT_FEEDER_ADDRESS,
+        USDC_FEEDER_ADDRESS: USDC_FEEDER_ADDRESS,
+        BTC_FEEDER_ADDRESS: BTC_FEEDER_ADDRESS,
+        ETH_FEEDER_ADDRESS: ETH_FEEDER_ADDRESS,
+        BNB_FEEDER_ADDRESS: BNB_FEEDER_ADDRESS,
+        SOL_FEEDER_ADDRESS: SOL_FEEDER_ADDRESS,
+        AVAX_FEEDER_ADDRESS: AVAX_FEEDER_ADDRESS,
+        PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
+        DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
+
+        PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
+        EXECUTER_PK: EXECUTER_PK_3,
+        LIQUIDATOR_PK: LIQUIDATOR_PK,
 
         UPDATE_PRICE_FEED: "OFF",
         SYNC_POSITIONS: "OFF",
         SYNC_ORDERS: "OFF",
         EXECUTE_ORDERS: "OFF",
-        EXECUTE_LIQUIDATION: "ON", //ON
+        EXECUTE_LIQUIDATION: "ON",
 
-        LIQUIDATOR_PK:
-          "0xd7ff7eb426390042479b13393c0c3727f3790377d13bd28970639a7a787ee173",
-        //apt
-        // EXECUTER_PK:
-        //   "0x1b197f5236783789dd354d6968a1e7b3728350bfe62ebaf803afb3402acb0662",
-        //usdc
-        // EXECUTER_PK:
-        //   "0xbd7f26f79f52b7248b89a8eac0abefc4b34bd615dc0a04ee7829b5dbad588a71",
-        //usdt
-        EXECUTER_PK:
-          "0xca6545daf272ca7e95f741553003877c003511a0c047716eb1fef9e8bbeed037",
         VAULT_APT: "ON",
         VAULT_USDC: "ON",
         VAULT_USDT: "ON",
+        VAULT_BTC: "ON",
+        VAULT_ETH: "ON",
       },
     },
   ],

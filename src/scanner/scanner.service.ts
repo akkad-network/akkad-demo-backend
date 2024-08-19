@@ -37,6 +37,8 @@ export class ScannerService {
     private readonly VAULT_APT = process.env.VAULT_APT
     private readonly VAULT_USDC = process.env.VAULT_USDC
     private readonly VAULT_USDT = process.env.VAULT_USDT
+    private readonly VAULT_BTC = process.env.VAULT_BTC
+    private readonly VAULT_ETH = process.env.VAULT_ETH
 
     private FUNC_PAIRS: any[] = []
 
@@ -57,6 +59,16 @@ export class ScannerService {
                     this.FUNC_PAIRS.push(pair)
                 }
             }
+            if (this.isFunctionOn(this.VAULT_BTC)) {
+                if (pair.vault === 'BTC') {
+                    this.FUNC_PAIRS.push(pair)
+                }
+            }
+            if (this.isFunctionOn(this.VAULT_ETH)) {
+                if (pair.vault === 'ETH') {
+                    this.FUNC_PAIRS.push(pair)
+                }
+            }
         })
         console.log('start scanner : FUNC_PAIRS ', this.FUNC_PAIRS)
 
@@ -70,6 +82,8 @@ export class ScannerService {
         console.log('check scanner config => VAULT_APT', this.VAULT_APT)
         console.log('check scanner config => VAULT_USDC', this.VAULT_USDC)
         console.log('check scanner config => VAULT_USDT', this.VAULT_USDT)
+        console.log('check scanner config => VAULT_BTC', this.VAULT_BTC)
+        console.log('check scanner config => VAULT_ETH', this.VAULT_ETH)
     }
 
     @Cron(CronExpression.EVERY_10_SECONDS)

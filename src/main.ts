@@ -28,7 +28,6 @@ export const AvaxFeeder = process.env.AVAX_FEEDER_ADDRESS
 export const PepeFeeder = process.env.PEPE_FEEDER_ADDRESS
 export const DogeFeeder = process.env.DOGE_FEEDER_ADDRESS
 
-
 export const MODULE_ADDRESS = process.env.MODULE_ADDRESS
 export const FEERDER_ADDRESS = process.env.PRICE_FEEDER_ADDRESS
 export const COIN_ADDRESS = process.env.COIN_ADDRESS

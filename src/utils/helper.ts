@@ -44,6 +44,27 @@ export const DIRECTION = [
     { name: 'LONG', address: SIDE_LONG }, { name: 'SHORT', address: SIDE_SHORT }
 ]
 
+export const APT_FEEDER_ADDRESS =
+    "0x44a93dddd8effa54ea51076c4e851b6cbbfd938e82eb90197de38fe8876bb66e"
+export const USDT_FEEDER_ADDRESS =
+    "0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"
+export const USDC_FEEDER_ADDRESS =
+    "0x1fc18861232290221461220bd4e2acd1dcdfbc89c84092c93c18bdc7756c1588"
+export const BTC_FEEDER_ADDRESS =
+    "0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b"
+export const ETH_FEEDER_ADDRESS =
+    "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6"
+export const BNB_FEEDER_ADDRESS =
+    "0xecf553770d9b10965f8fb64771e93f5690a182edc32be4a3236e0caaa6e0581a"
+export const SOL_FEEDER_ADDRESS =
+    "0xfe650f0367d4a7ef9815a593ea15d36593f0643aaaf0149bb04be67ab851decd"
+export const AVAX_FEEDER_ADDRESS =
+    "0xd7566a3ba7f7286ed54f4ae7e983f4420ae0b1e0f3892e11f9c4ab107bbad7b9"
+export const PEPE_FEEDER_ADDRESS =
+    "0xed82efbfade01083ffa8f64664c86af39282c9f084877066ae72b635e77718f0"
+export const DOGE_FEEDER_ADDRESS =
+    "0x31775e1d6897129e8a84eeba975778fb50015b88039e9bc140bbd839694ac0ae"
+
 export const VaultList: VaultInfo[] = [
     {
         name: 'APTOS',
@@ -88,7 +109,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenName: 'APTOS',
         tokenSymbol: 'APT',
         tokenAddress: APTOS_COIN,
-        pythFeederAddress: "0x44a93dddd8effa54ea51076c4e851b6cbbfd938e82eb90197de38fe8876bb66e",
+        pythFeederAddress: APT_FEEDER_ADDRESS,
         decimal: 8
     },
     {
@@ -96,7 +117,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenName: 'BTC',
         tokenSymbol: 'BTC',
         tokenAddress: `${COIN_ADDRESS}::btc::BTC`,
-        pythFeederAddress: "0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b",
+        pythFeederAddress: BTC_FEEDER_ADDRESS,
         decimal: 8
     },
     {
@@ -104,7 +125,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenName: 'ETH',
         tokenSymbol: 'ETH',
         tokenAddress: `${COIN_ADDRESS}::ETH::ETH`,
-        pythFeederAddress: "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6",
+        pythFeederAddress: ETH_FEEDER_ADDRESS,
         decimal: 8
     },
     {
@@ -112,7 +133,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenName: 'BNB',
         tokenSymbol: 'BNB',
         tokenAddress: `${COIN_ADDRESS}::BNB::BNB`,
-        pythFeederAddress: "ecf553770d9b10965f8fb64771e93f5690a182edc32be4a3236e0caaa6e0581a",
+        pythFeederAddress: BNB_FEEDER_ADDRESS,
         decimal: 8
     },
     {
@@ -120,7 +141,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenName: 'SOL',
         tokenSymbol: 'SOL',
         tokenAddress: `${COIN_ADDRESS}::SOL::SOL`,
-        pythFeederAddress: "fe650f0367d4a7ef9815a593ea15d36593f0643aaaf0149bb04be67ab851decd",
+        pythFeederAddress: SOL_FEEDER_ADDRESS,
         decimal: 8
     },
     {
@@ -128,7 +149,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenName: 'AVAX',
         tokenSymbol: 'AVAX',
         tokenAddress: `${COIN_ADDRESS}::AVAX::AVAX`,
-        pythFeederAddress: "d7566a3ba7f7286ed54f4ae7e983f4420ae0b1e0f3892e11f9c4ab107bbad7b9",
+        pythFeederAddress: AVAX_FEEDER_ADDRESS,
         decimal: 8
     },
     {
@@ -136,7 +157,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenName: 'PEPE',
         tokenSymbol: 'PEPE',
         tokenAddress: `${COIN_ADDRESS}::PEPE::PEPE`,
-        pythFeederAddress: "ed82efbfade01083ffa8f64664c86af39282c9f084877066ae72b635e77718f0",
+        pythFeederAddress: PEPE_FEEDER_ADDRESS,
         decimal: 8
     },
     {
@@ -144,7 +165,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenName: 'DOGE',
         tokenSymbol: 'DOGE',
         tokenAddress: `${COIN_ADDRESS}::DOGE::DOGE`,
-        pythFeederAddress: "31775e1d6897129e8a84eeba975778fb50015b88039e9bc140bbd839694ac0ae",
+        pythFeederAddress: DOGE_FEEDER_ADDRESS,
         decimal: 8
     },
 
@@ -161,6 +182,16 @@ export const PAIRS = [
     { vault: 'APTOS', symbol: 'ETH', direction: 'SHORT' },
     { vault: 'APTOS', symbol: 'BTC', direction: 'LONG' },
     { vault: 'APTOS', symbol: 'BTC', direction: 'SHORT' },
+    { vault: 'APTOS', symbol: 'BNB', direction: 'LONG' },
+    { vault: 'APTOS', symbol: 'BNB', direction: 'SHORT' },
+    { vault: 'APTOS', symbol: 'SOL', direction: 'LONG' },
+    { vault: 'APTOS', symbol: 'SOL', direction: 'SHORT' },
+    { vault: 'APTOS', symbol: 'AVAX', direction: 'LONG' },
+    { vault: 'APTOS', symbol: 'AVAX', direction: 'SHORT' },
+    { vault: 'APTOS', symbol: 'PEPE', direction: 'LONG' },
+    { vault: 'APTOS', symbol: 'PEPE', direction: 'SHORT' },
+    { vault: 'APTOS', symbol: 'DOGE', direction: 'LONG' },
+    { vault: 'APTOS', symbol: 'DOGE', direction: 'SHORT' },
 
     { vault: 'USDC', symbol: 'APTOS', direction: 'LONG' },
     { vault: 'USDC', symbol: 'APTOS', direction: 'SHORT' },
@@ -168,13 +199,53 @@ export const PAIRS = [
     { vault: 'USDC', symbol: 'ETH', direction: 'SHORT' },
     { vault: 'USDC', symbol: 'BTC', direction: 'LONG' },
     { vault: 'USDC', symbol: 'BTC', direction: 'SHORT' },
+    { vault: 'USDC', symbol: 'BNB', direction: 'LONG' },
+    { vault: 'USDC', symbol: 'BNB', direction: 'SHORT' },
+    { vault: 'USDC', symbol: 'SOL', direction: 'LONG' },
+    { vault: 'USDC', symbol: 'SOL', direction: 'SHORT' },
+    { vault: 'USDC', symbol: 'AVAX', direction: 'LONG' },
+    { vault: 'USDC', symbol: 'AVAX', direction: 'SHORT' },
+    { vault: 'USDC', symbol: 'PEPE', direction: 'LONG' },
+    { vault: 'USDC', symbol: 'PEPE', direction: 'SHORT' },
+    { vault: 'USDC', symbol: 'DOGE', direction: 'LONG' },
+    { vault: 'USDC', symbol: 'DOGE', direction: 'SHORT' },
 
-    { vault: 'USDT', symbol: 'APTOS', direction: 'LONG' },
-    { vault: 'USDT', symbol: 'APTOS', direction: 'SHORT' },
-    { vault: 'USDT', symbol: 'ETH', direction: 'LONG' },
-    { vault: 'USDT', symbol: 'ETH', direction: 'SHORT' },
-    { vault: 'USDT', symbol: 'BTC', direction: 'LONG' },
-    { vault: 'USDT', symbol: 'BTC', direction: 'SHORT' },
+    { vault: 'BTC', symbol: 'APTOS', direction: 'LONG' },
+    { vault: 'BTC', symbol: 'APTOS', direction: 'SHORT' },
+    { vault: 'BTC', symbol: 'ETH', direction: 'LONG' },
+    { vault: 'BTC', symbol: 'ETH', direction: 'SHORT' },
+    { vault: 'BTC', symbol: 'BTC', direction: 'LONG' },
+    { vault: 'BTC', symbol: 'BTC', direction: 'SHORT' },
+    { vault: 'BTC', symbol: 'BNB', direction: 'LONG' },
+    { vault: 'BTC', symbol: 'BNB', direction: 'SHORT' },
+    { vault: 'BTC', symbol: 'SOL', direction: 'LONG' },
+    { vault: 'BTC', symbol: 'SOL', direction: 'SHORT' },
+    { vault: 'BTC', symbol: 'AVAX', direction: 'LONG' },
+    { vault: 'BTC', symbol: 'AVAX', direction: 'SHORT' },
+    { vault: 'BTC', symbol: 'PEPE', direction: 'LONG' },
+    { vault: 'BTC', symbol: 'PEPE', direction: 'SHORT' },
+    { vault: 'BTC', symbol: 'DOGE', direction: 'LONG' },
+    { vault: 'BTC', symbol: 'DOGE', direction: 'SHORT' },
+
+
+    { vault: 'ETH', symbol: 'APTOS', direction: 'LONG' },
+    { vault: 'ETH', symbol: 'APTOS', direction: 'SHORT' },
+    { vault: 'ETH', symbol: 'ETH', direction: 'LONG' },
+    { vault: 'ETH', symbol: 'ETH', direction: 'SHORT' },
+    { vault: 'ETH', symbol: 'BTC', direction: 'LONG' },
+    { vault: 'ETH', symbol: 'BTC', direction: 'SHORT' },
+    { vault: 'ETH', symbol: 'BNB', direction: 'LONG' },
+    { vault: 'ETH', symbol: 'BNB', direction: 'SHORT' },
+    { vault: 'ETH', symbol: 'SOL', direction: 'LONG' },
+    { vault: 'ETH', symbol: 'SOL', direction: 'SHORT' },
+    { vault: 'ETH', symbol: 'AVAX', direction: 'LONG' },
+    { vault: 'ETH', symbol: 'AVAX', direction: 'SHORT' },
+    { vault: 'ETH', symbol: 'PEPE', direction: 'LONG' },
+    { vault: 'ETH', symbol: 'PEPE', direction: 'SHORT' },
+    { vault: 'ETH', symbol: 'DOGE', direction: 'LONG' },
+    { vault: 'ETH', symbol: 'DOGE', direction: 'SHORT' },
+
+
 ]
 
 export const getTableHandle = async (address: string, resourceType: `${string}::${string}::${string}`) => {
