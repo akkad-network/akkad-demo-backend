@@ -22,6 +22,12 @@ export const UsdtFeeder = process.env.USDT_FEEDER_ADDRESS
 export const UsdcFeeder = process.env.USDC_FEEDER_ADDRESS
 export const BtcFeeder = process.env.BTC_FEEDER_ADDRESS
 export const EthFeeder = process.env.ETH_FEEDER_ADDRESS
+export const BnbFeeder = process.env.BNB_FEEDER_ADDRESS
+export const SolFeeder = process.env.SOL_FEEDER_ADDRESS
+export const AvaxFeeder = process.env.AVAX_FEEDER_ADDRESS
+export const PepeFeeder = process.env.PEPE_FEEDER_ADDRESS
+export const DogeFeeder = process.env.DOGE_FEEDER_ADDRESS
+
 
 export const MODULE_ADDRESS = process.env.MODULE_ADDRESS
 export const FEERDER_ADDRESS = process.env.PRICE_FEEDER_ADDRESS

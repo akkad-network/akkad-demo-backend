@@ -14,6 +14,8 @@ export const SIDE_SHORT = `${MODULE_ADDRESS}::pool::SHORT`
 export const APTOS_COIN_STORE = "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>"
 export const MOCK_USDC_COIN_STORE = `0x1::coin::CoinStore<${COIN_ADDRESS}::usdc::USDC>`
 export const MOCK_USDT_COIN_STORE = `0x1::coin::CoinStore<${COIN_ADDRESS}::usdt::USDT>`
+export const MOCK_BTC_COIN_STORE = `0x1::coin::CoinStore<${COIN_ADDRESS}::btc::BTC>`
+export const MOCK_ETH_COIN_STORE = `0x1::coin::CoinStore<${COIN_ADDRESS}::ETH::ETH>`
 
 export const CHECK_LIQUIDATION_FUNC_PATH = `${MODULE_ADDRESS}::positions::check_liquidation`
 
@@ -63,6 +65,20 @@ export const VaultList: VaultInfo[] = [
         tokenAddress: `${COIN_ADDRESS}::usdc::USDC`,
         tokenStore: MOCK_USDC_COIN_STORE,
         decimal: 6
+    },
+    {
+        name: 'BTC',
+        symbol: 'BTC',
+        tokenAddress: `${COIN_ADDRESS}::btc::BTC`,
+        tokenStore: MOCK_BTC_COIN_STORE,
+        decimal: 8
+    },
+    {
+        name: 'ETH',
+        symbol: 'ETH',
+        tokenAddress: `${COIN_ADDRESS}::ETH::ETH`,
+        tokenStore: MOCK_ETH_COIN_STORE,
+        decimal: 8
     }
 ]
 
@@ -90,7 +106,48 @@ export const SymbolList: SymbolInfo[] = [
         tokenAddress: `${COIN_ADDRESS}::ETH::ETH`,
         pythFeederAddress: "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6",
         decimal: 8
-    }
+    },
+    {
+        name: "BNB/USD",
+        tokenName: 'BNB',
+        tokenSymbol: 'BNB',
+        tokenAddress: `${COIN_ADDRESS}::BNB::BNB`,
+        pythFeederAddress: "ecf553770d9b10965f8fb64771e93f5690a182edc32be4a3236e0caaa6e0581a",
+        decimal: 8
+    },
+    {
+        name: "SOL/USD",
+        tokenName: 'SOL',
+        tokenSymbol: 'SOL',
+        tokenAddress: `${COIN_ADDRESS}::SOL::SOL`,
+        pythFeederAddress: "fe650f0367d4a7ef9815a593ea15d36593f0643aaaf0149bb04be67ab851decd",
+        decimal: 8
+    },
+    {
+        name: "AVAX/USD",
+        tokenName: 'AVAX',
+        tokenSymbol: 'AVAX',
+        tokenAddress: `${COIN_ADDRESS}::AVAX::AVAX`,
+        pythFeederAddress: "d7566a3ba7f7286ed54f4ae7e983f4420ae0b1e0f3892e11f9c4ab107bbad7b9",
+        decimal: 8
+    },
+    {
+        name: "PEPE/USD",
+        tokenName: 'PEPE',
+        tokenSymbol: 'PEPE',
+        tokenAddress: `${COIN_ADDRESS}::PEPE::PEPE`,
+        pythFeederAddress: "ed82efbfade01083ffa8f64664c86af39282c9f084877066ae72b635e77718f0",
+        decimal: 8
+    },
+    {
+        name: "DOGE/USD",
+        tokenName: 'DOGE',
+        tokenSymbol: 'DOGE',
+        tokenAddress: `${COIN_ADDRESS}::DOGE::DOGE`,
+        pythFeederAddress: "31775e1d6897129e8a84eeba975778fb50015b88039e9bc140bbd839694ac0ae",
+        decimal: 8
+    },
+
 ]
 
 

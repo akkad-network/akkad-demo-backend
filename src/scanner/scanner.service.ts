@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Aptos, APTOS_COIN } from '@aptos-labs/ts-sdk';
 import axios from 'axios';
 import { convertBackDecimal, convertDecimal, getSideAddress, getTableHandle, PAIRS, SymbolList, VaultList } from 'src/utils/helper';
-import { AptFeeder, aptos, BtcFeeder, EthFeeder, executerSigner, FEERDER_ADDRESS, liquidatorSigner, MODULE_ADDRESS, priceFeederSyncerSigner, UsdcFeeder, UsdtFeeder } from 'src/main';
+import { AptFeeder, aptos, AvaxFeeder, BnbFeeder, BtcFeeder, DogeFeeder, EthFeeder, executerSigner, FEERDER_ADDRESS, liquidatorSigner, MODULE_ADDRESS, PepeFeeder, priceFeederSyncerSigner, SolFeeder, UsdcFeeder, UsdtFeeder } from 'src/main';
 import { DecreaseOrderRecord, IncreaseOrderRecord, PositionOrderHandle, PositionRecord } from '@prisma/client';
 
 @Injectable()
@@ -20,7 +20,12 @@ export class ScannerService {
         { name: "USDT", address: UsdtFeeder },
         { name: "USDC", address: UsdcFeeder },
         { name: "BTC", address: BtcFeeder },
-        { name: "ETH", address: EthFeeder }
+        { name: "ETH", address: EthFeeder },
+        { name: "BNB", address: BnbFeeder },
+        { name: "SOL", address: SolFeeder },
+        { name: "AVAX", address: AvaxFeeder },
+        { name: "PEPE", address: PepeFeeder },
+        { name: "DOGE", address: DogeFeeder },
     ];
     private readonly SYNC_POSITIONS = process.env.SYNC_POSITIONS
     private readonly SYNC_ORDERS = process.env.SYNC_ORDERS
@@ -105,6 +110,8 @@ export class ScannerService {
     async fetchVaa(priceId: string): Promise<any> {
         try {
             const response = await axios.get(`https://hermes-beta.pyth.network/v2/updates/price/latest?ids%5B%5D=${priceId}`);
+            console.log("🚀 ~ ScannerService ~ fetchVaa ~ response:", response.data.parsed[0].price.price)
+
             return { binary: response.data.binary.data[0], parsed: response.data.parsed[0].price.price }
         } catch (error) {
             console.error(`Error fetching VAA for priceId ${priceId}:`, error);
@@ -506,6 +513,7 @@ export class ScannerService {
                 const collateralValue = convertBackDecimal(position.collateral, vaultInfo.decimal) * convertBackDecimal(collateralPrice, 18);
                 const collVauleMulRate = collateralValue * 98 / 100
                 const deltaSize = Number(convertBackDecimal(symbolPrice, 18)) * Number(convertBackDecimal(position.position_amount, symbol.decimal)) - Number(convertBackDecimal(position.position_size, 18));
+                // console.log("🚀 ~ ScannerService ~ explodingPositions ~ deltaSize:", deltaSize)
                 if (position.direction === 'LONG') {
                     return collVauleMulRate + deltaSize < 0
                 } else {
@@ -515,13 +523,13 @@ export class ScannerService {
             });
 
             for (const position of explodingPositions) {
-                await this.executeLiquidation(position);
+                // await this.executeLiquidation(position);
             }
         }
     }
 
     async executeLiquidation(position: PositionRecord) {
-        console.log("🚀 ~ executeLiquidation ~ position execute", `${position.id} ${position.order_id} ${position.owner} ${position.vault} ${position.symbol} ${position.direction}`)
+        // console.log("🚀 ~ executeLiquidation ~ position execute", `${position.id} ${position.order_id} ${position.owner} ${position.vault} ${position.symbol} ${position.direction}`)
         const accountInfo = await aptos.account.getAccountInfo({ accountAddress: liquidatorSigner.accountAddress })
         const seqNumber = accountInfo.sequence_number
         const transaction = await aptos.transaction.build.simple({

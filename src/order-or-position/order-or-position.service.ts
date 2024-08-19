@@ -84,6 +84,9 @@ export class OrderOrPositionService {
                         })
                         if (type === 'PositionRecord') {
                             let handle = result?.positions?.handle
+                            if (handle && handle.length !== 66) {
+                                handle = '0x'.concat('0'.repeat(66 - handle.length)).concat(handle.slice(2))
+                            }
                             if (record) {
                                 await this.prisma.positionOrderHandle.update({
                                     data: {
@@ -109,6 +112,12 @@ export class OrderOrPositionService {
                         } else { // order record
                             let increase_order_handle = result?.open_orders?.handle
                             let decrease_order_handle = result?.decrease_orders?.handle
+                            if (increase_order_handle && increase_order_handle.length !== 66) {
+                                increase_order_handle = '0x'.concat('0'.repeat(66 - increase_order_handle.length)).concat(increase_order_handle.slice(2))
+                            }
+                            if (decrease_order_handle && decrease_order_handle.length !== 66) {
+                                decrease_order_handle = '0x'.concat('0'.repeat(66 - decrease_order_handle.length)).concat(decrease_order_handle.slice(2))
+                            }
                             if (record) {
                                 await this.prisma.positionOrderHandle.update({
                                     data: {
