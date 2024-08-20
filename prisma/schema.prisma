@@ -128,3 +128,15 @@ model PositionOrderHandle {
   version_number        Int      @default(1)
   createAt              DateTime @default(now())
 }
+
+model PriceFeederRecord {
+  id           Int      @id @default(autoincrement())
+  name         String
+  symbol       String
+  address      String
+  price        String
+  publish_time String
+  expo         Int
+  decimal      Int
+  createAt     DateTime @default(now())
+}

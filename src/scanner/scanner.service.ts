@@ -16,7 +16,7 @@ export class ScannerService {
     private readonly priceFeedAddress: string = FEERDER_ADDRESS
     private readonly moduleAddress: string = MODULE_ADDRESS
     private readonly priceIds: any[] = [
-        { name: "APTOS", address: AptFeeder },
+        { name: "APT", address: AptFeeder },
         { name: "USDT", address: UsdtFeeder },
         { name: "USDC", address: UsdcFeeder },
         { name: "BTC", address: BtcFeeder },
@@ -45,7 +45,7 @@ export class ScannerService {
     constructor(private readonly prisma: PrismaService, private readonly orderOrPositionService: OrderOrPositionService) {
         PAIRS.map((pair) => {
             if (this.isFunctionOn(this.VAULT_APT)) {
-                if (pair.vault === 'APTOS') {
+                if (pair.vault === 'APT') {
                     this.FUNC_PAIRS.push(pair)
                 }
             }
@@ -86,7 +86,7 @@ export class ScannerService {
         console.log('check scanner config => VAULT_ETH', this.VAULT_ETH)
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_MINUTE)
     async handlePriceFeeder() {
         await this.fetchPrice();
     }
@@ -106,12 +106,12 @@ export class ScannerService {
     }
 
     async fetchPrice(): Promise<void> {
-        const vaas = await Promise.all(this.priceIds.map(pair => this.fetchVaa(pair.address)));
+        const vaas = await Promise.all(this.priceIds.map(item => this.fetchVaa(item)));
         const vasBytes = vaas.map(vaa => Array.from(Buffer.from(vaa.binary, 'hex')));
         const parsedPrices = vaas.map(vaa => vaa.parsed);
 
         if (this.isFunctionOn(this.UPDATE_PRICE_FEED)) {
-            await this.updateFeedToAptos(vasBytes)
+            // await this.updateFeedToAptos(vasBytes)
         }
         if (this.isFunctionOn(this.EXECUTE_ORDERS)) {
             await this.scanOrderRecords(parsedPrices)
@@ -121,14 +121,24 @@ export class ScannerService {
         }
     }
 
-    async fetchVaa(priceId: string): Promise<any> {
+    async fetchVaa(item: any): Promise<any> {
         try {
-            const response = await axios.get(`https://hermes-beta.pyth.network/v2/updates/price/latest?ids%5B%5D=${priceId}`);
-            console.log("🚀 ~ ScannerService ~ fetchVaa ~ response:", response.data.parsed[0].price.price)
+            const response = await axios.get(`https://hermes-beta.pyth.network/v2/updates/price/latest?ids%5B%5D=${item.address}`);
+            await this.prisma.priceFeederRecord.create({
+                data: {
+                    name: item.name,
+                    symbol: item.name,
+                    address: item.address,
+                    price: response.data.parsed[0].price.price,
+                    publish_time: response.data.parsed[0].price.publish_time.toString(),
+                    expo: response.data.parsed[0].price.expo,
+                    decimal: Math.abs(response.data.parsed[0].price.expo)
+                }
+            })
 
             return { binary: response.data.binary.data[0], parsed: response.data.parsed[0].price.price }
         } catch (error) {
-            console.error(`Error fetching VAA for priceId ${priceId}:`, error);
+            console.error(`Error fetching VAA for priceId ${item.address}:`, error);
             throw error;
         }
     }
@@ -147,6 +157,7 @@ export class ScannerService {
             signer: priceFeederSyncerSigner,
             transaction,
         });
+
 
         this.logger.log('Transaction submitted update price feed:', committedTransaction.toString());
     }
@@ -348,7 +359,6 @@ export class ScannerService {
         })
     }
 
-
     async syncOnChainOrderRecords() {
         const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
 
@@ -473,7 +483,7 @@ export class ScannerService {
 
     async fetchPositionRecords(pair: PositionOrderHandle, pHeight: string) {
         const result = await aptos.getTableItemsData({
-            minimumLedgerVersion: Number(pHeight),
+            // minimumLedgerVersion: Number(pHeight),
             options: {
                 where: {
                     table_handle: { _eq: pair.position_handle },

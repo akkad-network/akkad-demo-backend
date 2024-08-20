@@ -67,7 +67,7 @@ export const DOGE_FEEDER_ADDRESS =
 
 export const VaultList: VaultInfo[] = [
     {
-        name: 'APTOS',
+        name: 'APT',
         symbol: 'APT',
         tokenAddress: APTOS_COIN,
         tokenStore: APTOS_COIN_STORE,
@@ -105,8 +105,8 @@ export const VaultList: VaultInfo[] = [
 
 export const SymbolList: SymbolInfo[] = [
     {
-        name: "APTOS/USD",
-        tokenName: 'APTOS',
+        name: "APT/USD",
+        tokenName: 'APT',
         tokenSymbol: 'APT',
         tokenAddress: APTOS_COIN,
         pythFeederAddress: APT_FEEDER_ADDRESS,
@@ -176,25 +176,25 @@ export type APTOS_ADDRESS = `${string}::${string}::${string}`
 
 
 export const PAIRS = [
-    { vault: 'APTOS', symbol: 'APTOS', direction: 'LONG' },
-    { vault: 'APTOS', symbol: 'APTOS', direction: 'SHORT' },
-    { vault: 'APTOS', symbol: 'ETH', direction: 'LONG' },
-    { vault: 'APTOS', symbol: 'ETH', direction: 'SHORT' },
-    { vault: 'APTOS', symbol: 'BTC', direction: 'LONG' },
-    { vault: 'APTOS', symbol: 'BTC', direction: 'SHORT' },
-    { vault: 'APTOS', symbol: 'BNB', direction: 'LONG' },
-    { vault: 'APTOS', symbol: 'BNB', direction: 'SHORT' },
-    { vault: 'APTOS', symbol: 'SOL', direction: 'LONG' },
-    { vault: 'APTOS', symbol: 'SOL', direction: 'SHORT' },
-    { vault: 'APTOS', symbol: 'AVAX', direction: 'LONG' },
-    { vault: 'APTOS', symbol: 'AVAX', direction: 'SHORT' },
-    { vault: 'APTOS', symbol: 'PEPE', direction: 'LONG' },
-    { vault: 'APTOS', symbol: 'PEPE', direction: 'SHORT' },
-    { vault: 'APTOS', symbol: 'DOGE', direction: 'LONG' },
-    { vault: 'APTOS', symbol: 'DOGE', direction: 'SHORT' },
+    { vault: 'APT', symbol: 'APT', direction: 'LONG' },
+    { vault: 'APT', symbol: 'APT', direction: 'SHORT' },
+    { vault: 'APT', symbol: 'ETH', direction: 'LONG' },
+    { vault: 'APT', symbol: 'ETH', direction: 'SHORT' },
+    { vault: 'APT', symbol: 'BTC', direction: 'LONG' },
+    { vault: 'APT', symbol: 'BTC', direction: 'SHORT' },
+    { vault: 'APT', symbol: 'BNB', direction: 'LONG' },
+    { vault: 'APT', symbol: 'BNB', direction: 'SHORT' },
+    { vault: 'APT', symbol: 'SOL', direction: 'LONG' },
+    { vault: 'APT', symbol: 'SOL', direction: 'SHORT' },
+    { vault: 'APT', symbol: 'AVAX', direction: 'LONG' },
+    { vault: 'APT', symbol: 'AVAX', direction: 'SHORT' },
+    { vault: 'APT', symbol: 'PEPE', direction: 'LONG' },
+    { vault: 'APT', symbol: 'PEPE', direction: 'SHORT' },
+    { vault: 'APT', symbol: 'DOGE', direction: 'LONG' },
+    { vault: 'APT', symbol: 'DOGE', direction: 'SHORT' },
 
-    { vault: 'USDC', symbol: 'APTOS', direction: 'LONG' },
-    { vault: 'USDC', symbol: 'APTOS', direction: 'SHORT' },
+    { vault: 'USDC', symbol: 'APT', direction: 'LONG' },
+    { vault: 'USDC', symbol: 'APT', direction: 'SHORT' },
     { vault: 'USDC', symbol: 'ETH', direction: 'LONG' },
     { vault: 'USDC', symbol: 'ETH', direction: 'SHORT' },
     { vault: 'USDC', symbol: 'BTC', direction: 'LONG' },
@@ -210,8 +210,26 @@ export const PAIRS = [
     { vault: 'USDC', symbol: 'DOGE', direction: 'LONG' },
     { vault: 'USDC', symbol: 'DOGE', direction: 'SHORT' },
 
-    { vault: 'BTC', symbol: 'APTOS', direction: 'LONG' },
-    { vault: 'BTC', symbol: 'APTOS', direction: 'SHORT' },
+
+    { vault: 'USDT', symbol: 'APT', direction: 'LONG' },
+    { vault: 'USDT', symbol: 'APT', direction: 'SHORT' },
+    { vault: 'USDT', symbol: 'ETH', direction: 'LONG' },
+    { vault: 'USDT', symbol: 'ETH', direction: 'SHORT' },
+    { vault: 'USDT', symbol: 'BTC', direction: 'LONG' },
+    { vault: 'USDT', symbol: 'BTC', direction: 'SHORT' },
+    { vault: 'USDT', symbol: 'BNB', direction: 'LONG' },
+    { vault: 'USDT', symbol: 'BNB', direction: 'SHORT' },
+    { vault: 'USDT', symbol: 'SOL', direction: 'LONG' },
+    { vault: 'USDT', symbol: 'SOL', direction: 'SHORT' },
+    { vault: 'USDT', symbol: 'AVAX', direction: 'LONG' },
+    { vault: 'USDT', symbol: 'AVAX', direction: 'SHORT' },
+    { vault: 'USDT', symbol: 'PEPE', direction: 'LONG' },
+    { vault: 'USDT', symbol: 'PEPE', direction: 'SHORT' },
+    { vault: 'USDT', symbol: 'DOGE', direction: 'LONG' },
+    { vault: 'USDT', symbol: 'DOGE', direction: 'SHORT' },
+
+    { vault: 'BTC', symbol: 'APT', direction: 'LONG' },
+    { vault: 'BTC', symbol: 'APT', direction: 'SHORT' },
     { vault: 'BTC', symbol: 'ETH', direction: 'LONG' },
     { vault: 'BTC', symbol: 'ETH', direction: 'SHORT' },
     { vault: 'BTC', symbol: 'BTC', direction: 'LONG' },
@@ -228,8 +246,8 @@ export const PAIRS = [
     { vault: 'BTC', symbol: 'DOGE', direction: 'SHORT' },
 
 
-    { vault: 'ETH', symbol: 'APTOS', direction: 'LONG' },
-    { vault: 'ETH', symbol: 'APTOS', direction: 'SHORT' },
+    { vault: 'ETH', symbol: 'APT', direction: 'LONG' },
+    { vault: 'ETH', symbol: 'APT', direction: 'SHORT' },
     { vault: 'ETH', symbol: 'ETH', direction: 'LONG' },
     { vault: 'ETH', symbol: 'ETH', direction: 'SHORT' },
     { vault: 'ETH', symbol: 'BTC', direction: 'LONG' },
