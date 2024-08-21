@@ -140,3 +140,36 @@ model PriceFeederRecord {
   decimal      Int
   createAt     DateTime @default(now())
 }
+
+model SymbolDirectionConfig {
+  id                           Int      @id @default(autoincrement())
+  symbol                       String
+  direction                    String
+  acc_funding_rate_flag        Boolean
+  acc_funding_rate_value       String
+  opening_amount               String
+  opening_size                 String
+  realised_pnl_flag            Boolean
+  realised_pnl_value           String
+  unrealised_funding_fee_flag  Boolean
+  unrealised_funding_fee_value String
+  last_update                  String
+  createAt                     DateTime @default(now())
+}
+
+model VaultConfig {
+  id                              Int    @id @default(autoincrement())
+  vault                           String
+  acc_reserving_rate              String
+  last_update                     String
+  liquidity                       String
+  reserved_amount                 String
+  unrealised_reserving_fee_amount String
+}
+
+model LPTokenPriceRecords {
+  id              Int      @id @default(autoincrement())
+  price           String
+  price_formatted String
+  createAt        DateTime @default(now())
+}

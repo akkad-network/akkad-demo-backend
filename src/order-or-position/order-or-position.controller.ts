@@ -34,12 +34,19 @@ export class OrderOrPositionController {
         return this.orderOrPositionService.findIncreaseOrders(owner, vault, symbol);
     }
 
-    @Get('averageFeeRate')
-    async getLatestAggregate(
-        @Query('vault') vault: string,
+    @Get('get8HoursFundingRateAver')
+    async getLast8HoursFundingRateAver(
         @Query('symbol') symbol: string,
     ) {
-        return this.orderOrPositionService.getLatestAggregateData(vault, symbol);
+        return this.orderOrPositionService.getLast8HoursFundingRateAver(symbol);
+    }
+
+
+    @Get('get8HoursReservingRateAver')
+    async getLast8HoursReservingRateAver(
+        @Query('vault') vault: string,
+    ) {
+        return this.orderOrPositionService.getLast8HoursReservingRateAver(vault);
     }
 
     @Get('syncHandles')

@@ -6,7 +6,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { Aptos, APTOS_COIN } from '@aptos-labs/ts-sdk';
 import axios from 'axios';
-import { convertBackDecimal, convertDecimal, getSideAddress, getTableHandle, PAIRS, SymbolList, VaultList } from 'src/utils/helper';
+import { COIN_ADDRESS, convertBackDecimal, convertDecimal, DIRECTION, getSideAddress, getTableHandle, MOCK_USDT_COIN_STORE, PAIRS, parseAptosDecimal, SymbolList, VaultList } from 'src/utils/helper';
 import { AptFeeder, aptos, AvaxFeeder, BnbFeeder, BtcFeeder, DogeFeeder, EthFeeder, executerSigner, FEERDER_ADDRESS, liquidatorSigner, MODULE_ADDRESS, PepeFeeder, priceFeederSyncerSigner, SolFeeder, UsdcFeeder, UsdtFeeder } from 'src/main';
 import { DecreaseOrderRecord, IncreaseOrderRecord, PositionOrderHandle, PositionRecord } from '@prisma/client';
 
@@ -29,6 +29,10 @@ export class ScannerService {
     ];
     private readonly SYNC_POSITIONS = process.env.SYNC_POSITIONS
     private readonly SYNC_ORDERS = process.env.SYNC_ORDERS
+    private readonly SYNC_SYMBOL_CONFIG = process.env.SYNC_SYMBOL_CONFIG
+    private readonly SYNC_VAULT_CONFIG = process.env.SYNC_VAULT_CONFIG
+    private readonly SYNC_LP_TOKEN_PRICE = process.env.SYNC_LP_TOKEN_PRICE
+
 
     private readonly UPDATE_PRICE_FEED = process.env.UPDATE_PRICE_FEED
     private readonly EXECUTE_ORDERS = process.env.EXECUTE_ORDERS
@@ -39,6 +43,7 @@ export class ScannerService {
     private readonly VAULT_USDT = process.env.VAULT_USDT
     private readonly VAULT_BTC = process.env.VAULT_BTC
     private readonly VAULT_ETH = process.env.VAULT_ETH
+
 
     private FUNC_PAIRS: any[] = []
 
@@ -105,13 +110,56 @@ export class ScannerService {
         }
     }
 
+    @Cron(CronExpression.EVERY_30_MINUTES)
+    async handleSyncSymbolConfig() {
+        if (this.isFunctionOn(this.SYNC_SYMBOL_CONFIG)) {
+            await this.syncOnChainSymbolConfig();
+        }
+    }
+
+    @Cron(CronExpression.EVERY_30_MINUTES)
+    async handleSyncVaultConfig() {
+        if (this.isFunctionOn(this.SYNC_VAULT_CONFIG)) {
+            await this.syncOnChainVaultConfig();
+        }
+    }
+
+    @Cron(CronExpression.EVERY_10_SECONDS)
+    async syncLpTokenPrice() {
+        if (this.isFunctionOn(this.SYNC_LP_TOKEN_PRICE)) {
+            await this.syncOnChainLpTokenPrice();
+        }
+    }
+
+    async syncOnChainLpTokenPrice() {
+        try {
+            const result = await aptos.view({
+                payload: {
+                    function: `${MODULE_ADDRESS}::market::to_lp_amount`,
+                    typeArguments: [`${COIN_ADDRESS}::usdt::USDT`],
+                    functionArguments: [1000000000],
+                },
+            })
+            const price = Number(result?.[0]).toString()
+            const price_formatted = (1 / parseAptosDecimal((Number(result?.[0]) / 1000) || 0, 6)).toFixed(8)
+            await this.prisma.lPTokenPriceRecords.create({
+                data: {
+                    price, price_formatted
+                }
+            })
+        } catch (error) {
+            console.error(`Error fetching LP Token`);
+            throw error;
+        } finally { }
+    }
+
     async fetchPrice(): Promise<void> {
         const vaas = await Promise.all(this.priceIds.map(item => this.fetchVaa(item)));
         const vasBytes = vaas.map(vaa => Array.from(Buffer.from(vaa.binary, 'hex')));
         const parsedPrices = vaas.map(vaa => vaa.parsed);
 
         if (this.isFunctionOn(this.UPDATE_PRICE_FEED)) {
-            // await this.updateFeedToAptos(vasBytes)
+            await this.updateFeedToAptos(vasBytes)
         }
         if (this.isFunctionOn(this.EXECUTE_ORDERS)) {
             await this.scanOrderRecords(parsedPrices)
@@ -460,6 +508,58 @@ export class ScannerService {
             await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'DECREASE_ORDER_RECORD')
         }
         this.prisma.saveDecreaseOrderRecord(sortedData)
+    }
+
+    async syncOnChainVaultConfig() {
+        for (const vault of VaultList) {
+            const result = await aptos.getAccountResource({
+                accountAddress: MODULE_ADDRESS,
+                resourceType: `${MODULE_ADDRESS}::pool::Vault<${vault.tokenAddress}>`
+            })
+            console.log("🚀 ~ ScannerService ~ syncOnChainVaultConfig ~ result:", result)
+            if (result) {
+                await this.prisma.vaultConfig.create({
+                    data: {
+                        vault: vault.symbol,
+                        acc_reserving_rate: result.acc_reserving_rate.value,
+                        last_update: result.last_update,
+                        liquidity: result.liquidity.value,
+                        reserved_amount: result.reserved_amount,
+                        unrealised_reserving_fee_amount: result.unrealised_reserving_fee_amount.value
+                    }
+                })
+            }
+        }
+    }
+
+    async syncOnChainSymbolConfig() {
+        for (const direction of DIRECTION) {
+            for (const symbol of SymbolList) {
+                const result = await aptos.getAccountResource({
+                    accountAddress: MODULE_ADDRESS,
+                    resourceType: `${MODULE_ADDRESS}::pool::Symbol<${symbol.tokenAddress},${direction.address}>`
+                })
+                console.log("🚀 ~ ScannerService ~ syncOnChainSymbolConfig ~ result:", result)
+                if (result) {
+                    await this.prisma.symbolDirectionConfig.create({
+                        data: {
+                            symbol: symbol.tokenSymbol,
+                            direction: direction.name,
+                            acc_funding_rate_flag: result.acc_funding_rate.is_positive,
+                            acc_funding_rate_value: result.acc_funding_rate.value.value,
+                            opening_amount: result.opening_amount,
+                            opening_size: result.opening_size.value,
+                            realised_pnl_flag: result.realised_pnl.is_positive,
+                            realised_pnl_value: result.realised_pnl.value.value,
+                            unrealised_funding_fee_flag: result.unrealised_funding_fee_value.is_positive,
+                            unrealised_funding_fee_value: result.unrealised_funding_fee_value.value.value,
+                            last_update: result.last_update
+                        }
+                    })
+                }
+            }
+
+        }
     }
 
     async syncOnChainPositionRecords() {

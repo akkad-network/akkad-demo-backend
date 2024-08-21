@@ -1,10 +1,10 @@
 import { APTOS_COIN } from '@aptos-labs/ts-sdk';
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { Decimal } from '@prisma/client/runtime/library';
 import { aptos, MODULE_ADDRESS } from 'src/main';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { DIRECTION, PAIRS, SymbolList, TYPES, VaultList } from 'src/utils/helper';
-
 @Injectable()
 export class OrderOrPositionService {
 
@@ -12,59 +12,6 @@ export class OrderOrPositionService {
 
     }
 
-    @Cron(CronExpression.EVERY_HOUR)
-    async handleAggregateFeeData() {
-        await this.aggregateFeeData();
-    }
-
-    async aggregateFeeData() {
-        Promise.all(PAIRS.map((pair: any) => {
-            this.getAggregateData(pair.vault, pair.symbol, pair.direction)
-        }))
-    }
-
-    async getAggregateData(vault: string, symbol: string, direction: string) {
-        const eightHoursAgo = Math.floor(Date.now() / 1000) - 8 * 60 * 60;
-
-        const records = await this.prisma.positionRecord.findMany({
-            where: {
-                vault,
-                symbol,
-                direction,
-                // open_timestamp: {
-                //     gte: eightHoursAgo.toString(),
-                // },
-            },
-        });
-
-        const averageFundingFee = this.calculateAverage(
-            records,
-            'funding_fee_value',
-            'funding_fee_is_positive',
-        );
-
-        const averageFundingRate = this.calculateAverage(
-            records,
-            'last_funding_rate',
-            'last_funding_is_positive',
-        );
-
-        const averageReservingRate = this.calculateAverage(
-            records,
-            'last_reserving_rate',
-        );
-
-        await this.prisma.aggregatePositionRecord.create({
-            data: {
-                vault,
-                symbol,
-                direction,
-                average_funding_fee: averageFundingFee.toString(),
-                average_funding_rate: averageFundingRate.toString(),
-                average_reserving_rate: averageReservingRate.toString(),
-            },
-        });
-    }
     async syncHandles() {
         for (const type of TYPES) {
             for (const vault of VaultList) {
@@ -186,6 +133,82 @@ export class OrderOrPositionService {
             },
         });
     }
+    async getLast8HoursReservingRateAver(vault: string) {
+        const now = new Date();
+        const eightHoursAgo = new Date(now.getTime() - 8 * 60 * 60 * 1000);
+
+        const records = await this.prisma.vaultConfig.findMany({
+            where: {
+                vault: vault,
+                // createAt: {
+                //     gte: eightHoursAgo,
+                //     lte: now,
+                // },
+            },
+            select: {
+                acc_reserving_rate: true,
+            },
+        });
+
+        const total = records.reduce((sum, record) => {
+            const value = new Decimal(record.acc_reserving_rate);
+            return sum.plus(value);
+        }, new Decimal(0));
+        const averageReserving = total.dividedBy(records.length);
+        return { averageReserving }
+    }
+
+
+
+    async getLast8HoursFundingRateAver(symbol: string) {
+        const now = new Date();
+        const eightHoursAgo = new Date(now.getTime() - 8 * 60 * 60 * 1000);
+
+        const longRecords = await this.prisma.symbolDirectionConfig.findMany({
+            where: {
+                symbol: symbol,
+                direction: 'LONG'
+                // createAt: {
+                //     gte: eightHoursAgo,
+                //     lte: now,
+                // },
+            },
+            select: {
+                acc_funding_rate_flag: true,
+                acc_funding_rate_value: true,
+            },
+        });
+
+        const totalLong = longRecords.reduce((sum, record) => {
+            const value = new Decimal(record.acc_funding_rate_value);
+            return sum.plus(record.acc_funding_rate_flag ? value : value.neg());
+        }, new Decimal(0));
+        const averageLong = totalLong.dividedBy(longRecords.length);
+
+
+        const shortRecords = await this.prisma.symbolDirectionConfig.findMany({
+            where: {
+                symbol: symbol,
+                direction: 'SHORT'
+                // createAt: {
+                //     gte: eightHoursAgo,
+                //     lte: now,
+                // },
+            },
+            select: {
+                acc_funding_rate_flag: true,
+                acc_funding_rate_value: true,
+            },
+        });
+
+        const totalShort = shortRecords.reduce((sum, record) => {
+            const value = new Decimal(record.acc_funding_rate_value);
+            return sum.plus(record.acc_funding_rate_flag ? value : value.neg());
+        }, new Decimal(0));
+        const averageShort = totalShort.dividedBy(shortRecords.length);
+
+        return { averageLong, averageShort }
+    }
 
 
     private calculateAverage(records: any[], valueField: string, positiveField?: string): string {
@@ -203,32 +226,5 @@ export class OrderOrPositionService {
 
         const average = sum / BigInt(records.length);
         return average.toString();
-
     }
-
-    async getLatestAggregateData(vault: string, symbol: string) {
-        const longResult = await this.prisma.aggregatePositionRecord.findFirst({
-            where: {
-                vault,
-                symbol,
-                direction: "LONG",
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        });
-        const shortResult = await this.prisma.aggregatePositionRecord.findFirst({
-            where: {
-                vault,
-                symbol,
-                direction: "SHORT",
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        });
-
-        return { longResult, shortResult }
-    }
-
 }
