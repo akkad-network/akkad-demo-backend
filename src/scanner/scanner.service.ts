@@ -451,6 +451,11 @@ export class ScannerService {
             },
         });
 
+        if (!inc_response || inc_response.length === 0) {
+            console.log(`🚀 ~ Fetch Increase Orders ${pair.vault}|${pair.symbol} => No orders`)
+            return
+        }
+
         const updatedIncResponse = inc_response.map(item => ({
             ...item,
             order_type: 'increase',
@@ -461,21 +466,23 @@ export class ScannerService {
 
         const nullList = updatedIncResponse.filter((item) => item.decoded_value === null)
 
-        if (nullList.length > 0) {
+        if (nullList && nullList.length > 0) {
             this.prisma.updateIncCancelOrderRecords(nullList)
         }
 
         const notNullList = updatedIncResponse.filter((item) => item.decoded_value !== null)
 
-        const sortedData: any[] = notNullList.sort((a, b) => {
-            const verA = a.transaction_version
-            const verB = b.transaction_version
-            return verB - verA
-        })
-        if (sortedData.length > 0) {
-            await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'INCREASE_ORDER_RECORD')
+        if (notNullList && notNullList.length > 0) {
+            const sortedData: any[] = notNullList.sort((a, b) => {
+                const verA = a.transaction_version
+                const verB = b.transaction_version
+                return verB - verA
+            })
+            if (sortedData.length > 0) {
+                await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'INCREASE_ORDER_RECORD')
+            }
+            this.prisma.saveIncreaseOrderRecord(sortedData)
         }
-        this.prisma.saveIncreaseOrderRecord(sortedData)
     }
 
     async fetchOrderRecordTableDecrease(pair: PositionOrderHandle, dHeight: string) {
@@ -491,6 +498,10 @@ export class ScannerService {
                 orderBy: [{ transaction_version: 'desc' }],
             },
         });
+        if (!dec_response || dec_response.length === 0) {
+            console.log(`🚀 ~ Fetch Decrease Orders ${pair.vault}|${pair.symbol} =>  No orders`)
+            return
+        }
         const updatedDecResponse = dec_response.map(item => ({
             ...item,
             order_type: 'decrease',
@@ -501,22 +512,24 @@ export class ScannerService {
 
         const nullList = updatedDecResponse.filter((item) => item.decoded_value === null)
 
-        if (nullList.length > 0) {
+        if (nullList && nullList.length > 0) {
             this.prisma.updateDecCancelOrderRecords(nullList)
         }
 
         const notNullList = updatedDecResponse.filter((item) => item.decoded_value !== null)
 
-        const sortedData: any[] = notNullList.sort((a, b) => {
-            const verA = a.transaction_version
-            const verB = b.transaction_version
-            return verB - verA
-        })
+        if (notNullList && notNullList.length > 0) {
+            const sortedData: any[] = notNullList.sort((a, b) => {
+                const verA = a.transaction_version
+                const verB = b.transaction_version
+                return verB - verA
+            })
 
-        if (sortedData.length > 0) {
-            await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'DECREASE_ORDER_RECORD')
+            if (sortedData.length > 0) {
+                await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'DECREASE_ORDER_RECORD')
+            }
+            this.prisma.saveDecreaseOrderRecord(sortedData)
         }
-        this.prisma.saveDecreaseOrderRecord(sortedData)
     }
 
     async syncOnChainVaultConfig() {
@@ -598,6 +611,10 @@ export class ScannerService {
                 orderBy: [{ transaction_version: 'desc' }],
             },
         });
+        if (!result || result.length === 0) {
+            console.log(`🚀 ~ Fetch Positions => ${pair.vault}|${pair.symbol} ~ No Position`)
+            return
+        }
         const updatedDecResponse = result.map(item => ({
             ...item,
             vault: pair.vault,
