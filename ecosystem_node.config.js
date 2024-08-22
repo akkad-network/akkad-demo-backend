@@ -1,7 +1,6 @@
 const {
   SCRIPT_SRC,
-  MAIN_DATABASE_URL,
-  SUPPORT_DATABASE_URL,
+  DATABASE_URL,
   MODULE_ADDRESS,
   COIN_ADDRESS,
   PRICE_FEEDER_ADDRESS,
@@ -31,7 +30,7 @@ module.exports = {
       env: {
         PORT: 3001,
 
-        DATABASE_URL: SUPPORT_DATABASE_URL,
+        DATABASE_URL: DATABASE_URL,
         MODULE_ADDRESS: MODULE_ADDRESS,
         COIN_ADDRESS: COIN_ADDRESS,
 
@@ -47,16 +46,23 @@ module.exports = {
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
 
+        //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
         EXECUTER_PK: EXECUTER_PK_1,
         LIQUIDATOR_PK: LIQUIDATOR_PK,
 
-        UPDATE_PRICE_FEED: "OFF",
+        //sync func
         SYNC_POSITIONS: "OFF",
         SYNC_ORDERS: "OFF",
+        SYNC_VAULT_CONFIG: "OFF",
+        SYNC_LP_TOKEN_PRICE: "OFF",
+
+        //onchain func
+        UPDATE_PRICE_FEED: "OFF",
         EXECUTE_ORDERS: "ON",
         EXECUTE_LIQUIDATION: "OFF",
 
+        //vault switcher
         VAULT_APT: "ON",
         VAULT_USDC: "OFF",
         VAULT_USDT: "OFF",
@@ -71,7 +77,7 @@ module.exports = {
       env: {
         PORT: 3002,
 
-        DATABASE_URL: SUPPORT_DATABASE_URL,
+        DATABASE_URL: DATABASE_URL,
         MODULE_ADDRESS: MODULE_ADDRESS,
         COIN_ADDRESS: COIN_ADDRESS,
 
@@ -87,16 +93,23 @@ module.exports = {
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
 
+        //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
         EXECUTER_PK: EXECUTER_PK_2,
         LIQUIDATOR_PK: LIQUIDATOR_PK,
 
-        UPDATE_PRICE_FEED: "OFF",
+        //sync func
         SYNC_POSITIONS: "OFF",
         SYNC_ORDERS: "OFF",
+        SYNC_VAULT_CONFIG: "OFF",
+        SYNC_LP_TOKEN_PRICE: "OFF",
+
+        //onchain func
+        UPDATE_PRICE_FEED: "OFF",
         EXECUTE_ORDERS: "ON",
         EXECUTE_LIQUIDATION: "OFF",
 
+        //vault switcher
         VAULT_APT: "OFF",
         VAULT_USDC: "ON",
         VAULT_USDT: "OFF",
@@ -111,7 +124,7 @@ module.exports = {
       env: {
         PORT: 3003,
 
-        DATABASE_URL: SUPPORT_DATABASE_URL,
+        DATABASE_URL: DATABASE_URL,
         MODULE_ADDRESS: MODULE_ADDRESS,
         COIN_ADDRESS: COIN_ADDRESS,
 
@@ -127,16 +140,23 @@ module.exports = {
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
 
+        //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
         EXECUTER_PK: EXECUTER_PK_3,
         LIQUIDATOR_PK: LIQUIDATOR_PK,
 
-        UPDATE_PRICE_FEED: "OFF",
+        //sync func
         SYNC_POSITIONS: "OFF",
         SYNC_ORDERS: "OFF",
+        SYNC_VAULT_CONFIG: "OFF",
+        SYNC_LP_TOKEN_PRICE: "OFF",
+
+        //onchain func
+        UPDATE_PRICE_FEED: "OFF",
         EXECUTE_ORDERS: "ON",
         EXECUTE_LIQUIDATION: "OFF",
 
+        //vault switcher
         VAULT_APT: "OFF",
         VAULT_USDC: "OFF",
         VAULT_USDT: "ON",
@@ -151,7 +171,7 @@ module.exports = {
       env: {
         PORT: 3004,
 
-        DATABASE_URL: SUPPORT_DATABASE_URL,
+        DATABASE_URL: DATABASE_URL,
         MODULE_ADDRESS: MODULE_ADDRESS,
         COIN_ADDRESS: COIN_ADDRESS,
 
@@ -167,16 +187,23 @@ module.exports = {
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
 
+        //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
         EXECUTER_PK: EXECUTER_PK_3,
         LIQUIDATOR_PK: LIQUIDATOR_PK,
 
-        UPDATE_PRICE_FEED: "OFF",
+        //sync func
         SYNC_POSITIONS: "OFF",
         SYNC_ORDERS: "OFF",
+        SYNC_VAULT_CONFIG: "OFF",
+        SYNC_LP_TOKEN_PRICE: "OFF",
+
+        //onchain func
+        UPDATE_PRICE_FEED: "OFF",
         EXECUTE_ORDERS: "OFF",
         EXECUTE_LIQUIDATION: "ON",
 
+        //vault switcher
         VAULT_APT: "ON",
         VAULT_USDC: "ON",
         VAULT_USDT: "ON",

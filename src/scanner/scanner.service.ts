@@ -110,21 +110,21 @@ export class ScannerService {
         }
     }
 
-    @Cron(CronExpression.EVERY_30_MINUTES)
+    @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncSymbolConfig() {
         if (this.isFunctionOn(this.SYNC_SYMBOL_CONFIG)) {
             await this.syncOnChainSymbolConfig();
         }
     }
 
-    @Cron(CronExpression.EVERY_30_MINUTES)
+    @Cron(CronExpression.EVERY_5_MINUTES)
     async handleSyncVaultConfig() {
         if (this.isFunctionOn(this.SYNC_VAULT_CONFIG)) {
             await this.syncOnChainVaultConfig();
         }
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_5_MINUTES)
     async syncLpTokenPrice() {
         if (this.isFunctionOn(this.SYNC_LP_TOKEN_PRICE)) {
             await this.syncOnChainLpTokenPrice();
