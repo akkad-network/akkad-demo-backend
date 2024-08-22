@@ -231,4 +231,31 @@ export class OrderOrPositionService {
         const average = sum / BigInt(records.length);
         return average.toString();
     }
+
+    async fetchAllVaultConfig() {
+        await this.prisma.vaultConfig.findMany({
+            where: {},
+            orderBy: {
+                id: 'desc'
+            }
+        })
+    }
+
+    async fetchAllSymbolConfig() {
+        await this.prisma.symbolDirectionConfig.findMany({
+            where: {},
+            orderBy: {
+                id: 'desc'
+            }
+        })
+    }
+
+    async fetchAllLpTokenRecords() {
+        await this.prisma.lPTokenPriceRecords.findMany({
+            where: {},
+            orderBy: {
+                id: 'desc'
+            }
+        })
+    }
 }

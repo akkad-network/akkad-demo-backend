@@ -44,6 +44,8 @@ export class ScannerService {
     private readonly VAULT_BTC = process.env.VAULT_BTC
     private readonly VAULT_ETH = process.env.VAULT_ETH
 
+    private vasBytes: number[][] = []
+    private parsedPrices: any[] = []
 
     private FUNC_PAIRS: any[] = []
 
@@ -91,10 +93,17 @@ export class ScannerService {
         console.log('check scanner config => VAULT_ETH', this.VAULT_ETH)
     }
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_10_SECONDS)
     async handlePriceFeeder() {
         await this.fetchPrice();
-        console.log("🚀 ~ ScannerService ~ Price Feeder Executed ~ ")
+    }
+
+    @Cron(CronExpression.EVERY_MINUTE)
+    async updatePriceFeeder() {
+        if (this.isFunctionOn(this.UPDATE_PRICE_FEED)) {
+            await this.updateFeedToAptos(this.vasBytes)
+            console.log("🚀 ~ ScannerService ~ Price Feeder Executed ~ ")
+        }
     }
 
     @Cron(CronExpression.EVERY_10_SECONDS)
@@ -113,7 +122,7 @@ export class ScannerService {
         }
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_5_MINUTES)
     async handleSyncSymbolConfig() {
         if (this.isFunctionOn(this.SYNC_SYMBOL_CONFIG)) {
             await this.syncOnChainSymbolConfig();
@@ -134,6 +143,22 @@ export class ScannerService {
         if (this.isFunctionOn(this.SYNC_LP_TOKEN_PRICE)) {
             await this.syncOnChainLpTokenPrice();
             console.log("🚀 ~ ScannerService ~ Sync On-Chain Lp Token Price Executed ~ ")
+        }
+    }
+
+    @Cron(CronExpression.EVERY_10_SECONDS)
+    async scanExecuteOrders() {
+        if (this.isFunctionOn(this.EXECUTE_ORDERS)) {
+            await this.scanOrderRecords(this.parsedPrices)
+            console.log("🚀 ~ ScannerService ~ scan & Execute Orders  ~ ")
+        }
+    }
+
+    @Cron(CronExpression.EVERY_10_SECONDS)
+    async scanExecuteLiquidation() {
+        if (this.isFunctionOn(this.EXECUTE_LIQUIDATION)) {
+            await this.checkLiquidation(this.parsedPrices);
+            console.log("🚀 ~ ScannerService ~ scan & Liquidation ~ ")
         }
     }
 
@@ -161,18 +186,9 @@ export class ScannerService {
 
     async fetchPrice(): Promise<void> {
         const vaas = await Promise.all(this.priceIds.map(item => this.fetchVaa(item)));
-        const vasBytes = vaas.map(vaa => Array.from(Buffer.from(vaa.binary, 'hex')));
-        const parsedPrices = vaas.map(vaa => vaa.parsed);
+        this.vasBytes = vaas?.map(vaa => Array.from(Buffer.from(vaa?.binary, 'hex')));
+        this.parsedPrices = vaas?.map(vaa => vaa?.parsed);
 
-        if (this.isFunctionOn(this.UPDATE_PRICE_FEED)) {
-            await this.updateFeedToAptos(vasBytes)
-        }
-        if (this.isFunctionOn(this.EXECUTE_ORDERS)) {
-            await this.scanOrderRecords(parsedPrices)
-        }
-        if (this.isFunctionOn(this.EXECUTE_LIQUIDATION)) {
-            await this.checkLiquidation(parsedPrices);
-        }
     }
 
     async fetchVaa(item: any): Promise<any> {
@@ -201,6 +217,7 @@ export class ScannerService {
     }
 
     async updateFeedToAptos(vasBytes: number[][]) {
+        if (vasBytes.length === 0) return
         const transaction = await aptos.transaction.build.simple({
             sender: priceFeederSyncerSigner.accountAddress,
             data: {
@@ -220,6 +237,7 @@ export class ScannerService {
     }
 
     async scanOrderRecords(prices: any[]) {
+        if (prices.length === 0) return
         const pricesList = prices.map((price, index) => {
             return { name: this.priceIds[index].name, price: convertDecimal(Number(price)) }
         })
@@ -452,7 +470,6 @@ export class ScannerService {
         });
 
         if (!inc_response || inc_response.length === 0) {
-            console.log(`🚀 ~ Fetch Increase Orders ${pair.vault}|${pair.symbol} => No orders`)
             return
         }
 
@@ -499,7 +516,6 @@ export class ScannerService {
             },
         });
         if (!dec_response || dec_response.length === 0) {
-            console.log(`🚀 ~ Fetch Decrease Orders ${pair.vault}|${pair.symbol} =>  No orders`)
             return
         }
         const updatedDecResponse = dec_response.map(item => ({
@@ -612,7 +628,6 @@ export class ScannerService {
             },
         });
         if (!result || result.length === 0) {
-            console.log(`🚀 ~ Fetch Positions => ${pair.vault}|${pair.symbol} ~ No Position`)
             return
         }
         const updatedDecResponse = result.map(item => ({
@@ -640,6 +655,7 @@ export class ScannerService {
 
 
     async checkLiquidation(prices: any[]) {
+        if (prices.length === 0) return
         const pricesList = prices.map((price, index) => {
             return { name: this.priceIds[index].name, price: convertDecimal(Number(price)) }
         })

@@ -54,4 +54,18 @@ export class OrderOrPositionController {
         return this.orderOrPositionService.syncHandles()
     }
 
+    @Get('getAllVaultConfig')
+    async getAllVaultConfig() {
+        return this.orderOrPositionService.fetchAllVaultConfig()
+    }
+
+    @Get('getAllSymbolConfig')
+    async getAllSymbolConfig() {
+        return this.orderOrPositionService.fetchAllSymbolConfig()
+    }
+
+    @Get('getAllLpToken')
+    async getAllLpToken() {
+        return this.orderOrPositionService.fetchAllLpTokenRecords()
+    }
 }
