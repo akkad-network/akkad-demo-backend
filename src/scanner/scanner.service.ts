@@ -179,15 +179,18 @@ export class ScannerService {
                 }
             })
         } catch (error) {
-            console.error(`Error fetching LP Token`);
-            throw error;
+            throw error(`Error fetching LP Token`);
         } finally { }
     }
 
     async fetchPrice(): Promise<void> {
-        const vaas = await Promise.all(this.priceIds.map(item => this.fetchVaa(item)));
-        this.vasBytes = vaas?.map(vaa => Array.from(Buffer.from(vaa?.binary, 'hex')));
-        this.parsedPrices = vaas?.map(vaa => vaa?.parsed);
+        try {
+            const vaas = await Promise.all(this.priceIds.map(item => this.fetchVaa(item)));
+            this.vasBytes = vaas?.map(vaa => Array.from(Buffer.from(vaa?.binary, 'hex')));
+            this.parsedPrices = vaas?.map(vaa => vaa?.parsed);
+        } catch (error) {
+            throw error(`Error Fetching Pyth Price Failed`);
+        }
 
     }
 
