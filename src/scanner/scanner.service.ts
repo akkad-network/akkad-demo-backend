@@ -220,7 +220,7 @@ export class ScannerService {
     }
 
     async updateFeedToAptos(vasBytes: number[][]) {
-        if (vasBytes.length === 0) return
+        if (!vasBytes || vasBytes.length === 0) return
         const transaction = await aptos.transaction.build.simple({
             sender: priceFeederSyncerSigner.accountAddress,
             data: {
@@ -240,7 +240,7 @@ export class ScannerService {
     }
 
     async scanOrderRecords(prices: any[]) {
-        if (prices.length === 0) return
+        if (!prices || prices.length === 0) return
         const pricesList = prices.map((price, index) => {
             return { name: this.priceIds[index].name, price: convertDecimal(Number(price)) }
         })
@@ -658,7 +658,7 @@ export class ScannerService {
 
 
     async checkLiquidation(prices: any[]) {
-        if (prices.length === 0) return
+        if (!prices || prices.length === 0) return
         const pricesList = prices.map((price, index) => {
             return { name: this.priceIds[index].name, price: convertDecimal(Number(price)) }
         })

@@ -68,4 +68,18 @@ export class OrderOrPositionController {
     async getAllLpToken() {
         return this.orderOrPositionService.fetchAllLpTokenRecords()
     }
+
+    @Get("get7DaysAPR")
+    async get7DaysAPR() {
+        return this.orderOrPositionService.get7DaysLpTokenApr()
+    }
+
+    @Get("get24HoursPriceChange")
+    async get24HoursPriceChange(
+        @Query('symbol') symbol: string,
+    ) {
+        return this.orderOrPositionService.fetch24HoursChange(symbol)
+    }
 }
+
+//https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,dogecoin,solana,avalanche-2,aptos,pepe&vs_currencies=usd&include_24hr_change=true

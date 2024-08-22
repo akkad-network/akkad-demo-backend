@@ -1,6 +1,7 @@
 import { APTOS_COIN } from '@aptos-labs/ts-sdk';
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { PriceFeederRecord } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { aptos, MODULE_ADDRESS } from 'src/main';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -257,5 +258,87 @@ export class OrderOrPositionService {
                 id: 'desc'
             }
         })
+    }
+
+
+    async get7DaysLpTokenApr() {
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);  // 7天前的时间
+
+        const closestRecord = await this.prisma.lPTokenPriceRecords.findFirst({
+            where: {
+                createAt: {
+                    lte: sevenDaysAgo,
+                },
+            },
+            orderBy: {
+                createAt: 'desc',
+            },
+        });
+
+        const firstRecord = await this.prisma.lPTokenPriceRecords.findFirst({
+            orderBy: {
+                createAt: 'asc',
+            },
+        });
+
+        if (!closestRecord && !firstRecord) {
+            return { changeRate: 0 };
+        }
+
+        const latestRecord = await this.prisma.lPTokenPriceRecords.findFirst({
+            orderBy: {
+                createAt: 'desc',
+            },
+        });
+
+        const initialPrice = closestRecord ? parseFloat(closestRecord.price) : parseFloat(firstRecord.price);
+        const latestPrice = parseFloat(latestRecord.price);
+
+        const changeRate = ((latestPrice - initialPrice) / initialPrice) * 100;
+
+        return { changeRate };
+    }
+
+    async fetch24HoursChange(symbol: string) {
+        const now = new Date();
+        const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+        const latestRecord = await this.prisma.priceFeederRecord.findFirst({
+            where: { symbol },
+            orderBy: { createAt: 'desc' },
+        });
+
+        if (!latestRecord) {
+            throw new Error('No price records found for the given symbol.');
+        }
+
+        const pastRecord = await this.prisma.priceFeederRecord.findFirst({
+            where: {
+                symbol,
+                createAt: { lte: twentyFourHoursAgo },
+            },
+            orderBy: { createAt: 'desc' },
+        });
+
+        if (!pastRecord) {
+            const firstRecord = await this.prisma.priceFeederRecord.findFirst({
+                where: { symbol },
+                orderBy: { createAt: 'asc' },
+            });
+
+            if (!firstRecord) {
+                throw new Error('No past price records found for the given symbol.');
+            }
+            return this.calculateChangeRate(firstRecord, latestRecord);
+        }
+
+        return this.calculateChangeRate(pastRecord, latestRecord);
+    }
+
+    private calculateChangeRate(pastRecord: PriceFeederRecord, latestRecord: PriceFeederRecord): number {
+        const pastPrice = parseFloat(pastRecord.price);
+        const latestPrice = parseFloat(latestRecord.price);
+        return ((latestPrice - pastPrice) / pastPrice) * 100;
     }
 }
