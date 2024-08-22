@@ -242,7 +242,7 @@ export class OrderOrPositionService {
     }
 
     async fetchAllSymbolConfig() {
-        await this.prisma.symbolDirectionConfig.findMany({
+        return await this.prisma.symbolDirectionConfig.findMany({
             where: {},
             orderBy: {
                 id: 'desc'
@@ -251,7 +251,7 @@ export class OrderOrPositionService {
     }
 
     async fetchAllLpTokenRecords() {
-        await this.prisma.lPTokenPriceRecords.findMany({
+        return await this.prisma.lPTokenPriceRecords.findMany({
             where: {},
             orderBy: {
                 id: 'desc'
