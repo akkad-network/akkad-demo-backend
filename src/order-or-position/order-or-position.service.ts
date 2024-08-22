@@ -149,7 +149,9 @@ export class OrderOrPositionService {
                 acc_reserving_rate: true,
             },
         });
-
+        if (records.length === 0) {
+            return 0
+        }
         const total = records.reduce((sum, record) => {
             const value = new Decimal(record.acc_reserving_rate);
             return sum.plus(value);
@@ -179,11 +181,13 @@ export class OrderOrPositionService {
             },
         });
 
+
+
         const totalLong = longRecords.reduce((sum, record) => {
             const value = new Decimal(record.acc_funding_rate_value);
             return sum.plus(record.acc_funding_rate_flag ? value : value.neg());
         }, new Decimal(0));
-        const averageLong = totalLong.dividedBy(longRecords.length);
+        const averageLong = longRecords.length === 0 ? 0 : totalLong.dividedBy(longRecords.length);
 
 
         const shortRecords = await this.prisma.symbolDirectionConfig.findMany({
@@ -205,7 +209,7 @@ export class OrderOrPositionService {
             const value = new Decimal(record.acc_funding_rate_value);
             return sum.plus(record.acc_funding_rate_flag ? value : value.neg());
         }, new Decimal(0));
-        const averageShort = totalShort.dividedBy(shortRecords.length);
+        const averageShort = shortRecords.length === 0 ? 0 : totalShort.dividedBy(shortRecords.length);
 
         return { averageLong, averageShort }
     }
