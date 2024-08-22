@@ -1,6 +1,6 @@
 const {
   SCRIPT_SRC,
-  MAIN_DATABASE_URL,
+  DATABASE_URL,
   MODULE_ADDRESS,
   COIN_ADDRESS,
   PRICE_FEEDER_ADDRESS,
@@ -26,8 +26,8 @@ module.exports = {
       script: SCRIPT_SRC,
       watch: true,
       env: {
-        PORT: 3001,
-        DATABASE_URL: MAIN_DATABASE_URL,
+        PORT: 3000,
+        DATABASE_URL: DATABASE_URL,
         MODULE_ADDRESS: MODULE_ADDRESS,
         COIN_ADDRESS: COIN_ADDRESS,
 
@@ -43,21 +43,28 @@ module.exports = {
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
 
+        //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
         EXECUTER_PK: EXECUTER_PK_1,
         LIQUIDATOR_PK: LIQUIDATOR_PK,
 
-        UPDATE_PRICE_FEED: "ON",
+        //sync func
         SYNC_POSITIONS: "ON",
         SYNC_ORDERS: "ON",
+        SYNC_VAULT_CONFIG: "OFF",
+        SYNC_LP_TOKEN_PRICE: "OFF",
+
+        //onchain func
+        UPDATE_PRICE_FEED: "OFF",
         EXECUTE_ORDERS: "OFF",
         EXECUTE_LIQUIDATION: "OFF",
 
+        //vault switcher
         VAULT_APT: "ON",
-        VAULT_USDC: "ON",
+        VAULT_USDC: "OFF",
         VAULT_USDT: "OFF",
-        VAULT_BTC: "OFF",
-        VAULT_ETH: "OFF",
+        VAULT_BTC: "ON",
+        VAULT_ETH: "ON",
       },
     },
     {
@@ -65,9 +72,9 @@ module.exports = {
       script: SCRIPT_SRC,
       watch: true,
       env: {
-        PORT: 3002,
+        PORT: 3001,
 
-        DATABASE_URL: MAIN_DATABASE_URL,
+        DATABASE_URL: DATABASE_URL,
         MODULE_ADDRESS: MODULE_ADDRESS,
         COIN_ADDRESS: COIN_ADDRESS,
 
@@ -83,21 +90,28 @@ module.exports = {
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
 
+        //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
         EXECUTER_PK: EXECUTER_PK_1,
         LIQUIDATOR_PK: LIQUIDATOR_PK,
 
-        UPDATE_PRICE_FEED: "OFF",
+        //sync func
         SYNC_POSITIONS: "ON",
         SYNC_ORDERS: "ON",
+        SYNC_VAULT_CONFIG: "ON",
+        SYNC_LP_TOKEN_PRICE: "ON",
+
+        //onchain func
+        UPDATE_PRICE_FEED: "OFF",
         EXECUTE_ORDERS: "OFF",
         EXECUTE_LIQUIDATION: "OFF",
 
+        //vault switcher
         VAULT_APT: "OFF",
-        VAULT_USDC: "OFF",
+        VAULT_USDC: "ON",
         VAULT_USDT: "ON",
-        VAULT_BTC: "ON",
-        VAULT_ETH: "ON",
+        VAULT_BTC: "OFF",
+        VAULT_ETH: "OFF",
       },
     },
   ],

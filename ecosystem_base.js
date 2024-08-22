@@ -1,8 +1,7 @@
 module.exports = {
-  MAIN_DATABASE_URL:
-    "mysql://root:RootRoot*123456@localhost:3306/aptos_off_chain",
-  SUPPORT_DATABASE_URL:
-    "mysql://root:RootRoot*123456@localhost:3307/aptos_off_chain",
+  DATABASE_URL:
+    "mysql://agdexbackenddevadmin:O:BBg*dmpX=X4Lp1@agdex-backend-dev.czk2c0qoo160.us-east-1.rds.amazonaws.com:3306/aptos_off_chain",
+  // DATABASE_URL: "mysql://root:111111@localhost:3306/aptos_off_chain",
   SCRIPT_SRC: "./dist/src/main.js",
 
   APT_FEEDER_ADDRESS:
@@ -29,7 +28,7 @@ module.exports = {
   PRICE_FEEDER_ADDRESS:
     "0x7e783b349d3e89cf5931af376ebeadbfab855b3fa239b7ada8f5a92fbea6b387",
   MODULE_ADDRESS:
-    "0xd6f52e4b31ca8fc8708da946344b1577b1466450f9d6b53d0a3066a1df90861b",
+    "0x8916cdadc2d1097eb278ad02193089a604909c65849d6bfaeb7fce87acba1677",
   COIN_ADDRESS:
     "0x6f60af74988c64cd3b7c1e214697e6949db39c061d8d4cf59a7e2bd1b66c8bf0",
 

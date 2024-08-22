@@ -358,7 +358,6 @@ export class ScannerService {
     }
 
     async executeDecreaseOrderRecords(order: DecreaseOrderRecord) {
-        console.log("🚀 ~ ScannerService ~ executeOrderRecords decrease ~ order:", order)
         const accountInfo = await aptos.account.getAccountInfo({ accountAddress: executerSigner.accountAddress })
         const seqNumber = accountInfo.sequence_number
         const transaction = await aptos.transaction.build.simple({
@@ -516,7 +515,6 @@ export class ScannerService {
                 accountAddress: MODULE_ADDRESS,
                 resourceType: `${MODULE_ADDRESS}::pool::Vault<${vault.tokenAddress}>`
             })
-            console.log("🚀 ~ ScannerService ~ syncOnChainVaultConfig ~ result:", result)
             if (result) {
                 await this.prisma.vaultConfig.create({
                     data: {
@@ -539,7 +537,6 @@ export class ScannerService {
                     accountAddress: MODULE_ADDRESS,
                     resourceType: `${MODULE_ADDRESS}::pool::Symbol<${symbol.tokenAddress},${direction.address}>`
                 })
-                console.log("🚀 ~ ScannerService ~ syncOnChainSymbolConfig ~ result:", result)
                 if (result) {
                     await this.prisma.symbolDirectionConfig.create({
                         data: {
@@ -583,7 +580,6 @@ export class ScannerService {
 
     async fetchPositionRecords(pair: PositionOrderHandle, pHeight: string) {
         const result = await aptos.getTableItemsData({
-            // minimumLedgerVersion: Number(pHeight),
             options: {
                 where: {
                     table_handle: { _eq: pair.position_handle },
@@ -653,7 +649,7 @@ export class ScannerService {
     }
 
     async executeLiquidation(position: PositionRecord) {
-        // console.log("🚀 ~ executeLiquidation ~ position execute", `${position.id} ${position.order_id} ${position.owner} ${position.vault} ${position.symbol} ${position.direction}`)
+        console.log("🚀 ~ executeLiquidation ~ position execute", `${position.id} ${position.order_id} ${position.owner} ${position.vault} ${position.symbol} ${position.direction}`)
         const accountInfo = await aptos.account.getAccountInfo({ accountAddress: liquidatorSigner.accountAddress })
         const seqNumber = accountInfo.sequence_number
         const transaction = await aptos.transaction.build.simple({
