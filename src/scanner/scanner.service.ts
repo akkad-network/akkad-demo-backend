@@ -94,12 +94,14 @@ export class ScannerService {
     @Cron(CronExpression.EVERY_MINUTE)
     async handlePriceFeeder() {
         await this.fetchPrice();
+        console.log("🚀 ~ ScannerService ~ Price Feeder Executed ~ ")
     }
 
     @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncOrderRecords() {
         if (this.isFunctionOn(this.SYNC_ORDERS)) {
             await this.syncOnChainOrderRecords();
+            console.log("🚀 ~ ScannerService ~ Sync On-Chain OrderRecords Executed ~ ")
         }
     }
 
@@ -107,6 +109,7 @@ export class ScannerService {
     async handleSyncPositionData() {
         if (this.isFunctionOn(this.SYNC_POSITIONS)) {
             await this.syncOnChainPositionRecords();
+            console.log("🚀 ~ ScannerService ~ Sync On-Chain Positions Executed ~ ")
         }
     }
 
@@ -114,6 +117,7 @@ export class ScannerService {
     async handleSyncSymbolConfig() {
         if (this.isFunctionOn(this.SYNC_SYMBOL_CONFIG)) {
             await this.syncOnChainSymbolConfig();
+            console.log("🚀 ~ ScannerService ~ Sync On-Chain Symbol Config Executed ~ ")
         }
     }
 
@@ -121,6 +125,7 @@ export class ScannerService {
     async handleSyncVaultConfig() {
         if (this.isFunctionOn(this.SYNC_VAULT_CONFIG)) {
             await this.syncOnChainVaultConfig();
+            console.log("🚀 ~ ScannerService ~ Sync On-Chain Vault Config Executed ~ ")
         }
     }
 
@@ -128,6 +133,7 @@ export class ScannerService {
     async syncLpTokenPrice() {
         if (this.isFunctionOn(this.SYNC_LP_TOKEN_PRICE)) {
             await this.syncOnChainLpTokenPrice();
+            console.log("🚀 ~ ScannerService ~ Sync On-Chain Lp Token Price Executed ~ ")
         }
     }
 
@@ -172,17 +178,20 @@ export class ScannerService {
     async fetchVaa(item: any): Promise<any> {
         try {
             const response = await axios.get(`https://hermes-beta.pyth.network/v2/updates/price/latest?ids%5B%5D=${item.address}`);
-            await this.prisma.priceFeederRecord.create({
-                data: {
-                    name: item.name,
-                    symbol: item.name,
-                    address: item.address,
-                    price: response.data.parsed[0].price.price,
-                    publish_time: response.data.parsed[0].price.publish_time.toString(),
-                    expo: response.data.parsed[0].price.expo,
-                    decimal: Math.abs(response.data.parsed[0].price.expo)
-                }
-            })
+            if (response) {
+                await this.prisma.priceFeederRecord.create({
+                    data: {
+                        name: item.name,
+                        symbol: item.name,
+                        address: item.address,
+                        price: response.data.parsed[0].price.price,
+                        publish_time: response.data.parsed[0].price.publish_time.toString(),
+                        expo: response.data.parsed[0].price.expo,
+                        decimal: Math.abs(response.data.parsed[0].price.expo)
+                    }
+                })
+
+            }
 
             return { binary: response.data.binary.data[0], parsed: response.data.parsed[0].price.price }
         } catch (error) {
@@ -309,7 +318,7 @@ export class ScannerService {
     }
 
     async executeIncreaseOrderRecords(order: IncreaseOrderRecord) {
-        console.log("🚀 ~ ScannerService ~ executeOrderRecords increase ~ order:", order)
+        console.log("🚀 ~ execute Increase ~ Order ", `${order.id} ${order.order_id} ${order.owner} ${order.vault} ${order.symbol} ${order.direction}`)
         const accountInfo = await aptos.account.getAccountInfo({ accountAddress: executerSigner.accountAddress })
         const seqNumber = accountInfo.sequence_number
         const transaction = await aptos.transaction.build.simple({
@@ -358,6 +367,7 @@ export class ScannerService {
     }
 
     async executeDecreaseOrderRecords(order: DecreaseOrderRecord) {
+        console.log("🚀 ~ execute Decrease ~ Order ", `${order.id} ${order.order_id} ${order.owner} ${order.vault} ${order.symbol} ${order.direction}`)
         const accountInfo = await aptos.account.getAccountInfo({ accountAddress: executerSigner.accountAddress })
         const seqNumber = accountInfo.sequence_number
         const transaction = await aptos.transaction.build.simple({
@@ -649,7 +659,7 @@ export class ScannerService {
     }
 
     async executeLiquidation(position: PositionRecord) {
-        console.log("🚀 ~ executeLiquidation ~ position execute", `${position.id} ${position.order_id} ${position.owner} ${position.vault} ${position.symbol} ${position.direction}`)
+        console.log("🚀 ~ executeLiquidation ~ position ", `${position.id} ${position.order_id} ${position.owner} ${position.vault} ${position.symbol} ${position.direction}`)
         const accountInfo = await aptos.account.getAccountInfo({ accountAddress: liquidatorSigner.accountAddress })
         const seqNumber = accountInfo.sequence_number
         const transaction = await aptos.transaction.build.simple({
