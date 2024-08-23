@@ -197,21 +197,22 @@ export class ScannerService {
     async fetchVaa(item: any): Promise<any> {
         try {
             const response = await axios.get(`https://hermes-beta.pyth.network/v2/updates/price/latest?ids%5B%5D=${item.address}`);
+
             if (response) {
-                await this.prisma.priceFeederRecord.create({
-                    data: {
-                        name: item.name,
-                        symbol: item.name,
-                        address: item.address,
-                        price: response.data.parsed[0].price.price,
-                        publish_time: response.data.parsed[0].price.publish_time.toString(),
-                        expo: response.data.parsed[0].price.expo,
-                        decimal: Math.abs(response.data.parsed[0].price.expo)
-                    }
-                })
-
+                if (this.isFunctionOn(this.UPDATE_PRICE_FEED)) {
+                    await this.prisma.priceFeederRecord.create({
+                        data: {
+                            name: item.name,
+                            symbol: item.name,
+                            address: item.address,
+                            price: response.data.parsed[0].price.price,
+                            publish_time: response.data.parsed[0].price.publish_time.toString(),
+                            expo: response.data.parsed[0].price.expo,
+                            decimal: Math.abs(response.data.parsed[0].price.expo)
+                        }
+                    })
+                }
             }
-
             return { binary: response.data.binary.data[0], parsed: response.data.parsed[0].price.price }
         } catch (error) {
             console.error(`Error fetching VAA for priceId ${item.address}:`, error);
@@ -455,7 +456,7 @@ export class ScannerService {
                 }
             }));
         } catch (error) {
-            this.logger.error(error);
+            throw error(`Error Fetching Orders handle failed`);
         }
     }
 
