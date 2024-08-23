@@ -55,7 +55,7 @@ module.exports = {
         SYNC_LP_TOKEN_PRICE: "OFF",
 
         //onchain func
-        UPDATE_PRICE_FEED: "OFF",
+        UPDATE_PRICE_FEED: "ON",
         EXECUTE_ORDERS: "OFF",
         EXECUTE_LIQUIDATION: "OFF",
 
