@@ -130,12 +130,11 @@ export class SynchronizerService {
                 options: {
                     where: {
                         table_handle: { _eq: increase_handle },
-                        transaction_version: { _gte: iHeight }
+                        transaction_version: { _gt: iHeight }
                     },
                     orderBy: [{ transaction_version: 'desc' }],
                 },
             });
-            this.logger.debug('inc_response', JSON.stringify(inc_response))
             if (!inc_response || inc_response.length === 0) {
                 return
             }
@@ -179,13 +178,12 @@ export class SynchronizerService {
                 options: {
                     where: {
                         table_handle: { _eq: decrease_handle },
-                        transaction_version: { _gte: dHeight }
+                        transaction_version: { _gt: dHeight }
 
                     },
                     orderBy: [{ transaction_version: 'desc' }],
                 },
             });
-            this.logger.debug('dec_response', JSON.stringify(dec_response))
             if (!dec_response || dec_response.length === 0) {
                 return
             }
