@@ -80,29 +80,29 @@ export class SynchronizerService {
         }
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_MINUTE)
     async handleSyncOrderRecords() {
         if (this.isFunctionOn(this.SYNC_ORDERS)) {
             if (this.isSyncOrderBookInProcess) return
             this.isSyncOrderBookInProcess = true
+            this.logger.debug("🚀 ~ Order Book Sync ~ ")
             await this.syncOnChainOrderBook();
             this.isSyncOrderBookInProcess = false
         }
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_MINUTE)
     async handleSyncPositionData() {
         if (this.isFunctionOn(this.SYNC_POSITIONS)) {
             if (this.isSyncPositionInProcess) return
             this.isSyncPositionInProcess = true
+            this.logger.debug("🚀 ~ Positions Sync ~ ")
             await this.syncOnChainPositionRecords();
             this.isSyncPositionInProcess = false
-            this.logger.debug("🚀 ~ Positions Sync ~ ")
         }
     }
 
     async syncOnChainOrderBook() {
-        this.logger.debug("🚀 ~ Order Book Sync Start~ ")
         const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
         try {
             for (const pair of this.FUNC_PAIRS) {
@@ -121,7 +121,6 @@ export class SynchronizerService {
         } catch (error) {
             this.logger.error(`Error Fetching Orders handle failed`);
         } finally {
-            this.logger.debug("🚀 ~ Order Book Sync End~ ")
         }
     }
 

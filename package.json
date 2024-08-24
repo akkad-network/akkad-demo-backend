@@ -6,6 +6,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "aa": "yarn build && pm2 start ecosystem_backend.config.js && pm2 logs",
+    "ss": "yarn build && pm2 start ecosystem_node.config.js && pm2 logs",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
