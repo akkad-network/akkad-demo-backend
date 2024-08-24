@@ -73,7 +73,7 @@ export class PricefeederService {
             this.parsedPrices = vaas?.map(item => { return { name: item.name, symbol: item.symbol, parsed: item?.parsed } });
 
         } catch (error) {
-            this.logger.error(`Error Fetching Pyth Price Failed`);
+            this.logger.warn(`Error Fetching Pyth Price Failed`);
         }
     }
 
@@ -105,25 +105,31 @@ export class PricefeederService {
 
     async feedPriceToAptos() {
         if (!this.vasBytes || this.vasBytes.length === 0) return
-        const transaction = await aptos.transaction.build.simple({
-            sender: priceFeederSyncerSigner.accountAddress,
-            data: {
-                function: `${this.priceFeedAddress}::pyth::update_price_feeds_with_funder`,
-                typeArguments: [],
-                functionArguments: [this.vasBytes],
-            },
-        });
 
-        const signdTransaction = await aptos.signAndSubmitTransaction({
-            signer: priceFeederSyncerSigner,
-            transaction,
-        });
+        try {
 
-        const response = await aptos.waitForTransaction({
-            transactionHash: signdTransaction.hash
-        })
+            const transaction = await aptos.transaction.build.simple({
+                sender: priceFeederSyncerSigner.accountAddress,
+                data: {
+                    function: `${this.priceFeedAddress}::pyth::update_price_feeds_with_funder`,
+                    typeArguments: [],
+                    functionArguments: [this.vasBytes],
+                },
+            });
 
-        this.logger.verbose('Transaction submitted update price feed status', response.success.toString());
+            const signdTransaction = await aptos.signAndSubmitTransaction({
+                signer: priceFeederSyncerSigner,
+                transaction,
+            });
+
+            const response = await aptos.waitForTransaction({
+                transactionHash: signdTransaction.hash
+            })
+            this.logger.verbose('Transaction submitted update price feed status', response.success.toString());
+        } catch (error) {
+            this.logger.error('Transaction submitted Failed', error);
+        }
+
     }
 
     private isFunctionOn(flag: string): boolean {
