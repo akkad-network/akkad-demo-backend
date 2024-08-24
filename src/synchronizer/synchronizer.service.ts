@@ -87,7 +87,6 @@ export class SynchronizerService {
             this.isSyncOrderBookInProcess = true
             await this.syncOnChainOrderBook();
             this.isSyncOrderBookInProcess = false
-            this.logger.debug("🚀 ~ Order Book Sync ~ ")
         }
     }
 
@@ -103,6 +102,7 @@ export class SynchronizerService {
     }
 
     async syncOnChainOrderBook() {
+        this.logger.debug("🚀 ~ Order Book Sync Start~ ")
         const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
         try {
             for (const pair of this.FUNC_PAIRS) {
@@ -120,6 +120,8 @@ export class SynchronizerService {
             }
         } catch (error) {
             this.logger.error(`Error Fetching Orders handle failed`);
+        } finally {
+            this.logger.debug("🚀 ~ Order Book Sync End~ ")
         }
     }
 
