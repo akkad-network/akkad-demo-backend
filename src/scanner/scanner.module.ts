@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ScannerService } from './scanner.service';
 import { ScannerController } from './scanner.controller';
-import { ScheduleModule } from '@nestjs/schedule';
-import { PrismaService } from '../prisma/prisma.service';
-import { OrderOrPositionService } from 'src/order-or-position/order-or-position.service';
+import { ExecutorModule } from 'src/executor/executor.module';
+import { LiquidatorModule } from 'src/liquidator/liquidator.module';
+
 @Module({
-    imports: [ScheduleModule.forRoot()],
+    imports: [ExecutorModule, LiquidatorModule],
     controllers: [ScannerController],
-    providers: [ScannerService, PrismaService, OrderOrPositionService],
+    providers: [ScannerService],
+    exports: [ScannerService]
 })
 export class ScannerModule { }

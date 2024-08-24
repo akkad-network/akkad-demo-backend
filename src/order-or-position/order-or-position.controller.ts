@@ -1,6 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { OrderOrPositionService } from './order-or-position.service';
-import { AggregatePositionRecord } from '@prisma/client';
 
 @Controller('orderposition')
 export class OrderOrPositionController {

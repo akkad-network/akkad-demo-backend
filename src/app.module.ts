@@ -3,15 +3,17 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { PrismaService } from './prisma/prisma.service';
 import { ScannerModule } from './scanner/scanner.module';
 import { ReferralModule } from './referral/referral.module';
-import { OrderOrPositionService } from './order-or-position/order-or-position.service';
-import { OrderOrPositionController } from './order-or-position/order-or-position.controller';
 import { OrderOrPositionModule } from './order-or-position/order-or-position.module';
+import { PricefeederModule } from './pricefeeder/pricefeeder.module';
+import { ExecutorModule } from './executor/executor.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { SynchronizerModule } from './synchronizer/synchronizer.module';
+import { LiquidatorModule } from './liquidator/liquidator.module';
 @Module({
-  controllers: [AppController, OrderOrPositionController],
-  providers: [AppService, PrismaService, OrderOrPositionService],
+  controllers: [AppController],
+  providers: [AppService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -19,7 +21,12 @@ import { OrderOrPositionModule } from './order-or-position/order-or-position.mod
     ScheduleModule.forRoot(),
     ScannerModule,
     ReferralModule,
-    OrderOrPositionModule
+    OrderOrPositionModule,
+    PricefeederModule,
+    ExecutorModule,
+    PrismaModule,
+    SynchronizerModule,
+    LiquidatorModule
   ],
 })
 export class AppModule { }

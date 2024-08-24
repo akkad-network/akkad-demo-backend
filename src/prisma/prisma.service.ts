@@ -217,7 +217,6 @@ export class PrismaService
                     })
                 }
             } else {
-
                 const existingOrder = await this.increaseOrderRecord.findFirst({
                     where: {
                         OR: [

@@ -5,9 +5,4 @@ import { ScannerService } from './scanner.service';
 export class ScannerController {
     constructor(private readonly scannerService: ScannerService) { }
 
-    @Post('manual-sync')
-    async manualSync() {
-        await this.scannerService.manualSync();
-        return { message: 'Manual sync initiated' };
-    }
 }
