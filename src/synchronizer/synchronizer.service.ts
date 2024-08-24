@@ -22,6 +22,9 @@ export class SynchronizerService {
     private readonly SYNC_VAULT_CONFIG = process.env.SYNC_VAULT_CONFIG
     private readonly SYNC_LP_TOKEN_PRICE = process.env.SYNC_LP_TOKEN_PRICE
 
+    private isSyncOrderBookInProcess = false
+    private isSyncPositionInProcess = false
+
     constructor(
         private readonly prisma: PrismaService,) {
         PAIRS.map((pair) => {
@@ -80,7 +83,10 @@ export class SynchronizerService {
     @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncOrderRecords() {
         if (this.isFunctionOn(this.SYNC_ORDERS)) {
+            if (this.isSyncOrderBookInProcess) return
+            this.isSyncOrderBookInProcess = true
             await this.syncOnChainOrderBook();
+            this.isSyncOrderBookInProcess = false
             this.logger.debug("🚀 ~ Order Book Sync ~ ")
         }
     }
@@ -88,7 +94,10 @@ export class SynchronizerService {
     @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncPositionData() {
         if (this.isFunctionOn(this.SYNC_POSITIONS)) {
+            if (this.isSyncPositionInProcess) return
+            this.isSyncPositionInProcess = true
             await this.syncOnChainPositionRecords();
+            this.isSyncPositionInProcess = false
             this.logger.debug("🚀 ~ Positions Sync ~ ")
         }
     }
@@ -110,7 +119,7 @@ export class SynchronizerService {
                 }
             }
         } catch (error) {
-            throw error(`Error Fetching Orders handle failed`);
+            this.logger.error(`Error Fetching Orders handle failed`);
         }
     }
 
@@ -222,7 +231,7 @@ export class SynchronizerService {
             }
 
         } catch (error) {
-            throw error(`Error fetching Position Records`);
+            this.logger.error(`Error fetching Position Records`);
         }
     }
 
