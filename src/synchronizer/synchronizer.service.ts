@@ -263,7 +263,6 @@ export class SynchronizerService {
             await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'POSITION_RECORD')
         }
         this.prisma.savePositionRecords(sortedData)
-
     }
 
 
@@ -336,7 +335,7 @@ export class SynchronizerService {
                 }
             })
         } catch (error) {
-            throw error(`Error fetching LP Token`);
+            this.logger.error(`Error fetching LP Token`);
         } finally { }
     }
 
