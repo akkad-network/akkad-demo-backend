@@ -125,93 +125,102 @@ export class SynchronizerService {
 
     async fetchIncreaseOrders(pair: PositionOrderHandle, iHeight: string) {
         const increase_handle = pair.increase_order_handle
-        const inc_response = await aptos.getTableItemsData({
-            minimumLedgerVersion: Number(iHeight),
-            options: {
-                where: {
-                    table_handle: { _eq: increase_handle },
-                    transaction_version: { _gte: iHeight }
+        try {
+            const inc_response = await aptos.getTableItemsData({
+                minimumLedgerVersion: Number(iHeight),
+                options: {
+                    where: {
+                        table_handle: { _eq: increase_handle },
+                        transaction_version: { _gte: iHeight }
+                    },
+                    orderBy: [{ transaction_version: 'desc' }],
                 },
-                orderBy: [{ transaction_version: 'desc' }],
-            },
-        });
+            });
 
-        if (!inc_response || inc_response.length === 0) {
-            return
-        }
-
-        const updatedIncResponse = inc_response.map(item => ({
-            ...item,
-            order_type: 'increase',
-            vault: pair.vault,
-            symbol: pair.symbol,
-            direction: pair.direction,
-        }))
-
-        const nullList = updatedIncResponse.filter((item) => item.decoded_value === null)
-
-        if (nullList && nullList.length > 0) {
-            this.prisma.updateIncCancelOrderRecords(nullList)
-        }
-
-        const notNullList = updatedIncResponse.filter((item) => item.decoded_value !== null)
-
-        if (notNullList && notNullList.length > 0) {
-            const sortedData: any[] = notNullList.sort((a, b) => {
-                const verA = a.transaction_version
-                const verB = b.transaction_version
-                return verB - verA
-            })
-            if (sortedData.length > 0) {
-                await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'INCREASE_ORDER_RECORD')
+            if (!inc_response || inc_response.length === 0) {
+                return
             }
-            this.prisma.saveIncreaseOrderRecord(sortedData)
+
+            const updatedIncResponse = inc_response.map(item => ({
+                ...item,
+                order_type: 'increase',
+                vault: pair.vault,
+                symbol: pair.symbol,
+                direction: pair.direction,
+            }))
+
+            const nullList = updatedIncResponse.filter((item) => item.decoded_value === null)
+
+            if (nullList && nullList.length > 0) {
+                this.prisma.updateIncCancelOrderRecords(nullList)
+            }
+
+            const notNullList = updatedIncResponse.filter((item) => item.decoded_value !== null)
+
+            if (notNullList && notNullList.length > 0) {
+                const sortedData: any[] = notNullList.sort((a, b) => {
+                    const verA = a.transaction_version
+                    const verB = b.transaction_version
+                    return verB - verA
+                })
+                if (sortedData.length > 0) {
+                    await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'INCREASE_ORDER_RECORD')
+                }
+                this.prisma.saveIncreaseOrderRecord(sortedData)
+            }
+        } catch (error) {
+            this.logger.error('Fetch Increase Order Failed', error)
         }
+
     }
 
     async fetchDecreaseOrders(pair: PositionOrderHandle, dHeight: string) {
         const decrease_handle = pair.decrease_order_handle
-        const dec_response = await aptos.getTableItemsData({
-            minimumLedgerVersion: Number(dHeight),
-            options: {
-                where: {
-                    table_handle: { _eq: decrease_handle },
-                    transaction_version: { _gte: dHeight }
+        try {
+            const dec_response = await aptos.getTableItemsData({
+                minimumLedgerVersion: Number(dHeight),
+                options: {
+                    where: {
+                        table_handle: { _eq: decrease_handle },
+                        transaction_version: { _gte: dHeight }
 
+                    },
+                    orderBy: [{ transaction_version: 'desc' }],
                 },
-                orderBy: [{ transaction_version: 'desc' }],
-            },
-        });
-        if (!dec_response || dec_response.length === 0) {
-            return
-        }
-        const updatedDecResponse = dec_response.map(item => ({
-            ...item,
-            order_type: 'decrease',
-            vault: pair.vault,
-            symbol: pair.symbol,
-            direction: pair.direction,
-        }));
-
-        const nullList = updatedDecResponse.filter((item) => item.decoded_value === null)
-
-        if (nullList && nullList.length > 0) {
-            this.prisma.updateDecCancelOrderRecords(nullList)
-        }
-
-        const notNullList = updatedDecResponse.filter((item) => item.decoded_value !== null)
-
-        if (notNullList && notNullList.length > 0) {
-            const sortedData: any[] = notNullList.sort((a, b) => {
-                const verA = a.transaction_version
-                const verB = b.transaction_version
-                return verB - verA
-            })
-
-            if (sortedData.length > 0) {
-                await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'DECREASE_ORDER_RECORD')
+            });
+            if (!dec_response || dec_response.length === 0) {
+                return
             }
-            this.prisma.saveDecreaseOrderRecord(sortedData)
+            const updatedDecResponse = dec_response.map(item => ({
+                ...item,
+                order_type: 'decrease',
+                vault: pair.vault,
+                symbol: pair.symbol,
+                direction: pair.direction,
+            }));
+
+            const nullList = updatedDecResponse.filter((item) => item.decoded_value === null)
+
+            if (nullList && nullList.length > 0) {
+                this.prisma.updateDecCancelOrderRecords(nullList)
+            }
+
+            const notNullList = updatedDecResponse.filter((item) => item.decoded_value !== null)
+
+            if (notNullList && notNullList.length > 0) {
+                const sortedData: any[] = notNullList.sort((a, b) => {
+                    const verA = a.transaction_version
+                    const verB = b.transaction_version
+                    return verB - verA
+                })
+
+                if (sortedData.length > 0) {
+                    await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'DECREASE_ORDER_RECORD')
+                }
+                this.prisma.saveDecreaseOrderRecord(sortedData)
+            }
+        } catch (error) {
+            this.logger.error('Fetch Decrease Order Failed', error)
         }
     }
 
