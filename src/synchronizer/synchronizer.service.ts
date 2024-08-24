@@ -127,7 +127,6 @@ export class SynchronizerService {
         const increase_handle = pair.increase_order_handle
         try {
             const inc_response = await aptos.getTableItemsData({
-                minimumLedgerVersion: Number(iHeight),
                 options: {
                     where: {
                         table_handle: { _eq: increase_handle },
@@ -136,7 +135,7 @@ export class SynchronizerService {
                     orderBy: [{ transaction_version: 'desc' }],
                 },
             });
-
+            this.logger.debug('inc_response', JSON.stringify(inc_response))
             if (!inc_response || inc_response.length === 0) {
                 return
             }
@@ -171,14 +170,12 @@ export class SynchronizerService {
         } catch (error) {
             this.logger.error('Fetch Increase Order Failed', error)
         }
-
     }
 
     async fetchDecreaseOrders(pair: PositionOrderHandle, dHeight: string) {
         const decrease_handle = pair.decrease_order_handle
         try {
             const dec_response = await aptos.getTableItemsData({
-                minimumLedgerVersion: Number(dHeight),
                 options: {
                     where: {
                         table_handle: { _eq: decrease_handle },
@@ -188,6 +185,7 @@ export class SynchronizerService {
                     orderBy: [{ transaction_version: 'desc' }],
                 },
             });
+            this.logger.debug('dec_response', JSON.stringify(dec_response))
             if (!dec_response || dec_response.length === 0) {
                 return
             }
