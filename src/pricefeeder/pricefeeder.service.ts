@@ -42,7 +42,7 @@ export class PricefeederService {
         this.logger.debug("🚀 ~ Fetch Pyth Price ~ ")
     }
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_5_MINUTES)
     async updatePriceFeeder() {
         if (this.isFunctionOn(this.UPDATE_PRICE_FEED)) {
             if (this.isUpdateAptosInProcess) return
