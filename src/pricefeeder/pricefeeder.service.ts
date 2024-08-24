@@ -30,6 +30,7 @@ export class PricefeederService {
     private vasBytes: number[][] = []
     private parsedPrices: any[] = []
 
+    private isFetchPriceInProcess = false
     private isUpdateAptosInProcess = false
 
     constructor(
@@ -38,7 +39,10 @@ export class PricefeederService {
 
     @Cron(CronExpression.EVERY_10_SECONDS)
     async handlePriceFeeder() {
+        if (this.isFetchPriceInProcess) return
+        this.isFetchPriceInProcess = true
         await this.fetchPythPrices();
+        this.isFetchPriceInProcess = false
         this.logger.debug("🚀 ~ Fetch Pyth Price ~ ")
     }
 
