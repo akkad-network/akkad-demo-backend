@@ -98,10 +98,12 @@ export class ScannerService {
 
     async scanOrderBook() {
         const prices = this.priceFeederService.getParsedPrices()
-        if (!prices || prices.length === 0 || 1 === 1) return
+        console.log("🚀 ~ ScannerService ~ scanOrderBook ~ prices:", prices)
+        if (!prices || prices.length === 0) return
         const pricesList = prices.map((price, index) => {
-            return { name: this.priceIds[index].name, price: convertDecimal(Number(price)) }
+            return { name: this.priceIds[index].name, price: convertDecimal(Number(price.parsed)) }
         })
+        console.log("🚀 ~ ScannerService ~ pricesList ~ pricesList:", pricesList)
         for (const pair of this.FUNC_PAIRS) {
             const vaultName = pair.vault
             const symbolName = pair.symbol
@@ -197,11 +199,11 @@ export class ScannerService {
 
     async scanPositions() {
         const prices = this.priceFeederService.getParsedPrices()
-        if (!prices || prices.length === 0 || 1 === 1) return
+        if (!prices || prices.length === 0) return
         const pricesList = prices.map((price, index) => {
-            return { name: this.priceIds[index].name, price: convertDecimal(Number(price)) }
-        })
+            return { name: this.priceIds[index].name, price: convertDecimal(Number(price.parsed)) }
 
+        })
         for (const symbol of SymbolList) {
             const symbolName = symbol.tokenName
             const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName).price
