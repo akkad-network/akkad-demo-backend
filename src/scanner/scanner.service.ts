@@ -98,12 +98,10 @@ export class ScannerService {
 
     async scanOrderBook() {
         const prices = this.priceFeederService.getParsedPrices()
-        console.log("🚀 ~ ScannerService ~ scanOrderBook ~ prices:", prices)
         if (!prices || prices.length === 0) return
         const pricesList = prices.map((price, index) => {
             return { name: this.priceIds[index].name, price: convertDecimal(Number(price.parsed)) }
         })
-        console.log("🚀 ~ ScannerService ~ pricesList ~ pricesList:", pricesList)
         for (const pair of this.FUNC_PAIRS) {
             const vaultName = pair.vault
             const symbolName = pair.symbol
@@ -127,7 +125,6 @@ export class ScannerService {
 
             const symbolPriceBigInt = BigInt(symbolPriceToBigInt);
             const vaultPriceBigInt = BigInt(vaultPriceToBigInt);
-
 
             const allOrdersIncrease = await this.prisma.increaseOrderRecord.findMany({
                 where: {
@@ -195,7 +192,6 @@ export class ScannerService {
             }
         }
     }
-
 
     async scanPositions() {
         const prices = this.priceFeederService.getParsedPrices()

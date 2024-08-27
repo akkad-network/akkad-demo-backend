@@ -148,7 +148,6 @@ export class PricefeederService {
         return flag === 'ON'
     }
 
-
     async clearPriceData() {
         const cutoffDate = new Date();
         cutoffDate.setHours(cutoffDate.getHours() - 24);
