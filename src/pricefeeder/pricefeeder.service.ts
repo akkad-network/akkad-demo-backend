@@ -13,6 +13,7 @@ export class PricefeederService {
 
     private readonly priceFeedAddress: string = FEERDER_ADDRESS
     private readonly UPDATE_PRICE_FEED = process.env.UPDATE_PRICE_FEED
+    private readonly CLEAR_PRICE_DATA = process.env.CLEAR_PRICE_DATA
 
     private readonly priceIds: any[] = [
         { name: "APT", address: AptFeeder },
@@ -54,6 +55,13 @@ export class PricefeederService {
             await this.feedPriceToAptos()
             this.logger.debug("🚀 ~  Feed Aptos Executed ~ ")
             this.isUpdateAptosInProcess = false
+        }
+    }
+
+    @Cron(CronExpression.EVERY_DAY_AT_1AM)
+    async clearLastDayData() {
+        if (this.isFunctionOn(this.CLEAR_PRICE_DATA)) {
+            this.clearPriceData()
         }
     }
 
@@ -138,6 +146,22 @@ export class PricefeederService {
 
     private isFunctionOn(flag: string): boolean {
         return flag === 'ON'
+    }
+
+
+    async clearPriceData() {
+        const cutoffDate = new Date();
+        cutoffDate.setHours(cutoffDate.getHours() - 24);
+
+        console.log("🚀 ~ PricefeederService ~ clearPriceData ~ cutoffDate:", cutoffDate)
+
+        await this.prisma.priceFeederRecord.deleteMany({
+            where: {
+                createAt: {
+                    lt: cutoffDate,
+                },
+            },
+        });
     }
 
 }

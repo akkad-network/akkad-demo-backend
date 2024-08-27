@@ -102,6 +102,27 @@ export class SynchronizerService {
         }
     }
 
+
+    async mannualSyncOrderBook(vault: string, symbol: string, direction: string) {
+        const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
+        try {
+            const pairEntity = await this.prisma.positionOrderHandle.findFirst({
+                where: {
+                    vault,
+                    symbol,
+                    direction
+                }
+            })
+            if (pairEntity) {
+                await this.fetchIncreaseOrders(pairEntity, iHeight);
+                await this.fetchDecreaseOrders(pairEntity, dHeight);
+            }
+        } catch (error) {
+            this.logger.error(`Error Fetching Orders handle failed`);
+        } finally {
+        }
+    }
+
     async syncOnChainOrderBook() {
         const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
         try {
@@ -151,7 +172,7 @@ export class SynchronizerService {
             const nullList = updatedIncResponse.filter((item) => item.decoded_value === null)
 
             if (nullList && nullList.length > 0) {
-                this.prisma.updateIncCancelOrderRecords(nullList)
+                await this.prisma.updateIncCancelOrderRecords(nullList)
             }
 
             const notNullList = updatedIncResponse.filter((item) => item.decoded_value !== null)
@@ -221,6 +242,23 @@ export class SynchronizerService {
         }
     }
 
+    async mannualSyncPositionRecords(vault: string, symbol: string, direction: string) {
+        const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
+
+        try {
+            const pairEntity = await this.prisma.positionOrderHandle.findFirst({
+                where: {
+                    vault,
+                    symbol,
+                    direction
+                }
+            })
+            await this.fetchPositions(pairEntity, pHeight);
+        } catch (error) {
+            this.logger.error(`Error fetching Position Records`);
+        }
+    }
+
     async syncOnChainPositionRecords() {
         const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
 
@@ -235,7 +273,6 @@ export class SynchronizerService {
                 })
                 await this.fetchPositions(pairEntity, pHeight);
             }
-
         } catch (error) {
             this.logger.error(`Error fetching Position Records`);
         }

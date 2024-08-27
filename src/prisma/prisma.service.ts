@@ -48,24 +48,41 @@ export class PrismaService
             return null;
         }
 
-        const existingRecords = await this.positionRecord.findMany({
-            where: {
-                transaction_version: {
-                    in: parsedList.map((item: any) => item.transaction_version),
-                },
-            },
-        });
+        await this.positionHistoryRecords.createMany({ data: parsedList });
 
-        const newRecords = parsedList.filter(
-            (item: any) =>
-                !existingRecords.some((existingRecord: any) => existingRecord.transaction_version === item.transaction_version),
-        );
+        for (const record of parsedList) {
+            const existingOrder = await this.positionRecord.findFirst({
+                where: {
+                    order_id: record.order_id,
+                    owner: record.owner,
+                    vault: record.vault,
+                    symbol: record.symbol,
+                    direction: record.direction,
+                    table_handle: record.table_handle,
+                    key: record.key
+                }
+            })
 
-        if (newRecords.length === 0) {
-            return null;
+            if (existingOrder) {
+                await this.positionRecord.updateMany({
+                    data: record,
+                    where: {
+                        order_id: record.order_id,
+                        owner: record.owner,
+                        vault: record.vault,
+                        symbol: record.symbol,
+                        direction: record.direction,
+                        table_handle: record.table_handle,
+                        key: record.key
+                    }
+                })
+            } else {
+                await this.positionRecord.create({
+                    data: record
+                })
+            }
         }
 
-        return this.positionRecord.createMany({ data: newRecords });
     }
 
     async findRecordsHeight() {
@@ -133,7 +150,6 @@ export class PrismaService
     }
 
     async updateIncCancelOrderRecords(orderRecords: any[]) {
-
         for (const item of orderRecords) {
             const { table_handle, key, transaction_version } = item;
 
@@ -146,7 +162,7 @@ export class PrismaService
                     fee: "0",
                     executed: true,
                     created_at: new Date(0),
-                    open_amount: transaction_version.toString(),
+                    open_amount: "0",
                     reserve_amount: "0",
                     limited_index_price: "0",
                     collateral_price_threshold: "0",
@@ -189,47 +205,34 @@ export class PrismaService
         }
 
         for (const record of parsedList) {
-            if (Number(record.executed) === 1 && Number(record.fee) === 0) {
-                const existingOrder = await this.increaseOrderRecord.findFirst({
+            const existingOrder = await this.increaseOrderRecord.findFirst({
+                where: {
+                    order_id: record.order_id,
+                    owner: record.owner,
+                    vault: record.vault,
+                    symbol: record.symbol,
+                    direction: record.direction,
+                    table_handle: record.table_handle,
+                    key: record.key
+                }
+            })
+            if (existingOrder) {
+                await this.increaseOrderRecord.updateMany({
+                    data: record,
                     where: {
-                        order_id: record.order_id,
+                        order_id: existingOrder.order_id,
                         owner: record.owner,
                         vault: record.vault,
                         symbol: record.symbol,
-                        direction: record.direction
+                        direction: record.direction,
+                        table_handle: record.table_handle,
+                        key: record.key,
                     }
                 })
-                if (existingOrder) {
-                    const updatedRecords = await this.increaseOrderRecord.updateMany({
-                        data: {
-                            executed: true,
-                            fee: "0",
-                            transaction_version: record.transaction_version,
-                            created_transaction_version: existingOrder.transaction_version
-                        },
-                        where: {
-                            order_id: existingOrder.order_id,
-                            owner: record.owner,
-                            vault: record.vault,
-                            symbol: record.symbol,
-                            direction: record.direction
-                        }
-                    })
-                }
             } else {
-                const existingOrder = await this.increaseOrderRecord.findFirst({
-                    where: {
-                        OR: [
-                            { transaction_version: record.transaction_version },
-                            { created_transaction_version: record.transaction_version }
-                        ]
-                    }
+                await this.increaseOrderRecord.create({
+                    data: record
                 })
-                if (!existingOrder) {
-                    await this.increaseOrderRecord.create({
-                        data: record
-                    })
-                }
             }
         }
     }
@@ -248,7 +251,7 @@ export class PrismaService
                     executed: true,
                     created_at: new Date(0),
                     take_profit: false,
-                    decrease_amount: transaction_version.toString(),
+                    decrease_amount: "0",
                     limited_index_price: '',
                     collateral_price_threshold: '',
                     write_set_change_index: 0,
@@ -292,47 +295,30 @@ export class PrismaService
         }
 
         for (const record of parsedList) {
-            if (Number(record.executed) === 1 && Number(record.fee) === 0) {
-                const existingOrder = await this.decreaseOrderRecord.findFirst({
+            const existingOrder = await this.decreaseOrderRecord.findFirst({
+                where: {
+                    order_id: record.order_id,
+                    owner: record.owner,
+                    vault: record.vault,
+                    symbol: record.symbol,
+                    direction: record.direction
+                }
+            })
+            if (existingOrder) {
+                await this.decreaseOrderRecord.updateMany({
+                    data: record,
                     where: {
-                        order_id: record.order_id,
+                        order_id: existingOrder.order_id,
                         owner: record.owner,
                         vault: record.vault,
                         symbol: record.symbol,
                         direction: record.direction
                     }
                 })
-                if (existingOrder) {
-                    const updatedRecords = await this.decreaseOrderRecord.updateMany({
-                        data: {
-                            executed: true,
-                            fee: "0",
-                            transaction_version: record.transaction_version,
-                            created_transaction_version: existingOrder.transaction_version
-                        },
-                        where: {
-                            order_id: existingOrder.order_id,
-                            owner: record.owner,
-                            vault: record.vault,
-                            symbol: record.symbol,
-                            direction: record.direction
-                        }
-                    })
-                }
             } else {
-                const existingOrder = await this.decreaseOrderRecord.findFirst({
-                    where: {
-                        OR: [
-                            { transaction_version: record.transaction_version },
-                            { created_transaction_version: record.transaction_version }
-                        ]
-                    }
+                await this.decreaseOrderRecord.create({
+                    data: record
                 })
-                if (!existingOrder) {
-                    await this.decreaseOrderRecord.create({
-                        data: record
-                    })
-                }
             }
         }
     }

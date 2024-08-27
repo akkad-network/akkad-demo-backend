@@ -65,6 +65,9 @@ module.exports = {
         VAULT_USDT: "OFF",
         VAULT_BTC: "ON",
         VAULT_ETH: "ON",
+
+        //clear
+        CLEAR_PRICE_DATA: "ON",
       },
     },
     {
@@ -112,6 +115,9 @@ module.exports = {
         VAULT_USDT: "ON",
         VAULT_BTC: "OFF",
         VAULT_ETH: "OFF",
+
+        //clear
+        CLEAR_PRICE_DATA: "OFF",
       },
     },
   ],
