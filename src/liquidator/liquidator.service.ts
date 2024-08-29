@@ -42,8 +42,10 @@ export class LiquidatorService {
 
         if (response.success) {
             //TODO UPDATE DATABASE
+            this.logger.verbose("🚀 ~ Execute Liquidation Success~", response.toString())
         } else {
             //TODO ERROR FIX
+            this.logger.verbose("🚀 ~ Execute Liquidation Error~", response.toString())
         }
     }
 }
