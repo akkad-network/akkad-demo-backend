@@ -6,6 +6,8 @@ import { AptFeeder, aptos, AvaxFeeder, BnbFeeder, BtcFeeder, DogeFeeder, EthFeed
 import axios from 'axios';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ScannerService } from 'src/scanner/scanner.service';
+import { SymbolList } from 'src/utils/helper';
+import { PriceFeederRecord } from '@prisma/client';
 
 @Injectable()
 export class PricefeederService {
@@ -161,6 +163,67 @@ export class PricefeederService {
                 },
             },
         });
+    }
+
+    async fetchAllSymbol24HoursChange() {
+        const symbols = SymbolList.map((item) => {
+            return item.tokenSymbol
+        })
+        const now = new Date();
+        const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+        const latestRecords = await this.prisma.priceFeederRecord.findMany({
+            where: { symbol: { in: symbols } },
+            orderBy: { createAt: 'desc' },
+            distinct: ['symbol'],
+        });
+
+        if (latestRecords.length === 0) {
+            throw new Error('No price records found for the given symbols.');
+        }
+
+        const pastRecords = await this.prisma.priceFeederRecord.findMany({
+            where: {
+                symbol: { in: symbols },
+                createAt: { lte: twentyFourHoursAgo },
+            },
+            orderBy: { createAt: 'desc' },
+            distinct: ['symbol'],
+        });
+
+        let changeRates: any[] = []
+
+        for (const latestRecord of latestRecords) {
+            const pastRecord = pastRecords.find(record => record.symbol === latestRecord.symbol);
+
+            if (!pastRecord) {
+                const firstRecord = await this.prisma.priceFeederRecord.findFirst({
+                    where: { symbol: latestRecord.symbol },
+                    orderBy: { createAt: 'asc' },
+                });
+
+                if (!firstRecord) {
+                    throw new Error(`No past price records found for symbol ${latestRecord.symbol}.`);
+                }
+                return {
+                    symbol: latestRecord.symbol,
+                    changeRate: this.calculateChangeRate(firstRecord, latestRecord),
+                };
+            }
+
+            changeRates.push({
+                symbol: latestRecord.symbol,
+                changeRate: this.calculateChangeRate(pastRecord, latestRecord),
+            })
+        }
+
+        return changeRates;
+    }
+
+    private calculateChangeRate(pastRecord: PriceFeederRecord, latestRecord: PriceFeederRecord): number {
+        const pastPrice = parseFloat(pastRecord.price);
+        const latestPrice = parseFloat(latestRecord.price);
+        return ((latestPrice - pastPrice) / pastPrice) * 100;
     }
 
 }

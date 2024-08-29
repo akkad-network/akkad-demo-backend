@@ -59,6 +59,8 @@ export class ExecutorService {
                     direction: order.direction,
                 }
             })
+        } else {
+            this.logger.error("🚀 ~ Execute Increase Error~", response.toString())
         }
     }
 
