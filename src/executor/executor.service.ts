@@ -110,6 +110,8 @@ export class ExecutorService {
                     direction: order.direction,
                 }
             })
+        } else {
+            this.logger.error("🚀 ~ Execute Decrease Error~", response.toString())
         }
     }
 }
