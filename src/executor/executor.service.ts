@@ -66,7 +66,6 @@ export class ExecutorService {
         } catch (error) {
             this.logger.error("🚀 ~ Execute Increase Error~ try catch", error)
             if (error.toString().indexOf("ERR_ORDER_ALREADY_EXECUTED") !== -1) {
-                this.logger.error("🚀 ~ Execute Increase Error~ try catch", "ERR_ORDER_ALREADY_EXECUTED")
                 await this.prisma.increaseOrderRecord.update({
                     data: {
                         executed: true,
@@ -149,7 +148,6 @@ export class ExecutorService {
             }
         } catch (error) {
             if (error.toString().indexOf("ERR_ORDER_ALREADY_EXECUTED")) {
-                this.logger.error("🚀 ~ Execute Decrease Error~ try catch", "ERR_ORDER_ALREADY_EXECUTED")
                 await this.prisma.decreaseOrderRecord.update({
                     data: {
                         executed: true,
