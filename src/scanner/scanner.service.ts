@@ -12,18 +12,7 @@ import { LiquidatorService } from 'src/liquidator/liquidator.service';
 @Injectable()
 export class ScannerService {
     private readonly logger = new Logger(ScannerService.name)
-    private readonly priceIds: any[] = [
-        { name: "APT", address: AptFeeder },
-        { name: "USDT", address: UsdtFeeder },
-        { name: "USDC", address: UsdcFeeder },
-        { name: "BTC", address: BtcFeeder },
-        { name: "ETH", address: EthFeeder },
-        { name: "BNB", address: BnbFeeder },
-        { name: "SOL", address: SolFeeder },
-        { name: "AVAX", address: AvaxFeeder },
-        { name: "PEPE", address: PepeFeeder },
-        { name: "DOGE", address: DogeFeeder },
-    ];
+
     private readonly EXECUTE_ORDERS = process.env.EXECUTE_ORDERS
     private readonly EXECUTE_LIQUIDATION = process.env.EXECUTE_LIQUIDATION
 
@@ -85,7 +74,7 @@ export class ScannerService {
         }
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_5_SECONDS)
     async scanPositionsForLiquidation() {
         if (this.isFunctionOn(this.EXECUTE_LIQUIDATION)) {
             if (this.isLiquidatorInProcess) return
@@ -99,8 +88,8 @@ export class ScannerService {
     async scanOrderBook() {
         const prices = this.priceFeederService.getParsedPrices()
         if (!prices || prices.length === 0) return
-        const pricesList = prices.map((price, index) => {
-            return { name: this.priceIds[index].name, price: convertDecimal(Number(price.parsed)) }
+        const pricesList = prices.map((price) => {
+            return { name: price.name, price: convertDecimal(Number(price.parsed), price.priceDecimal) }
         })
         for (const pair of this.FUNC_PAIRS) {
             const vaultName = pair.vault
@@ -196,9 +185,8 @@ export class ScannerService {
     async scanPositions() {
         const prices = this.priceFeederService.getParsedPrices()
         if (!prices || prices.length === 0) return
-        const pricesList = prices.map((price, index) => {
-            return { name: this.priceIds[index].name, price: convertDecimal(Number(price.parsed)) }
-
+        const pricesList = prices.map((price) => {
+            return { name: price.name, price: convertDecimal(Number(price.parsed), price.priceDecimal) }
         })
         for (const symbol of SymbolList) {
             const symbolName = symbol.tokenName
@@ -215,7 +203,9 @@ export class ScannerService {
                 const vaultInfo = VaultList.find((vault) => vault.name === position.vault)
                 const collateralValue = convertBackDecimal(position.collateral, vaultInfo.decimal) * convertBackDecimal(collateralPrice, 18);
                 const collVauleMulRate = collateralValue * 98 / 100
+
                 const deltaSize = Number(convertBackDecimal(symbolPrice, 18)) * Number(convertBackDecimal(position.position_amount, symbol.decimal)) - Number(convertBackDecimal(position.position_size, 18));
+
                 if (position.direction === 'LONG') {
                     return collVauleMulRate + deltaSize < 0
                 } else {
@@ -224,7 +214,7 @@ export class ScannerService {
             });
 
             for (const position of explodingPositions) {
-                // await this.liquidatorService.executeLiquidation(position);
+                await this.liquidatorService.executeLiquidation(position);
             }
         }
     }

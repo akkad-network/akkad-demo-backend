@@ -29,10 +29,10 @@ export type SymbolInfo = {
 }
 
 export type VaultInfo = {
-    name: string,
-    symbol: string,
-    tokenAddress: string,
-    tokenStore: string,
+    name: string
+    symbol: string
+    tokenAddress: string
+    tokenStore: string
     decimal: number
 }
 export const TYPES = [
@@ -71,35 +71,35 @@ export const VaultList: VaultInfo[] = [
         symbol: 'APT',
         tokenAddress: APTOS_COIN,
         tokenStore: APTOS_COIN_STORE,
-        decimal: 8
+        decimal: 8,
     },
     {
         name: 'USDT',
         symbol: 'USDT',
         tokenAddress: `${COIN_ADDRESS}::usdt::USDT`,
         tokenStore: MOCK_USDT_COIN_STORE,
-        decimal: 6
+        decimal: 6,
     },
     {
         name: 'USDC',
         symbol: 'USDC',
         tokenAddress: `${COIN_ADDRESS}::usdc::USDC`,
         tokenStore: MOCK_USDC_COIN_STORE,
-        decimal: 6
+        decimal: 6,
     },
     {
         name: 'BTC',
         symbol: 'BTC',
         tokenAddress: `${COIN_ADDRESS}::btc::BTC`,
         tokenStore: MOCK_BTC_COIN_STORE,
-        decimal: 8
+        decimal: 8,
     },
     {
         name: 'ETH',
         symbol: 'ETH',
         tokenAddress: `${COIN_ADDRESS}::ETH::ETH`,
         tokenStore: MOCK_ETH_COIN_STORE,
-        decimal: 8
+        decimal: 8,
     }
 ]
 
@@ -110,7 +110,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenSymbol: 'APT',
         tokenAddress: APTOS_COIN,
         pythFeederAddress: APT_FEEDER_ADDRESS,
-        decimal: 8
+        decimal: 8,
     },
     {
         name: "BTC/USD",
@@ -118,7 +118,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenSymbol: 'BTC',
         tokenAddress: `${COIN_ADDRESS}::btc::BTC`,
         pythFeederAddress: BTC_FEEDER_ADDRESS,
-        decimal: 8
+        decimal: 8,
     },
     {
         name: "ETH/USD",
@@ -126,7 +126,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenSymbol: 'ETH',
         tokenAddress: `${COIN_ADDRESS}::ETH::ETH`,
         pythFeederAddress: ETH_FEEDER_ADDRESS,
-        decimal: 8
+        decimal: 8,
     },
     {
         name: "BNB/USD",
@@ -134,7 +134,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenSymbol: 'BNB',
         tokenAddress: `${COIN_ADDRESS}::BNB::BNB`,
         pythFeederAddress: BNB_FEEDER_ADDRESS,
-        decimal: 8
+        decimal: 8,
     },
     {
         name: "SOL/USD",
@@ -142,7 +142,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenSymbol: 'SOL',
         tokenAddress: `${COIN_ADDRESS}::SOL::SOL`,
         pythFeederAddress: SOL_FEEDER_ADDRESS,
-        decimal: 8
+        decimal: 8,
     },
     {
         name: "AVAX/USD",
@@ -150,7 +150,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenSymbol: 'AVAX',
         tokenAddress: `${COIN_ADDRESS}::AVAX::AVAX`,
         pythFeederAddress: AVAX_FEEDER_ADDRESS,
-        decimal: 8
+        decimal: 8,
     },
     {
         name: "PEPE/USD",
@@ -158,7 +158,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenSymbol: 'PEPE',
         tokenAddress: `${COIN_ADDRESS}::PEPE::PEPE`,
         pythFeederAddress: PEPE_FEEDER_ADDRESS,
-        decimal: 8
+        decimal: 8,
     },
     {
         name: "DOGE/USD",
@@ -166,7 +166,7 @@ export const SymbolList: SymbolInfo[] = [
         tokenSymbol: 'DOGE',
         tokenAddress: `${COIN_ADDRESS}::DOGE::DOGE`,
         pythFeederAddress: DOGE_FEEDER_ADDRESS,
-        decimal: 8
+        decimal: 8,
     },
 
 ]

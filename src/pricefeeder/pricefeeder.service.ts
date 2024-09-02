@@ -23,16 +23,16 @@ export class PricefeederService {
 
 
     private readonly priceIds: any[] = [
-        { name: "APT", address: AptFeeder },
-        { name: "USDT", address: UsdtFeeder },
-        { name: "USDC", address: UsdcFeeder },
-        { name: "BTC", address: BtcFeeder },
-        { name: "ETH", address: EthFeeder },
-        { name: "BNB", address: BnbFeeder },
-        { name: "SOL", address: SolFeeder },
-        { name: "AVAX", address: AvaxFeeder },
-        { name: "PEPE", address: PepeFeeder },
-        { name: "DOGE", address: DogeFeeder },
+        { name: "APT", address: AptFeeder, priceDecimal: 8 },
+        { name: "USDT", address: UsdtFeeder, priceDecimal: 8 },
+        { name: "USDC", address: UsdcFeeder, priceDecimal: 8 },
+        { name: "BTC", address: BtcFeeder, priceDecimal: 8 },
+        { name: "ETH", address: EthFeeder, priceDecimal: 8 },
+        { name: "BNB", address: BnbFeeder, priceDecimal: 8 },
+        { name: "SOL", address: SolFeeder, priceDecimal: 8 },
+        { name: "AVAX", address: AvaxFeeder, priceDecimal: 8 },
+        { name: "PEPE", address: PepeFeeder, priceDecimal: 10 },
+        { name: "DOGE", address: DogeFeeder, priceDecimal: 8 },
     ];
 
     private vasBytes: number[][] = []
@@ -45,7 +45,7 @@ export class PricefeederService {
         private readonly prisma: PrismaService,
     ) { }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_5_SECONDS)
     async handlePriceFeeder() {
         if (this.isFetchPriceInProcess) return
         this.isFetchPriceInProcess = true
@@ -89,8 +89,7 @@ export class PricefeederService {
                 }
             }
             this.vasBytes = vaas?.map(vaa => Array.from(Buffer.from(vaa?.binary, 'hex')));
-            this.parsedPrices = vaas?.map(item => { return { name: item.name, symbol: item.symbol, parsed: item?.parsed } });
-
+            this.parsedPrices = vaas?.map(item => { return { name: item.name, symbol: item.symbol, parsed: item?.parsed, priceDecimal: item?.priceDecimal } });
         } catch (error) {
             this.logger.warn(`Error Fetching Pyth Price Failed`);
         }
@@ -115,7 +114,9 @@ export class PricefeederService {
 
                 }
             }
-            return { name: item.name, symbol: item.name, binary: response.data.binary.data[0], parsed: response.data.parsed[0].price.price }
+            return {
+                name: item.name, symbol: item.name, binary: response.data.binary.data[0], parsed: response.data.parsed[0].price.price, priceDecimal: item.priceDecimal
+            }
         } catch (error) {
             this.logger.error(`Error fetching VAA for priceId ${item.address}:`, error.toString());
             return null
@@ -230,7 +231,6 @@ export class PricefeederService {
             }
         }
 
-        // 更新缓存
         this.cachedChangeRates = changeRates;
         this.lastFetchTime = currentTime;
 

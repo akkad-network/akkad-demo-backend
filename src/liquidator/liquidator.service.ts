@@ -1,14 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PositionRecord } from '@prisma/client';
 import { aptos, liquidatorSigner, MODULE_ADDRESS } from 'src/main';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { getSideAddress, SymbolList, VaultList } from 'src/utils/helper';
 
+@Injectable()
 export class LiquidatorService {
     private readonly logger = new Logger(LiquidatorService.name)
 
     private readonly moduleAddress: string = MODULE_ADDRESS
 
-    constructor() { }
+    constructor(private readonly prisma: PrismaService) { }
 
     async executeLiquidation(position: PositionRecord) {
         this.logger.log("🚀 ~ execute Liquidation ~ Order ", `${position.id} ${position.order_id} ${position.owner} ${position.vault} ${position.symbol} ${position.direction}`)
@@ -42,15 +44,33 @@ export class LiquidatorService {
             this.logger.verbose("🚀 ~ Execute Liquidation ~", response.success.toString())
 
             if (response.success) {
-                //TODO UPDATE DATABASE
                 this.logger.verbose("🚀 ~ Execute Liquidation Success~", response.toString())
+                await this.setPositionClosed(position.id, position.vault, position.symbol, position.direction)
             } else {
-                //TODO ERROR FIX
                 this.logger.verbose("🚀 ~ Execute Liquidation Error~", response.toString())
+                await this.setPositionClosed(position.id, position.vault, position.symbol, position.direction)
+
             }
         } catch (error) {
-            this.logger.verbose("🚀 ~ Execute Liquidation Error~ try catch", error)
+            this.logger.error("🚀 ~ Execute Liquidation Error~ try catch", error)
+            if (error.toString().indexOf("ERR_ALREADY_CLOSED") !== -1) {
+                await this.setPositionClosed(position.id, position.vault, position.symbol, position.direction)
+            }
         }
 
+    }
+
+    private async setPositionClosed(id: number, vault: string, symbol: string, direction: string) {
+        await this.prisma.positionRecord.update({
+            data: {
+                closed: true,
+            },
+            where: {
+                id: id,
+                vault: vault,
+                symbol: symbol,
+                direction: direction,
+            }
+        })
     }
 }
