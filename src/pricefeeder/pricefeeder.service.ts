@@ -17,6 +17,11 @@ export class PricefeederService {
     private readonly UPDATE_PRICE_FEED = process.env.UPDATE_PRICE_FEED
     private readonly CLEAR_PRICE_DATA = process.env.CLEAR_PRICE_DATA
 
+    private lastFetchTime: number = 0;
+    private cachedChangeRates: any[] | null = null;
+    private readonly cacheDuration = 5000;
+
+
     private readonly priceIds: any[] = [
         { name: "APT", address: AptFeeder },
         { name: "USDT", address: UsdtFeeder },
@@ -166,9 +171,16 @@ export class PricefeederService {
     }
 
     async fetchAllSymbol24HoursChange() {
+        const currentTime = Date.now();
+
+        if (this.cachedChangeRates && (currentTime - this.lastFetchTime) < this.cacheDuration) {
+            this.logger.debug("return cache")
+            return this.cachedChangeRates;
+        }
+
         const symbols = SymbolList.map((item) => {
-            return item.tokenSymbol
-        })
+            return item.tokenSymbol;
+        });
         const now = new Date();
         const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
@@ -191,7 +203,7 @@ export class PricefeederService {
             distinct: ['symbol'],
         });
 
-        let changeRates: any[] = []
+        let changeRates: any[] = [];
 
         for (const latestRecord of latestRecords) {
             const pastRecord = pastRecords.find(record => record.symbol === latestRecord.symbol);
@@ -205,17 +217,22 @@ export class PricefeederService {
                 if (!firstRecord) {
                     throw new Error(`No past price records found for symbol ${latestRecord.symbol}.`);
                 }
-                return {
+
+                changeRates.push({
                     symbol: latestRecord.symbol,
                     changeRate: this.calculateChangeRate(firstRecord, latestRecord),
-                };
+                });
+            } else {
+                changeRates.push({
+                    symbol: latestRecord.symbol,
+                    changeRate: this.calculateChangeRate(pastRecord, latestRecord),
+                });
             }
-
-            changeRates.push({
-                symbol: latestRecord.symbol,
-                changeRate: this.calculateChangeRate(pastRecord, latestRecord),
-            })
         }
+
+        // 更新缓存
+        this.cachedChangeRates = changeRates;
+        this.lastFetchTime = currentTime;
 
         return changeRates;
     }
