@@ -194,8 +194,8 @@ export class ScannerService {
             const positions = await this.prisma.positionRecord.findMany({
                 where: {
                     closed: false,
-                    symbol: symbolName
-                }
+                    symbol: symbolName,
+                },
             });
 
             const explodingPositions = positions.filter(position => {
@@ -224,3 +224,17 @@ export class ScannerService {
     }
 
 }
+
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ start -------------------------")
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ id:", position.id)
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ order_id:", position.order_id)
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ vault:", vaultInfo.name)
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ symbol:", symbol.name)
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ side:", position.direction)
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ collateralValue:", collateralValue)
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ position_amount:", Number(convertBackDecimal(position.position_amount, symbol.decimal)))
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ symbolPrice:", Number(convertBackDecimal(symbolPrice, 18)))
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ now size:", Number(convertBackDecimal(symbolPrice, 18)) * Number(convertBackDecimal(position.position_amount, symbol.decimal)))
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ old size:", Number(convertBackDecimal(position.position_size, 18)))
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ deltaSize:", deltaSize)
+// console.log("🚀 ~ ScannerService ~ explodingPositions ~ end ****************************")
