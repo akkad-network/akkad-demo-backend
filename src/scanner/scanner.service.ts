@@ -74,7 +74,7 @@ export class ScannerService {
         })
     }
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_5_SECONDS)
     async scanOrderBookForExecution() {
         if (this.isFunctionOn(this.EXECUTE_ORDERS)) {
             if (this.isExecutorInProcess) return
