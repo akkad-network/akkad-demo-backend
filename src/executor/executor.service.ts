@@ -65,12 +65,25 @@ export class ExecutorService {
             }
         } catch (error) {
             this.logger.error("🚀 ~ Execute Increase Error~ try catch", error)
-            if (error.toString().indexOf("ERR_ORDER_ALREADY_EXECUTED")) {
+            if (error.toString().indexOf("ERR_ORDER_ALREADY_EXECUTED") !== -1) {
                 this.logger.error("🚀 ~ Execute Increase Error~ try catch", "ERR_ORDER_ALREADY_EXECUTED")
                 await this.prisma.increaseOrderRecord.update({
                     data: {
                         executed: true,
                         status: 'ALREADY DONE'
+                    },
+                    where: {
+                        id: order.id,
+                        vault: order.vault,
+                        symbol: order.symbol,
+                        direction: order.direction,
+                    }
+                })
+            } else if (error.toString().indexOf("ERR_ALREADY_CLOSED") !== -1) {
+                await this.prisma.increaseOrderRecord.update({
+                    data: {
+                        executed: true,
+                        status: 'ALREADY CLOSED'
                     },
                     where: {
                         id: order.id,
@@ -141,6 +154,19 @@ export class ExecutorService {
                     data: {
                         executed: true,
                         status: 'ALREADY DONE'
+                    },
+                    where: {
+                        id: order.id,
+                        vault: order.vault,
+                        symbol: order.symbol,
+                        direction: order.direction,
+                    }
+                })
+            } else if (error.toString().indexOf("ERR_ALREADY_CLOSED") !== -1) {
+                await this.prisma.decreaseOrderRecord.update({
+                    data: {
+                        executed: true,
+                        status: 'ALREADY CLOSED'
                     },
                     where: {
                         id: order.id,
