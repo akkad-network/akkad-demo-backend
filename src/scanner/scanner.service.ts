@@ -224,7 +224,7 @@ export class ScannerService {
             });
 
             for (const position of explodingPositions) {
-                await this.liquidatorService.executeLiquidation(position);
+                // await this.liquidatorService.executeLiquidation(position);
             }
         }
     }
