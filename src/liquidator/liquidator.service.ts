@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PositionRecord } from '@prisma/client';
 import { aptos, liquidatorSigner, MODULE_ADDRESS } from 'src/main';
+import { PricefeederService } from 'src/pricefeeder/pricefeeder.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { getSideAddress, SymbolList, VaultList } from 'src/utils/helper';
 
@@ -10,10 +11,14 @@ export class LiquidatorService {
 
     private readonly moduleAddress: string = MODULE_ADDRESS
 
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(private readonly prisma: PrismaService,
+        private readonly priceFeederService: PricefeederService,
+    ) { }
 
     async executeLiquidation(position: PositionRecord) {
         this.logger.log("🚀 ~ execute Liquidation ~ Order ", `${position.id} ${position.order_id} ${position.owner} ${position.vault} ${position.symbol} ${position.direction}`)
+        const vasBytes = this.priceFeederService.getVasBytes()
+        if (!vasBytes || vasBytes.length === 0) return
         try {
             const accountInfo = await aptos.account.getAccountInfo({ accountAddress: liquidatorSigner.accountAddress })
             const seqNumber = accountInfo.sequence_number
@@ -29,7 +34,7 @@ export class LiquidatorService {
                     functionArguments: [
                         position.owner,
                         position.order_id,
-                        []
+                        vasBytes
                     ],
                 },
             });

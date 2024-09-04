@@ -2,6 +2,7 @@ import { APTOS_COIN } from '@aptos-labs/ts-sdk';
 import { Injectable, Logger } from '@nestjs/common';
 import { DecreaseOrderRecord, IncreaseOrderRecord } from '@prisma/client';
 import { aptos, executerSigner, MODULE_ADDRESS, } from 'src/main';
+import { PricefeederService } from 'src/pricefeeder/pricefeeder.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { getSideAddress, parseAptosDecimal, SymbolList, VaultList } from 'src/utils/helper';
 
@@ -11,10 +12,14 @@ export class ExecutorService {
 
     private readonly moduleAddress: string = MODULE_ADDRESS
 
-    constructor(private readonly prisma: PrismaService) { }
+    constructor(private readonly prisma: PrismaService,
+        private readonly priceFeederService: PricefeederService,
+    ) { }
 
     async executeIncreaseOrder(order: IncreaseOrderRecord) {
         this.logger.log("🚀 ~ execute Increase ~ Order ", `${order.id} ${order.order_id} ${parseAptosDecimal(Number(order.limited_index_price), 18)} ${order.owner} ${order.vault} ${order.symbol} ${order.direction}`)
+        const vasBytes = this.priceFeederService.getVasBytes()
+        if (!vasBytes || vasBytes.length === 0) return
         try {
             const accountInfo = await aptos.account.getAccountInfo({ accountAddress: executerSigner.accountAddress })
             const seqNumber = accountInfo.sequence_number

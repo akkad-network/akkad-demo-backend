@@ -303,6 +303,10 @@ export const formatAptosDecimal = (value: number, decimals: number = 8) => {
     return Number((value * Math.pow(10, decimals)).toFixed(0));
 }
 
+export const formatAptosDecimalForParams = (value: number, decimals: number = 8) => {
+    return BigInt(Math.floor((value * Math.pow(10, decimals)))).toString();
+}
+
 export const getSideAddress = (side: string) => {
     return `${MODULE_ADDRESS}::pool::${side}`
 }

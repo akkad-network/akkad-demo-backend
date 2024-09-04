@@ -21,7 +21,6 @@ export class PricefeederService {
     private cachedChangeRates: any[] | null = null;
     private readonly cacheDuration = 5000;
 
-
     private readonly priceIds: any[] = [
         { name: "APT", address: AptFeeder, priceDecimal: 8 },
         { name: "USDT", address: UsdtFeeder, priceDecimal: 8 },
@@ -111,7 +110,6 @@ export class PricefeederService {
                             decimal: Math.abs(response.data.parsed[0].price.expo)
                         }
                     })
-
                 }
             }
             return {
@@ -127,7 +125,6 @@ export class PricefeederService {
         if (!this.vasBytes || this.vasBytes.length === 0) return
 
         try {
-
             const transaction = await aptos.transaction.build.simple({
                 sender: priceFeederSyncerSigner.accountAddress,
                 data: {

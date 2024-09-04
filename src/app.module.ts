@@ -11,9 +11,12 @@ import { ExecutorModule } from './executor/executor.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SynchronizerModule } from './synchronizer/synchronizer.module';
 import { LiquidatorModule } from './liquidator/liquidator.module';
+import { BatchtestController } from './batchtest/batchtest.controller';
+import { BatchtestService } from './batchtest/batchtest.service';
+import { BatchtestModule } from './batchtest/batchtest.module';
 @Module({
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, BatchtestController],
+  providers: [AppService, BatchtestService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -26,7 +29,8 @@ import { LiquidatorModule } from './liquidator/liquidator.module';
     ExecutorModule,
     PrismaModule,
     SynchronizerModule,
-    LiquidatorModule
+    LiquidatorModule,
+    BatchtestModule
   ],
 })
 export class AppModule { }

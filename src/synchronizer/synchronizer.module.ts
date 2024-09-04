@@ -4,6 +4,7 @@ import { SynchronizerController } from './synchronizer.controller';
 
 @Module({
   providers: [SynchronizerService],
+  exports: [SynchronizerService],
   controllers: [SynchronizerController],
 })
 export class SynchronizerModule { }
