@@ -68,6 +68,9 @@ module.exports = {
 
         //clear
         CLEAR_PRICE_DATA: "ON",
+
+        //test
+        BATCH_TEST: "OFF",
       },
     },
     {
@@ -118,6 +121,9 @@ module.exports = {
 
         //clear
         CLEAR_PRICE_DATA: "OFF",
+
+        //test
+        BATCH_TEST: "OFF",
       },
     },
   ],
