@@ -58,6 +58,7 @@ export class BatchtestService {
         const symbolPrice = convertBackDecimal(symbolPriceInfo.parsed, symbolPriceInfo.priceDecimal)
         const slippage = 0.001
         if (vaultInfo.symbol === 'APT') return
+        if (vaultInfo.symbol === 'PEPE') return
         switch (vaultInfo.symbol) {
             case 'APT': // no enough test token
                 break

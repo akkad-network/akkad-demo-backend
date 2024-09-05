@@ -36,7 +36,7 @@ export class ExecutorService {
                     functionArguments: [
                         order.owner,
                         order.order_id,
-                        []
+                        vasBytes
                     ],
                 },
             });
@@ -103,6 +103,8 @@ export class ExecutorService {
 
     async executeDecreaseOrder(order: DecreaseOrderRecord) {
         this.logger.log("🚀 ~ execute Decrease ~ Order ", `${order.id} ${order.order_id} ${order.owner} ${order.vault} ${order.symbol} ${order.direction}`)
+        const vasBytes = this.priceFeederService.getVasBytes()
+        if (!vasBytes || vasBytes.length === 0) return
         try {
             const accountInfo = await aptos.account.getAccountInfo({ accountAddress: executerSigner.accountAddress })
             const transaction = await aptos.transaction.build.simple({
@@ -119,7 +121,7 @@ export class ExecutorService {
                         order.owner,
                         order.order_id,
                         order.position_num,
-                        []
+                        vasBytes
                     ],
                 },
             });
