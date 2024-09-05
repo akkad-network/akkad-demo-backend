@@ -17,7 +17,7 @@ export class BatchtestService {
     private readonly BATCH_TEST = process.env.BATCH_TEST
     private isBatchOpenPositionMarkInProcess = false
     private readonly moduleAddress: string = MODULE_ADDRESS
-    private readonly batchSigner = Account.fromPrivateKey({ privateKey: new Ed25519PrivateKey("0x85c97295489997d9a5bb550bb226603c725d48cace679de36beed9bf6af971f2") })
+    private readonly batchSigner = Account.fromPrivateKey({ privateKey: new Ed25519PrivateKey("0x2cb735d997d5321ca6bfed46fe00cb12050deb972181e20c345ba62a87861a80") })
 
     constructor(private readonly prisma: PrismaService,
         private readonly priceFeederService: PricefeederService,
@@ -78,7 +78,7 @@ export class BatchtestService {
                 break
             case 'ETH':
                 collateral = 0.003
-                reserve_amount = 0.01 * 20
+                reserve_amount = 0.003 * 20
                 open_amount = collateral * 90 * vaultPrice / symbolPrice
                 break
         }

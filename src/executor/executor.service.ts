@@ -178,6 +178,33 @@ export class ExecutorService {
                         direction: order.direction,
                     }
                 })
+            } else if (error.toString().indexOf("ERR_EXCEED_MAX_RESERVED") !== -1) {
+                await this.prisma.decreaseOrderRecord.update({
+                    data: {
+                        executed: true,
+                        status: 'MAX_RESERVED_CLOSED'
+                    },
+                    where: {
+                        id: order.id,
+                        vault: order.vault,
+                        symbol: order.symbol,
+                        direction: order.direction,
+                    }
+                })
+            }
+            else if (error.toString().indexOf("ERR_ALREADY_HAS_REFERRER_CODE") !== -1) {
+                await this.prisma.decreaseOrderRecord.update({
+                    data: {
+                        executed: true,
+                        status: 'MAX_RESERVED_CLOSED'
+                    },
+                    where: {
+                        id: order.id,
+                        vault: order.vault,
+                        symbol: order.symbol,
+                        direction: order.direction,
+                    }
+                })
             }
         }
     }
