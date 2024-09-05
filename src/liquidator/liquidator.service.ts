@@ -60,6 +60,8 @@ export class LiquidatorService {
             this.logger.error("🚀 ~ Execute Liquidation Error~ try catch", error)
             if (error.toString().indexOf("ERR_ALREADY_CLOSED") !== -1) {
                 await this.setPositionClosed(position.id, position.vault, position.symbol, position.direction)
+            } else if (error.toString().indexOf("Move abort in 0x1::table:") !== -1) {
+                await this.setPositionClosed(position.id, position.vault, position.symbol, position.direction)
             }
         }
 

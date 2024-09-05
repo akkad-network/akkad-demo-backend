@@ -80,7 +80,7 @@ export class SynchronizerService {
         }
     }
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncOrderRecords() {
         if (this.isFunctionOn(this.SYNC_ORDERS)) {
             if (this.isSyncOrderBookInProcess) return
@@ -91,7 +91,7 @@ export class SynchronizerService {
         }
     }
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncPositionData() {
         if (this.isFunctionOn(this.SYNC_POSITIONS)) {
             if (this.isSyncPositionInProcess) return

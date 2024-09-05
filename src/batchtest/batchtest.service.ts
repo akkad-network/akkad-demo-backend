@@ -6,7 +6,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PricefeederService } from 'src/pricefeeder/pricefeeder.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { aptos, MODULE_ADDRESS, priceFeederSyncerSigner } from 'src/main';
-import { APTOS_COIN } from '@aptos-labs/ts-sdk';
+import { Account, APTOS_COIN, Ed25519PrivateKey } from '@aptos-labs/ts-sdk';
 import { PAIRS, VaultList, convertBackDecimal } from 'src/utils/helper';
 import { SynchronizerService } from 'src/synchronizer/synchronizer.service';
 
@@ -17,6 +17,7 @@ export class BatchtestService {
     private readonly BATCH_TEST = process.env.BATCH_TEST
     private isBatchOpenPositionMarkInProcess = false
     private readonly moduleAddress: string = MODULE_ADDRESS
+    private readonly batchSigner = Account.fromPrivateKey({ privateKey: new Ed25519PrivateKey("0x85c97295489997d9a5bb550bb226603c725d48cace679de36beed9bf6af971f2") })
 
     constructor(private readonly prisma: PrismaService,
         private readonly priceFeederService: PricefeederService,
@@ -28,7 +29,7 @@ export class BatchtestService {
         if (this.isFunctionOn(this.BATCH_TEST)) {
             if (this.isBatchOpenPositionMarkInProcess) return
             this.isBatchOpenPositionMarkInProcess = true
-            // await this.batchMark()
+            await this.batchMark()
             this.isBatchOpenPositionMarkInProcess = false
             this.logger.debug("🚀 ~ batch OpenPosition | Mark | ~ ")
         }
@@ -55,7 +56,7 @@ export class BatchtestService {
         const vaultPrice = convertBackDecimal(vaultPriceInfo.parsed, vaultPriceInfo.priceDecimal)
         const symbolPriceInfo = prices.find((item) => item.symbol === symbolInfo.tokenSymbol)
         const symbolPrice = convertBackDecimal(symbolPriceInfo.parsed, symbolPriceInfo.priceDecimal)
-        const slippage = 0.01
+        const slippage = 0.001
         if (vaultInfo.symbol === 'APT') return
         switch (vaultInfo.symbol) {
             case 'APT': // no enough test token
@@ -82,7 +83,7 @@ export class BatchtestService {
                 break
         }
         const transaction = await aptos.transaction.build.simple({
-            sender: priceFeederSyncerSigner.accountAddress,
+            sender: this.batchSigner.accountAddress,
             data: {
                 function: `${this.moduleAddress}::market::open_position`,
                 typeArguments: [
@@ -116,7 +117,7 @@ export class BatchtestService {
         })
         try {
             const committedTx = await aptos.signAndSubmitTransaction({
-                signer: priceFeederSyncerSigner,
+                signer: this.batchSigner,
                 transaction: transaction,
             })
 
@@ -130,7 +131,6 @@ export class BatchtestService {
         } catch (error) {
             this.logger.error("🚀 ~ Batch Open Position ~", error.toString())
         }
-
     }
 
     private isFunctionOn(flag: string): boolean {
