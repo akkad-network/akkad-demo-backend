@@ -169,10 +169,9 @@ export class SynchronizerService {
     async fetchIncreaseOrders(pair: PositionOrderHandle, iHeight: string, mannual: boolean = false, owner: string = "") {
         const increase_handle = pair.increase_order_handle
         let whereParams = {}
-        if (owner) {
+        if (owner && mannual) {
             whereParams = {
                 table_handle: { _eq: increase_handle },
-                transaction_version: { _gt: iHeight },
                 owner: { _eq: owner }
             }
         } else {
@@ -227,10 +226,9 @@ export class SynchronizerService {
     async fetchDecreaseOrders(pair: PositionOrderHandle, dHeight: string, mannual: boolean = false, owner: string = "") {
         const decrease_handle = pair.decrease_order_handle
         let whereParams = {}
-        if (owner) {
+        if (owner && mannual) {
             whereParams = {
                 table_handle: { _eq: decrease_handle },
-                transaction_version: { _gt: dHeight },
                 owner: { _eq: owner }
             }
         } else {
@@ -321,10 +319,9 @@ export class SynchronizerService {
 
     async fetchPositions(pair: PositionOrderHandle, pHeight: string, mannual: boolean = false, owner: string = "") {
         let whereParams = {}
-        if (owner) {
+        if (owner && mannual) {
             whereParams = {
                 table_handle: { _eq: pair.position_handle },
-                transaction_version: { _gt: pHeight },
                 owner: { _eq: owner }
             }
         } else {
