@@ -172,7 +172,7 @@ export class SynchronizerService {
         if (owner && mannual) {
             whereParams = {
                 table_handle: { _eq: increase_handle },
-                owner: { _eq: owner }
+                decoded_key: { _contains: { owner } },
             }
         } else {
             whereParams = {
@@ -229,7 +229,7 @@ export class SynchronizerService {
         if (owner && mannual) {
             whereParams = {
                 table_handle: { _eq: decrease_handle },
-                owner: { _eq: owner }
+                decoded_key: { _contains: { owner } },
             }
         } else {
             whereParams = {
@@ -322,7 +322,7 @@ export class SynchronizerService {
         if (owner && mannual) {
             whereParams = {
                 table_handle: { _eq: pair.position_handle },
-                owner: { _eq: owner }
+                decoded_key: { _contains: { owner } },
             }
         } else {
             whereParams = {
