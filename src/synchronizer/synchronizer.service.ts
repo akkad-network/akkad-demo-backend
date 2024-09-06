@@ -103,6 +103,27 @@ export class SynchronizerService {
     }
 
 
+    async mannualSyncOrderAndPositionOfOwner(vault: string, symbol: string, direction: string, owner: string) {
+        const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
+        try {
+            const pairEntity = await this.prisma.positionOrderHandle.findFirst({
+                where: {
+                    vault,
+                    symbol,
+                    direction
+                }
+            })
+            if (pairEntity) {
+                await this.fetchPositions(pairEntity, pHeight, true, owner);
+                await this.fetchIncreaseOrders(pairEntity, iHeight, true, owner);
+                await this.fetchDecreaseOrders(pairEntity, dHeight, true, owner);
+            }
+        } catch (error) {
+            this.logger.error(`Error everthing Error`);
+        }
+    }
+
+
     async mannualSyncOrderBook(vault: string, symbol: string, direction: string) {
         const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
         try {
@@ -114,8 +135,8 @@ export class SynchronizerService {
                 }
             })
             if (pairEntity) {
-                await this.fetchIncreaseOrders(pairEntity, iHeight);
-                await this.fetchDecreaseOrders(pairEntity, dHeight);
+                await this.fetchIncreaseOrders(pairEntity, iHeight, true);
+                await this.fetchDecreaseOrders(pairEntity, dHeight, true);
             }
         } catch (error) {
             this.logger.error(`Error Fetching Orders handle failed`);
@@ -145,15 +166,25 @@ export class SynchronizerService {
         }
     }
 
-    async fetchIncreaseOrders(pair: PositionOrderHandle, iHeight: string) {
+    async fetchIncreaseOrders(pair: PositionOrderHandle, iHeight: string, mannual: boolean = false, owner: string = "") {
         const increase_handle = pair.increase_order_handle
+        let whereParams = {}
+        if (owner) {
+            whereParams = {
+                table_handle: { _eq: increase_handle },
+                transaction_version: { _gt: iHeight },
+                owner: { _eq: owner }
+            }
+        } else {
+            whereParams = {
+                table_handle: { _eq: increase_handle },
+                transaction_version: { _gt: iHeight },
+            }
+        }
         try {
             const inc_response = await aptos.getTableItemsData({
                 options: {
-                    where: {
-                        table_handle: { _eq: increase_handle },
-                        transaction_version: { _gt: iHeight }
-                    },
+                    where: whereParams,
                     orderBy: [{ transaction_version: 'desc' }],
                 },
             });
@@ -183,26 +214,35 @@ export class SynchronizerService {
                     const verB = b.transaction_version
                     return verB - verA
                 })
-                if (sortedData.length > 0) {
+                if (sortedData.length > 0 && !mannual) {
                     await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'INCREASE_ORDER_RECORD')
                 }
-                this.prisma.saveIncreaseOrderRecord(sortedData)
+                await this.prisma.saveIncreaseOrderRecord(sortedData)
             }
         } catch (error) {
             this.logger.error('Fetch Increase Order Failed', error)
         }
     }
 
-    async fetchDecreaseOrders(pair: PositionOrderHandle, dHeight: string) {
+    async fetchDecreaseOrders(pair: PositionOrderHandle, dHeight: string, mannual: boolean = false, owner: string = "") {
         const decrease_handle = pair.decrease_order_handle
+        let whereParams = {}
+        if (owner) {
+            whereParams = {
+                table_handle: { _eq: decrease_handle },
+                transaction_version: { _gt: dHeight },
+                owner: { _eq: owner }
+            }
+        } else {
+            whereParams = {
+                table_handle: { _eq: decrease_handle },
+                transaction_version: { _gt: dHeight },
+            }
+        }
         try {
             const dec_response = await aptos.getTableItemsData({
                 options: {
-                    where: {
-                        table_handle: { _eq: decrease_handle },
-                        transaction_version: { _gt: dHeight }
-
-                    },
+                    where: whereParams,
                     orderBy: [{ transaction_version: 'desc' }],
                 },
             });
@@ -232,15 +272,16 @@ export class SynchronizerService {
                     return verB - verA
                 })
 
-                if (sortedData.length > 0) {
+                if (sortedData.length > 0 && !mannual) {
                     await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'DECREASE_ORDER_RECORD')
                 }
-                this.prisma.saveDecreaseOrderRecord(sortedData)
+                await this.prisma.saveDecreaseOrderRecord(sortedData)
             }
         } catch (error) {
             this.logger.error('Fetch Decrease Order Failed', error)
         }
     }
+
 
     async mannualSyncPositionRecords(vault: string, symbol: string, direction: string) {
         const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
@@ -278,16 +319,27 @@ export class SynchronizerService {
         }
     }
 
-    async fetchPositions(pair: PositionOrderHandle, pHeight: string) {
+    async fetchPositions(pair: PositionOrderHandle, pHeight: string, mannual: boolean = false, owner: string = "") {
+        let whereParams = {}
+        if (owner) {
+            whereParams = {
+                table_handle: { _eq: pair.position_handle },
+                transaction_version: { _gt: pHeight },
+                owner: { _eq: owner }
+            }
+        } else {
+            whereParams = {
+                table_handle: { _eq: pair.position_handle },
+                transaction_version: { _gt: pHeight },
+            }
+        }
         const result = await aptos.getTableItemsData({
             options: {
-                where: {
-                    table_handle: { _eq: pair.position_handle },
-                    transaction_version: { _gt: pHeight }
-                },
+                where: whereParams,
                 orderBy: [{ transaction_version: 'desc' }],
             },
         });
+
         if (!result || result.length === 0) {
             return
         }
@@ -302,12 +354,11 @@ export class SynchronizerService {
             const verB = b.transaction_version
             return verB - verA
         })
-        if (sortedData.length > 0) {
+        if (sortedData.length > 0 && !mannual) {
             await this.prisma.updateGlobalSyncParams(sortedData[0].transaction_version.toString(), 'POSITION_RECORD')
         }
         this.prisma.savePositionRecords(sortedData)
     }
-
 
     async syncOnChainSymbolConfig() {
         for (const direction of DIRECTION) {

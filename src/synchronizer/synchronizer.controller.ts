@@ -19,4 +19,11 @@ export class SynchronizerController {
         const { vault, symbol, direction } = body;
         return this.synchronizerService.mannualSyncPositionRecords(vault, symbol, direction)
     }
+
+    @Post("notifySyncOrderAndPositionOfOwner")
+    async notifySyncOrderAndPositionOfOwner(@Body() body: any) {
+        const { vault, symbol, direction, owner } = body;
+        return this.synchronizerService.mannualSyncOrderAndPositionOfOwner(vault, symbol, direction, owner)
+    }
+
 }
