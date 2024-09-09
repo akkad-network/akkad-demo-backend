@@ -96,9 +96,12 @@ export class ScannerService {
             const symbolName = pair.symbol
             const direction = pair.direction
             const vaultPrice = pricesList.find((priceInfo) => priceInfo.name === vaultName).price
+            if (!vaultPrice) return
             const vaultPriceToBigInt = BigInt(vaultPrice)
             const vaultPriceToString = BigInt(vaultPrice).toString();
             const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName).price
+            if (!symbolPrice) return
+
             const symbolPriceToBigInt = BigInt(symbolPrice)
             const symbolPriceToString = BigInt(symbolPrice).toString();
             let limited_index_price_params = null

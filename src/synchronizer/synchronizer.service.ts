@@ -4,6 +4,8 @@ import { COIN_ADDRESS, convertBackDecimal, convertDecimal, DIRECTION, getSideAdd
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { AptFeeder, aptos, AvaxFeeder, BnbFeeder, BtcFeeder, DogeFeeder, EthFeeder, executerSigner, FEERDER_ADDRESS, liquidatorSigner, MODULE_ADDRESS, PepeFeeder, priceFeederSyncerSigner, SolFeeder, UsdcFeeder, UsdtFeeder } from 'src/main';
 import { PositionOrderHandle } from '@prisma/client';
+import { APTOS_COIN } from '@aptos-labs/ts-sdk';
+import { PricefeederService } from 'src/pricefeeder/pricefeeder.service';
 
 @Injectable()
 export class SynchronizerService {
@@ -21,12 +23,18 @@ export class SynchronizerService {
     private readonly SYNC_SYMBOL_CONFIG = process.env.SYNC_SYMBOL_CONFIG
     private readonly SYNC_VAULT_CONFIG = process.env.SYNC_VAULT_CONFIG
     private readonly SYNC_LP_TOKEN_PRICE = process.env.SYNC_LP_TOKEN_PRICE
+    private readonly SYNC_REFERRER = process.env.SYNC_REFERRER
+    private readonly SYNC_SIMULATE_LP = process.env.SYNC_SIMULATE_LP
 
     private isSyncOrderBookInProcess = false
     private isSyncPositionInProcess = false
+    private isSyncReferrerInProcess = false
+    private isSyncSimulateLpInProcess = false
 
     constructor(
-        private readonly prisma: PrismaService,) {
+        private readonly prisma: PrismaService,
+        private readonly priceFeederService: PricefeederService,
+    ) {
         PAIRS.map((pair) => {
             if (this.isFunctionOn(this.VAULT_APT)) {
                 if (pair.vault === 'APT') {
@@ -102,6 +110,126 @@ export class SynchronizerService {
         }
     }
 
+    @Cron(CronExpression.EVERY_10_MINUTES)
+    async handleSyncReferrerinfo() {
+        if (this.isFunctionOn(this.SYNC_REFERRER)) {
+            if (this.isSyncReferrerInProcess) return
+            this.isSyncReferrerInProcess = true
+            this.logger.debug("🚀 ~ Sync Referrer ~ ")
+            await this.syncOnChainReferrerInfo()
+            this.isSyncReferrerInProcess = false
+        }
+    }
+
+    @Cron(CronExpression.EVERY_MINUTE)
+    async handeSyncLpPriceWithAptos() {
+        if (this.isFunctionOn(this.SYNC_SIMULATE_LP)) {
+            if (this.isSyncSimulateLpInProcess) return
+            this.isSyncSimulateLpInProcess = true
+            this.logger.debug("🚀 ~ Sync Simulate Lp price ~ ")
+            await this.simulateLpPrice()
+            this.isSyncSimulateLpInProcess = false
+        }
+    }
+
+    async simulateLpPrice() {
+        const prices = this.priceFeederService.getParsedPrices()
+        if (!prices || prices.length === 0) return
+        const vasBytes = this.priceFeederService.getVasBytes()
+        if (!vasBytes || vasBytes.length === 0) return
+        const aptosPriceInfo = prices.find((price) => price.name === 'APT')
+        if (!aptosPriceInfo) return
+        const aptosPrice = convertBackDecimal(Number(aptosPriceInfo.parsed), aptosPriceInfo.priceDecimal)
+
+        const transaction = await aptos.transaction.build.simple({
+            sender: executerSigner?.accountAddress,
+            data: {
+                function: `${MODULE_ADDRESS}::market::deposit`,
+                typeArguments: [APTOS_COIN],
+                functionArguments: [
+                    "100000000",
+                    "100",
+                    vasBytes,
+                ],
+            },
+        })
+        try {
+            const [userTransactionResponse] = await aptos.transaction.simulate.simple({
+                signerPublicKey: executerSigner?.publicKey,
+                transaction,
+            });
+            const events = userTransactionResponse.events as any[]
+            if (!events || events.length === 0) return
+            const event = events.find((event) => {
+                return event.type.indexOf(`${MODULE_ADDRESS}::market::Deposited`) !== -1
+            })
+            if (!event) return
+            const mintAmount = event?.data?.mint_amount
+            const mintAmountParsed = parseAptosDecimal(Number(mintAmount), 6)
+            if (mintAmountParsed === 0) return
+
+            const lpPrice = Number(aptosPrice) / parseAptosDecimal(Number(mintAmount), 6)
+            await this.prisma.lPSimulatePriceRecords.create({
+                data: {
+                    lpInName: 'APT',
+                    lpInAmount: '100000000',
+                    lpInPrice: aptosPrice.toString(),
+                    lpOutName: 'AGLP',
+                    lpOutAmount: mintAmountParsed.toString(),
+                    lpOutPrice: lpPrice.toString()
+                }
+            })
+        } catch (error) {
+            this.logger.error(error.toString())
+        } finally {
+
+        }
+    }
+
+    async syncOnChainReferrerInfo() {
+        const { pHeight, iHeight, dHeight, rHeight } = await this.prisma.findRecordsHeight();
+
+        for (const pair of this.FUNC_PAIRS) {
+            const vaultAddress = VaultList.find((vault) => vault.symbol === pair.vault).tokenAddress
+            const symbolAddress = SymbolList.find((symbol) => symbol.tokenSymbol === pair.symbol).tokenAddress
+            try {
+                const events: any = await aptos.getModuleEventsByEventType({
+                    // options: { where: { type: { _eq: `${MODULE_ADDRESS}::market::ReferrerProfitExecute<${vaultAddress}, ${symbolAddress}>` } } }
+                    eventType: `${MODULE_ADDRESS}::market::ReferrerProfitExecute<${vaultAddress}, ${symbolAddress}>`
+                })
+                if (!events || events.length === 0) continue
+                for (const event of events) {
+                    const data = event?.data
+                    const transaction_version = event.transaction_version.toString()
+                    if (!data) continue
+                    const record = await this.prisma.referrerInfoRecords.findFirst({
+                        where: {
+                            transaction_version: transaction_version
+                        }
+                    })
+                    if (record) continue
+                    const tempResult = await this.prisma.referrerInfoRecords.create({
+                        data: {
+                            vault: pair.vault,
+                            symbol: pair.symbol,
+                            userAccount: data.user,
+                            referrer: data.referrer,
+                            rebate_user_amount: data.rebate_user_amount,
+                            rebate_referrer_amount: data.rebate_referrer_amount,
+                            transaction_version: transaction_version
+                        }
+                    })
+                    if (tempResult) {
+                        await this.prisma.updateGlobalSyncParams(transaction_version, 'REFERRER_RECORD')
+                    }
+                }
+            } catch (error) {
+                this.logger.error(error.toString())
+            } finally {
+                continue
+            }
+        }
+    }
 
     async mannualSyncOrderAndPositionOfOwner(vault: string, symbol: string, direction: string, owner: string) {
         const { pHeight, iHeight, dHeight } = await this.prisma.findRecordsHeight();
@@ -320,6 +448,7 @@ export class SynchronizerService {
     async fetchPositions(pair: PositionOrderHandle, pHeight: string, mannual: boolean = false, owner: string = "") {
         let whereParams = {}
         if (owner && mannual) {
+
             whereParams = {
                 table_handle: { _eq: pair.position_handle },
                 decoded_key: { _contains: { owner } },
@@ -428,6 +557,19 @@ export class SynchronizerService {
         } catch (error) {
             this.logger.error(`Error fetching LP Token`);
         } finally { }
+    }
+
+    async fetchReferrerVolAndRebate(accountAddress: string) {
+        return await this.prisma.referrerInfoRecords.findMany({
+            where: {
+                userAccount: accountAddress
+            }
+        })
+    }
+    async fetchLpSimulatePrice() {
+        return await this.prisma.lPSimulatePriceRecords.findFirst({
+            orderBy: { createAt: 'desc' }
+        })
     }
 
     private isFunctionOn(flag: string): boolean {

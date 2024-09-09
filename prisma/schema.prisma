@@ -201,3 +201,26 @@ model LPTokenPriceRecords {
   price_formatted String
   createAt        DateTime @default(now())
 }
+
+model ReferrerInfoRecords {
+  id                     Int      @id @default(autoincrement())
+  vault                  String
+  symbol                 String
+  userAccount            String
+  referrer               String
+  rebate_user_amount     String
+  rebate_referrer_amount String
+  transaction_version    String
+  createAt               DateTime @default(now())
+}
+
+model LPSimulatePriceRecords {
+  id          Int      @id @default(autoincrement())
+  lpInName    String
+  lpInAmount  String
+  lpInPrice   String
+  lpOutName   String
+  lpOutAmount String
+  lpOutPrice  String
+  createAt    DateTime @default(now())
+}

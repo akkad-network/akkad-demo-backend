@@ -53,6 +53,9 @@ module.exports = {
         SYNC_ORDERS: "ON",
         SYNC_VAULT_CONFIG: "OFF",
         SYNC_LP_TOKEN_PRICE: "OFF",
+        //new feature
+        SYNC_SIMULATE_LP: "ON",
+        SYNC_REFERRER: "ON",
 
         //onchain func
         UPDATE_PRICE_FEED: "ON",
@@ -106,6 +109,9 @@ module.exports = {
         SYNC_ORDERS: "ON",
         SYNC_VAULT_CONFIG: "ON",
         SYNC_LP_TOKEN_PRICE: "ON",
+        //new feature
+        SYNC_SIMULATE_LP: "OFF",
+        SYNC_REFERRER: "ON",
 
         //onchain func
         UPDATE_PRICE_FEED: "OFF",

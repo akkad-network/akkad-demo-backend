@@ -87,8 +87,18 @@ export class PricefeederService {
                     vaas.push(result)
                 }
             }
-            this.vasBytes = vaas?.map(vaa => Array.from(Buffer.from(vaa?.binary, 'hex')));
-            this.parsedPrices = vaas?.map(item => { return { name: item.name, symbol: item.symbol, parsed: item?.parsed, priceDecimal: item?.priceDecimal } });
+
+            const validVaas = vaas.filter(vaa => vaa !== null && vaa !== undefined);
+
+            this.vasBytes = validVaas.map(vaa => Array.from(Buffer.from(vaa.binary, 'hex')));
+            this.parsedPrices = validVaas.map(item => {
+                return {
+                    name: item.name,
+                    symbol: item.symbol,
+                    parsed: item?.parsed,
+                    priceDecimal: item?.priceDecimal
+                };
+            });
         } catch (error) {
             this.logger.warn(`Error Fetching Pyth Price Failed`);
         }

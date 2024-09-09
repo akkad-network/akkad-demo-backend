@@ -102,9 +102,16 @@ export class PrismaService
                 sync_type: 'DECREASE_ORDER_RECORD'
             }
         })
+
+        const referrerRecord = await this.globalSyncController.findFirst({
+            where: {
+                sync_type: 'REFERRER_RECORD'
+            }
+        })
         let pHeight = '5653799813'
         let iHeight = '5653799813'
         let dHeight = '5653799813'
+        let rHeight = '5653799813'
 
         if (positionRecord) {
             pHeight = positionRecord.last_sync_transaction_verision
@@ -115,8 +122,11 @@ export class PrismaService
         if (decRecord) {
             dHeight = decRecord.last_sync_transaction_verision
         }
+        if (referrerRecord) {
+            rHeight = referrerRecord.last_sync_transaction_verision
+        }
 
-        return { pHeight, iHeight, dHeight }
+        return { pHeight, iHeight, dHeight, rHeight }
     }
 
     async updateGlobalSyncParams(last_sync: string, sync_type: string) {
