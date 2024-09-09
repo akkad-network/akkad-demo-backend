@@ -96,11 +96,11 @@ export class ScannerService {
             const symbolName = pair.symbol
             const direction = pair.direction
             const vaultPrice = pricesList.find((priceInfo) => priceInfo.name === vaultName).price
-            if (!vaultPrice) return
+            if (!vaultPrice) continue
             const vaultPriceToBigInt = BigInt(vaultPrice)
             const vaultPriceToString = BigInt(vaultPrice).toString();
             const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName).price
-            if (!symbolPrice) return
+            if (!symbolPrice) continue
 
             const symbolPriceToBigInt = BigInt(symbolPrice)
             const symbolPriceToString = BigInt(symbolPrice).toString();
@@ -194,6 +194,7 @@ export class ScannerService {
         for (const symbol of SymbolList) {
             const symbolName = symbol.tokenName
             const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName).price
+            if (!symbolPrice) continue
             const positions = await this.prisma.positionRecord.findMany({
                 where: {
                     closed: false,
