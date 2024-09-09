@@ -96,6 +96,32 @@ export class ExecutorService {
                         direction: order.direction,
                     }
                 })
+            } else if (error.toString().indexOf("0x753e") !== -1) {
+                await this.prisma.increaseOrderRecord.update({
+                    data: {
+                        executed: true,
+                        status: 'EXCEED MAX RESERVED CLOSED'
+                    },
+                    where: {
+                        id: order.id,
+                        vault: order.vault,
+                        symbol: order.symbol,
+                        direction: order.direction,
+                    }
+                })
+            } else if (error.toString().indexOf("0x75eb") !== -1) {
+                await this.prisma.increaseOrderRecord.update({
+                    data: {
+                        executed: true,
+                        status: 'LEVERAGE TOO LARGE CLOSED'
+                    },
+                    where: {
+                        id: order.id,
+                        vault: order.vault,
+                        symbol: order.symbol,
+                        direction: order.direction,
+                    }
+                })
             }
         }
 
