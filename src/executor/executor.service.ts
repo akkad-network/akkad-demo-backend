@@ -109,7 +109,7 @@ export class ExecutorService {
                         direction: order.direction,
                     }
                 })
-            } else if (error.toString().indexOf("0x75eb") !== -1) {
+            } else if (error.toString().indexOf("0x753b") !== -1) {
                 await this.prisma.increaseOrderRecord.update({
                     data: {
                         executed: true,
