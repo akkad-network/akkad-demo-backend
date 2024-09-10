@@ -207,6 +207,7 @@ model ReferrerInfoRecords {
   vault                  String
   symbol                 String
   userAccount            String
+  amount                 String
   referrer               String
   rebate_user_amount     String
   rebate_referrer_amount String

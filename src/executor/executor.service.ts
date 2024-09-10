@@ -122,9 +122,35 @@ export class ExecutorService {
                         direction: order.direction,
                     }
                 })
+            } else if (error.toString().indexOf("ERR_EXCEED_MAX_RESERVED") !== -1) {
+                await this.prisma.decreaseOrderRecord.update({
+                    data: {
+                        executed: true,
+                        status: 'MAX_RESERVED_CLOSED'
+                    },
+                    where: {
+                        id: order.id,
+                        vault: order.vault,
+                        symbol: order.symbol,
+                        direction: order.direction,
+                    }
+                })
+            } else if (error.toString().indexOf("ERR_ALREADY_HAS_REFERRER_CODE") !== -1) {
+                await this.prisma.decreaseOrderRecord.update({
+                    data: {
+                        executed: true,
+                        status: 'MAX_RESERVED_CLOSED'
+                    },
+                    where: {
+                        id: order.id,
+                        vault: order.vault,
+                        symbol: order.symbol,
+                        direction: order.direction,
+                    }
+
+                })
             }
         }
-
     }
 
     async executeDecreaseOrder(order: DecreaseOrderRecord) {
@@ -225,6 +251,33 @@ export class ExecutorService {
                     data: {
                         executed: true,
                         status: 'MAX_RESERVED_CLOSED'
+                    },
+                    where: {
+                        id: order.id,
+                        vault: order.vault,
+                        symbol: order.symbol,
+                        direction: order.direction,
+                    }
+                })
+            }
+            else if (error.toString().indexOf("0x753e") !== -1) {
+                await this.prisma.increaseOrderRecord.update({
+                    data: {
+                        executed: true,
+                        status: 'EXCEED MAX RESERVED CLOSED'
+                    },
+                    where: {
+                        id: order.id,
+                        vault: order.vault,
+                        symbol: order.symbol,
+                        direction: order.direction,
+                    }
+                })
+            } else if (error.toString().indexOf("0x753b") !== -1) {
+                await this.prisma.increaseOrderRecord.update({
+                    data: {
+                        executed: true,
+                        status: 'LEVERAGE TOO LARGE CLOSED'
                     },
                     where: {
                         id: order.id,

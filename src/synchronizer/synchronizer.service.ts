@@ -213,6 +213,7 @@ export class SynchronizerService {
                             vault: pair.vault,
                             symbol: pair.symbol,
                             userAccount: data.user,
+                            amount: data.amount,
                             referrer: data.referrer,
                             rebate_user_amount: data.rebate_user_amount,
                             rebate_referrer_amount: data.rebate_referrer_amount,
