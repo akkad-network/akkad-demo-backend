@@ -10,4 +10,9 @@ export class PricefeederController {
     async getAllSymbol24HoursPriceChange() {
         return this.pricefeederService.fetchAllSymbol24HoursChange()
     }
+
+    @Get('lpHourly')
+    async getHourlyPrices() {
+        return this.pricefeederService.getHourlyPriceRecords();
+    }
 }

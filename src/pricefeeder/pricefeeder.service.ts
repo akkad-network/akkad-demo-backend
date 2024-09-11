@@ -250,4 +250,26 @@ export class PricefeederService {
         return ((latestPrice - pastPrice) / pastPrice) * 100;
     }
 
+    async getHourlyPriceRecords() {
+        const records = await this.prisma.$queryRaw`
+          WITH RECURSIVE hours AS (
+            SELECT DATE_FORMAT(MIN(createAt), '%Y-%m-%d %H:00:00') AS hour
+            FROM LPSimulatePriceRecords
+            UNION
+            SELECT DATE_ADD(hour, INTERVAL 1 HOUR)
+            FROM hours
+            WHERE hour < (SELECT MAX(DATE_FORMAT(createAt, '%Y-%m-%d %H:00:00')) FROM LPSimulatePriceRecords)
+          )
+          SELECT 
+            UNIX_TIMESTAMP(h.hour) as time, 
+            COALESCE(
+              (SELECT lpOutPrice FROM LPSimulatePriceRecords WHERE DATE_FORMAT(createAt, '%Y-%m-%d %H:00:00') = h.hour LIMIT 1), 
+              (SELECT lpOutPrice FROM LPSimulatePriceRecords WHERE createAt > h.hour ORDER BY createAt ASC LIMIT 1)
+            ) as value 
+          FROM hours h
+          ORDER BY h.hour ASC;
+        `;
+        return records;
+    }
+
 }
