@@ -1,3 +1,4 @@
+import { formatAptosDecimalForParams, SymbolInfo } from './../utils/helper';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { COIN_ADDRESS, convertBackDecimal, convertDecimal, DIRECTION, getSideAddress, getTableHandle, MOCK_USDT_COIN_STORE, PAIRS, parseAptosDecimal, SymbolList, VaultList } from 'src/utils/helper';
@@ -83,7 +84,7 @@ export class SynchronizerService {
     @Cron(CronExpression.EVERY_5_MINUTES)
     async syncLpTokenPrice() {
         if (this.isFunctionOn(this.SYNC_LP_TOKEN_PRICE)) {
-            await this.syncOnChainLpTokenPrice();
+            // await this.syncOnChainLpTokenPrice();
             this.logger.debug("🚀 ~ Lp Token Price Sync ~ ")
         }
     }
@@ -121,34 +122,36 @@ export class SynchronizerService {
         }
     }
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_5_MINUTES)
     async handeSyncLpPriceWithAptos() {
         if (this.isFunctionOn(this.SYNC_SIMULATE_LP)) {
             if (this.isSyncSimulateLpInProcess) return
             this.isSyncSimulateLpInProcess = true
             this.logger.debug("🚀 ~ Sync Simulate Lp price ~ ")
-            await this.simulateLpPrice()
+            await this.simulateLpInPrice('APT')
             this.isSyncSimulateLpInProcess = false
         }
     }
 
-    async simulateLpPrice() {
+    async simulateLpInPrice(vault: string, amountIn?: number) {
+        if (!amountIn) amountIn = 1
         const prices = this.priceFeederService.getParsedPrices()
         if (!prices || prices.length === 0) return
         const vasBytes = this.priceFeederService.getVasBytes()
         if (!vasBytes || vasBytes.length === 0) return
-        const aptosPriceInfo = prices.find((price) => price.name === 'APT')
-        if (!aptosPriceInfo) return
-        const aptosPrice = convertBackDecimal(Number(aptosPriceInfo.parsed), aptosPriceInfo.priceDecimal)
+        const priceInfo = prices.find((price) => price.name === vault)
+        if (!priceInfo) return
+        const vaultPrice = convertBackDecimal(Number(priceInfo.parsed), priceInfo.priceDecimal)
+        const vaultInfo = VaultList.find((item) => item.symbol === vault)
 
         const transaction = await aptos.transaction.build.simple({
             sender: executerSigner?.accountAddress,
             data: {
                 function: `${MODULE_ADDRESS}::market::deposit`,
-                typeArguments: [APTOS_COIN],
+                typeArguments: [vaultInfo.tokenAddress],
                 functionArguments: [
-                    "100000000",
-                    "100",
+                    formatAptosDecimalForParams(amountIn, vaultInfo.decimal),
+                    "10",
                     vasBytes,
                 ],
             },
@@ -163,22 +166,68 @@ export class SynchronizerService {
             const event = events.find((event) => {
                 return event.type.indexOf(`${MODULE_ADDRESS}::market::Deposited`) !== -1
             })
-            if (!event) return
-            const mintAmount = event?.data?.mint_amount
-            const mintAmountParsed = parseAptosDecimal(Number(mintAmount), 6)
-            if (mintAmountParsed === 0) return
+            if (event) {
+                const mintAmount = event?.data?.mint_amount
+                const mintAmountParsed = parseAptosDecimal(Number(mintAmount), 6)
+                if (mintAmountParsed === 0) return
 
-            const lpPrice = Number(aptosPrice) / parseAptosDecimal(Number(mintAmount), 6)
-            await this.prisma.lPSimulatePriceRecords.create({
-                data: {
-                    lpInName: 'APT',
-                    lpInAmount: '100000000',
-                    lpInPrice: aptosPrice.toString(),
-                    lpOutName: 'AGLP',
-                    lpOutAmount: mintAmountParsed.toString(),
-                    lpOutPrice: lpPrice.toString()
-                }
+                const lpPrice = Number(vaultPrice) / parseAptosDecimal(Number(mintAmount), 6)
+                await this.prisma.lPSimulatePriceRecords.create({
+                    data: {
+                        lpInName: vaultInfo.symbol,
+                        lpInAmount: formatAptosDecimalForParams(amountIn, vaultInfo.decimal),
+                        lpInPrice: vaultPrice.toString(),
+                        lpOutName: 'AGLP',
+                        lpOutAmount: mintAmountParsed.toString(),
+                        lpOutPrice: lpPrice.toString()
+                    }
+                })
+                return { deposit_amonut: event?.data?.deposit_amount, fee_value: event?.data?.fee_value?.value, mint_amount: event?.data?.mint_amount }
+            }
+        } catch (error) {
+            this.logger.error(error.toString())
+        } finally {
+
+        }
+    }
+
+
+    async simulateLpOutPrice(vault: string, lpIn?: number) {
+        if (!lpIn) lpIn = 100
+        const prices = this.priceFeederService.getParsedPrices()
+        if (!prices || prices.length === 0) return
+        const vasBytes = this.priceFeederService.getVasBytes()
+        if (!vasBytes || vasBytes.length === 0) return
+        const priceInfo = prices.find((price) => price.name === vault)
+        if (!priceInfo) return
+        const vaultPrice = convertBackDecimal(Number(priceInfo.parsed), priceInfo.priceDecimal)
+        const vaultInfo = VaultList.find((item) => item.symbol === vault)
+
+        const transaction = await aptos.transaction.build.simple({
+            sender: executerSigner?.accountAddress,
+            data: {
+                function: `${MODULE_ADDRESS}::market::withdraw`,
+                typeArguments: [vaultInfo.tokenAddress],
+                functionArguments: [
+                    formatAptosDecimalForParams(lpIn, 6),
+                    "1",
+                    vasBytes,
+                ],
+            },
+        })
+        try {
+            const [userTransactionResponse] = await aptos.transaction.simulate.simple({
+                signerPublicKey: executerSigner?.publicKey,
+                transaction,
+            });
+            const events = userTransactionResponse.events as any[]
+            if (!events || events.length === 0) return
+            const event = events.find((event) => {
+                return event.type.indexOf(`${MODULE_ADDRESS}::market::Withdrawn`) !== -1
             })
+            if (event) {
+                return { burn_amount: event?.data?.burn_amount, fee_value: event?.data?.fee_value?.value, withdraw_amount: event?.data?.withdraw_amount }
+            }
         } catch (error) {
             this.logger.error(error.toString())
         } finally {
@@ -539,26 +588,26 @@ export class SynchronizerService {
     }
 
 
-    async syncOnChainLpTokenPrice() {
-        try {
-            const result = await aptos.view({
-                payload: {
-                    function: `${MODULE_ADDRESS}::market::to_lp_amount`,
-                    typeArguments: [`${COIN_ADDRESS}::usdt::USDT`],
-                    functionArguments: [1000000000],
-                },
-            })
-            const price = Number(result?.[0]).toString()
-            const price_formatted = (1 / parseAptosDecimal((Number(result?.[0]) / 1000) || 0, 6)).toFixed(8)
-            await this.prisma.lPTokenPriceRecords.create({
-                data: {
-                    price, price_formatted
-                }
-            })
-        } catch (error) {
-            this.logger.error(`Error fetching LP Token`);
-        } finally { }
-    }
+    // async syncOnChainLpTokenPrice() {
+    //     try {
+    //         const result = await aptos.view({
+    //             payload: {
+    //                 function: `${MODULE_ADDRESS}::market::to_lp_amount`,
+    //                 typeArguments: [`${COIN_ADDRESS}::usdt::USDT`],
+    //                 functionArguments: [1000000000],
+    //             },
+    //         })
+    //         const price = Number(result?.[0]).toString()
+    //         const price_formatted = (1 / parseAptosDecimal((Number(result?.[0]) / 1000) || 0, 6)).toFixed(8)
+    //         await this.prisma.lPTokenPriceRecords.create({
+    //             data: {
+    //                 price, price_formatted
+    //             }
+    //         })
+    //     } catch (error) {
+    //         this.logger.error(`Error fetching LP Token`);
+    //     } finally { }
+    // }
 
     async fetchReferrerVolAndRebate(accountAddress: string) {
         return await this.prisma.referrerInfoRecords.findMany({

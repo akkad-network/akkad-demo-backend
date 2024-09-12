@@ -37,4 +37,15 @@ export class SynchronizerController {
     async getLastestLpSimulatePrice() {
         return await this.synchronizerService.fetchLpSimulatePrice()
     }
+
+    @Get("simulateInFeeRate")
+    async simulateInFeeRate(@Query('vault') vault: string, @Query('amountIn') amountIn: number) {
+        return await this.synchronizerService.simulateLpInPrice(vault, amountIn)
+    }
+
+
+    @Get("simulateOutFeeRate")
+    async simulateOutFeeRate(@Query('vault') vault: string, @Query('lpIn') lpIn: number) {
+        return await this.synchronizerService.simulateLpOutPrice(vault, lpIn)
+    }
 }
