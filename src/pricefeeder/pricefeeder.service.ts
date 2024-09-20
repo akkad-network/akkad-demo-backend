@@ -273,7 +273,7 @@ export class PricefeederService {
     }
 
     async getDailyPriceRecords() {
-        const records = await this.prisma.$queryRaw`
+        const records: any[] = await this.prisma.$queryRaw`
           WITH RECURSIVE days AS (
             SELECT DATE(MIN(createAt)) AS day
             FROM LPSimulatePriceRecords
@@ -291,7 +291,12 @@ export class PricefeederService {
           FROM days d
           ORDER BY d.day ASC;
         `;
-        return records;
+        if (!records || records.length === 0) return []
+        // Convert BigInt fields to string or number
+        return records.map(record => ({
+            ...record,
+            time: Number(record.time)  // or record.time.toString() if you prefer
+        }));
     }
 
 }

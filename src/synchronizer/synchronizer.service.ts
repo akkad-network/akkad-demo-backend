@@ -134,14 +134,14 @@ export class SynchronizerService {
     }
 
 
-    @Cron(CronExpression.EVERY_5_SECONDS)
-    async handleCompetitionRank() {
-        if (this.isCompetitionRankSyncInProcess) return
-        this.isCompetitionRankSyncInProcess = true
-        this.syncCompetitionRank()
-        this.logger.debug("🚀 ~ Competition Rank Execute ~ ")
-        this.isCompetitionRankSyncInProcess = false
-    }
+    // @Cron(CronExpression.EVERY_5_SECONDS)
+    // async handleCompetitionRank() {
+    //     if (this.isCompetitionRankSyncInProcess) return
+    //     this.isCompetitionRankSyncInProcess = true
+    //     this.syncCompetitionRank()
+    //     this.logger.debug("🚀 ~ Competition Rank Execute ~ ")
+    //     this.isCompetitionRankSyncInProcess = false
+    // }
 
     async simulateLpInPrice(vault: string, amountIn?: number) {
         if (!amountIn) amountIn = 1
@@ -637,12 +637,12 @@ export class SynchronizerService {
 
 
 
-    async syncCompetitionRank() {
-        const result = await aptos.getModuleEventsByEventType({
-            eventType: `0x8a212ced6c20fb3a24c0580c7a5d7fc4dff7acf67abe697d7b0b56891d8d7c5d::pool::VaultDepositEvent<0x36e30e32c62d6c3ff4e3f000885626e18d6deb162a8091ac3af6aad4f3bdfae5::usdt::USDT>`
-        })
-        console.log("🚀 ~ SynchronizerService ~ syncCompetitionRank ~ result:", result)
-    }
+    // async syncCompetitionRank() {
+    //     const result = await aptos.getModuleEventsByEventType({
+    //         eventType: `0x8a212ced6c20fb3a24c0580c7a5d7fc4dff7acf67abe697d7b0b56891d8d7c5d::pool::VaultDepositEvent<0x36e30e32c62d6c3ff4e3f000885626e18d6deb162a8091ac3af6aad4f3bdfae5::usdt::USDT>`
+    //     })
+    //     console.log("🚀 ~ SynchronizerService ~ syncCompetitionRank ~ result:", result)
+    // }
 
 
 
