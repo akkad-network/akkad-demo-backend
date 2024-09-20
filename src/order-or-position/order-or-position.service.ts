@@ -292,7 +292,7 @@ export class OrderOrPositionService {
             },
         });
 
-        const initialPrice = closestRecord ? parseFloat(closestRecord.lpOutPrice) : parseFloat(firstRecord.price);
+        const initialPrice = closestRecord ? parseFloat(closestRecord.lpOutPrice) : parseFloat(firstRecord.lpOutPrice);
         const latestPrice = parseFloat(latestRecord.lpOutPrice);
 
         const changeRate = ((latestPrice - initialPrice) / initialPrice) * 100;
