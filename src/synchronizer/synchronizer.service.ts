@@ -171,7 +171,7 @@ export class SynchronizerService {
                 const mintAmountParsed = parseAptosDecimal(Number(mintAmount), 6)
                 if (mintAmountParsed === 0) return
 
-                const lpPrice = Number(vaultPrice) / parseAptosDecimal(Number(mintAmount), 6)
+                const lpPrice = Number(vaultPrice) * amountIn / parseAptosDecimal(Number(mintAmount), 6)
                 await this.prisma.lPSimulatePriceRecords.create({
                     data: {
                         lpInName: vaultInfo.symbol,
@@ -190,7 +190,6 @@ export class SynchronizerService {
 
         }
     }
-
 
     async simulateLpOutPrice(vault: string, lpIn?: number) {
         if (!lpIn) lpIn = 100
