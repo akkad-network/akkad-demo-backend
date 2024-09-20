@@ -15,4 +15,10 @@ export class PricefeederController {
     async getHourlyPrices() {
         return this.pricefeederService.getHourlyPriceRecords();
     }
+
+    @Get('lpDaily')
+    async getDailyPrices() {
+        return this.pricefeederService.getDailyPriceRecords();
+    }
+
 }

@@ -272,4 +272,26 @@ export class PricefeederService {
         return records;
     }
 
+    async getDailyPriceRecords() {
+        const records = await this.prisma.$queryRaw`
+          WITH RECURSIVE days AS (
+            SELECT DATE(MIN(createAt)) AS day
+            FROM LPSimulatePriceRecords
+            UNION ALL
+            SELECT DATE_ADD(day, INTERVAL 1 DAY)
+            FROM days
+            WHERE day < (SELECT DATE(MAX(createAt)) FROM LPSimulatePriceRecords)
+          )
+          SELECT 
+            UNIX_TIMESTAMP(d.day) as time, 
+            COALESCE(
+              (SELECT lpOutPrice FROM LPSimulatePriceRecords WHERE DATE(createAt) = d.day LIMIT 1), 
+              (SELECT lpOutPrice FROM LPSimulatePriceRecords WHERE createAt > d.day ORDER BY createAt ASC LIMIT 1)
+            ) as value 
+          FROM days d
+          ORDER BY d.day ASC;
+        `;
+        return records;
+    }
+
 }
