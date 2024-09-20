@@ -5,7 +5,6 @@ import { COIN_ADDRESS, convertBackDecimal, convertDecimal, DIRECTION, getSideAdd
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { AptFeeder, aptos, AvaxFeeder, BnbFeeder, BtcFeeder, DogeFeeder, EthFeeder, executerSigner, FEERDER_ADDRESS, liquidatorSigner, MODULE_ADDRESS, PepeFeeder, priceFeederSyncerSigner, SolFeeder, UsdcFeeder, UsdtFeeder } from 'src/main';
 import { PositionOrderHandle } from '@prisma/client';
-import { APTOS_COIN } from '@aptos-labs/ts-sdk';
 import { PricefeederService } from 'src/pricefeeder/pricefeeder.service';
 
 @Injectable()
@@ -31,6 +30,7 @@ export class SynchronizerService {
     private isSyncPositionInProcess = false
     private isSyncReferrerInProcess = false
     private isSyncSimulateLpInProcess = false
+    private isCompetitionRankSyncInProcess = false
 
     constructor(
         private readonly prisma: PrismaService,
@@ -123,7 +123,7 @@ export class SynchronizerService {
     }
 
     @Cron(CronExpression.EVERY_5_MINUTES)
-    async handeSyncLpPriceWithAptos() {
+    async handleSyncLpPriceWithAptos() {
         if (this.isFunctionOn(this.SYNC_SIMULATE_LP)) {
             if (this.isSyncSimulateLpInProcess) return
             this.isSyncSimulateLpInProcess = true
@@ -131,6 +131,16 @@ export class SynchronizerService {
             await this.simulateLpInPrice('APT')
             this.isSyncSimulateLpInProcess = false
         }
+    }
+
+
+    @Cron(CronExpression.EVERY_5_SECONDS)
+    async handleCompetitionRank() {
+        if (this.isCompetitionRankSyncInProcess) return
+        this.isCompetitionRankSyncInProcess = true
+        this.syncCompetitionRank()
+        this.logger.debug("🚀 ~ Competition Rank Execute ~ ")
+        this.isCompetitionRankSyncInProcess = false
     }
 
     async simulateLpInPrice(vault: string, amountIn?: number) {
@@ -624,5 +634,17 @@ export class SynchronizerService {
     private isFunctionOn(flag: string): boolean {
         return flag === 'ON'
     }
+
+
+
+    async syncCompetitionRank() {
+        const result = await aptos.getModuleEventsByEventType({
+            eventType: `0x8a212ced6c20fb3a24c0580c7a5d7fc4dff7acf67abe697d7b0b56891d8d7c5d::pool::VaultDepositEvent<0x36e30e32c62d6c3ff4e3f000885626e18d6deb162a8091ac3af6aad4f3bdfae5::usdt::USDT>`
+        })
+        console.log("🚀 ~ SynchronizerService ~ syncCompetitionRank ~ result:", result)
+    }
+
+
+
 
 }

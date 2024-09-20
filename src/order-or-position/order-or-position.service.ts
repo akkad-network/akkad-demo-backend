@@ -265,7 +265,7 @@ export class OrderOrPositionService {
         const now = new Date();
         const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);  // 7天前的时间
 
-        const closestRecord = await this.prisma.lPTokenPriceRecords.findFirst({
+        const closestRecord = await this.prisma.lPSimulatePriceRecords.findFirst({
             where: {
                 createAt: {
                     lte: sevenDaysAgo,
@@ -276,7 +276,7 @@ export class OrderOrPositionService {
             },
         });
 
-        const firstRecord = await this.prisma.lPTokenPriceRecords.findFirst({
+        const firstRecord = await this.prisma.lPSimulatePriceRecords.findFirst({
             orderBy: {
                 createAt: 'asc',
             },
@@ -286,14 +286,14 @@ export class OrderOrPositionService {
             return { changeRate: 0 };
         }
 
-        const latestRecord = await this.prisma.lPTokenPriceRecords.findFirst({
+        const latestRecord = await this.prisma.lPSimulatePriceRecords.findFirst({
             orderBy: {
                 createAt: 'desc',
             },
         });
 
-        const initialPrice = closestRecord ? parseFloat(closestRecord.price) : parseFloat(firstRecord.price);
-        const latestPrice = parseFloat(latestRecord.price);
+        const initialPrice = closestRecord ? parseFloat(closestRecord.lpOutPrice) : parseFloat(firstRecord.price);
+        const latestPrice = parseFloat(latestRecord.lpOutPrice);
 
         const changeRate = ((latestPrice - initialPrice) / initialPrice) * 100;
 
