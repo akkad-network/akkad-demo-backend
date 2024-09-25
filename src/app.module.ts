@@ -14,6 +14,9 @@ import { LiquidatorModule } from './liquidator/liquidator.module';
 import { BatchtestController } from './batchtest/batchtest.controller';
 import { BatchtestService } from './batchtest/batchtest.service';
 import { BatchtestModule } from './batchtest/batchtest.module';
+import { CampaignController } from './campaign/campaign.controller';
+import { CampaignService } from './campaign/campaign.service';
+import { CampaignModule } from './campaign/campaign.module';
 @Module({
   controllers: [AppController, BatchtestController],
   providers: [AppService, BatchtestService],
@@ -30,7 +33,8 @@ import { BatchtestModule } from './batchtest/batchtest.module';
     PrismaModule,
     SynchronizerModule,
     LiquidatorModule,
-    BatchtestModule
+    BatchtestModule,
+    CampaignModule
   ],
 })
 export class AppModule { }

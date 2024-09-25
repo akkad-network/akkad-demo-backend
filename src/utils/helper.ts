@@ -171,9 +171,7 @@ export const SymbolList: SymbolInfo[] = [
 
 ]
 
-
 export type APTOS_ADDRESS = `${string}::${string}::${string}`
-
 
 export const PAIRS = [
     { vault: 'APT', symbol: 'APT', direction: 'LONG' },

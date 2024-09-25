@@ -4,12 +4,14 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PriceFeederRecord } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 import { aptos, MODULE_ADDRESS } from 'src/main';
+import { PricefeederService } from 'src/pricefeeder/pricefeeder.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { DIRECTION, PAIRS, SymbolList, TYPES, VaultList } from 'src/utils/helper';
+import { convertBackDecimal, DIRECTION, PAIRS, SymbolList, TYPES, VaultList } from 'src/utils/helper';
 @Injectable()
 export class OrderOrPositionService {
 
-    constructor(private readonly prisma: PrismaService) {
+    constructor(private readonly prisma: PrismaService,
+    ) {
 
     }
 
@@ -31,6 +33,7 @@ export class OrderOrPositionService {
                             }
                         })
                         if (type === 'PositionRecord') {
+                            const creation_num = Number(result?.creation_num)
                             let handle = result?.positions?.handle
                             if (handle && handle.length !== 66) {
                                 handle = '0x'.concat('0'.repeat(66 - handle.length)).concat(handle.slice(2))
@@ -41,7 +44,8 @@ export class OrderOrPositionService {
                                         vault: vault.name,
                                         symbol: symbol.tokenName,
                                         direction: direction.name,
-                                        position_handle: handle
+                                        position_handle: handle,
+                                        creation_num: creation_num
                                     },
                                     where: { id: record.id }
                                 })
@@ -51,11 +55,12 @@ export class OrderOrPositionService {
                                         vault: vault.name,
                                         symbol: symbol.tokenName,
                                         direction: direction.name,
-                                        position_handle: handle
+                                        position_handle: handle,
+                                        creation_num: creation_num
                                     }
                                 })
                             }
-                            console.log(`🚀 ~ syncHandles position ~ ${vault.name} ${symbol.tokenName} ${direction.name} ${handle}`)
+                            console.log(`🚀 ~ syncHandles position ~ ${vault.name} ${symbol.tokenName} ${direction.name} ${handle} ${creation_num}`)
 
                         } else { // order record
                             let increase_order_handle = result?.open_orders?.handle
@@ -398,4 +403,12 @@ export class OrderOrPositionService {
         const latestPrice = parseFloat(latestRecord.price);
         return ((latestPrice - pastPrice) / pastPrice) * 100;
     }
+
+
+    async getAllPositionData(vault: string, symbol: string) {
+        return await this.prisma.positionRecord.findMany({
+            where: { vault, symbol, closed: false }
+        })
+    }
+
 }

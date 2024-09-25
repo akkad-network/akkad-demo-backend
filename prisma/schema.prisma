@@ -154,6 +154,7 @@ model PositionOrderHandle {
   increase_order_handle String?
   decrease_order_handle String?
   version_number        Int      @default(1)
+  creation_num          Int      @default(0)
   createAt              DateTime @default(now())
 }
 
@@ -224,4 +225,33 @@ model LPSimulatePriceRecords {
   lpOutAmount String
   lpOutPrice  String
   createAt    DateTime @default(now())
+}
+
+model CampaignSocialRecords {
+  id              Int      @id @default(autoincrement())
+  address         String   @unique
+  isTwitterFollow Boolean  @default(false)
+  isDiscordJoined Boolean  @default(false)
+  createAt        DateTime @default(now())
+}
+
+model CampaignUser {
+  id       Int      @id @default(autoincrement())
+  address  String
+  createAt DateTime @default(now())
+}
+
+model CampaignRank {
+  id                       Int      @id @default(autoincrement())
+  vault                    String
+  symbol                   String
+  direction                String
+  eventType                String
+  vaultDecimal             String   @default("0")
+  userAddress              String
+  amount                   Decimal
+  position_id              String
+  transaction_version      String
+  transaction_block_height String
+  createAt                 DateTime @default(now())
 }

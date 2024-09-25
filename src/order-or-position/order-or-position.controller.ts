@@ -79,6 +79,14 @@ export class OrderOrPositionController {
     ) {
         return this.orderOrPositionService.fetch24HoursChange(symbol)
     }
+
+    @Get("getAllPositions")
+    async getAllPositionData(
+        @Query('vault') vault: string,
+        @Query('symbol') symbol: string,
+    ) {
+        return this.orderOrPositionService.getAllPositionData(vault, symbol)
+    }
 }
 
 //https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,dogecoin,solana,avalanche-2,aptos,pepe&vs_currencies=usd&include_24hr_change=true
