@@ -95,7 +95,6 @@ export class CampaignService {
             })
         }
         for (const pair of PAIRS) {
-            console.log("🚀 ~ CampaignService ~ syncOnChainEvents ~ pair:", pair)
             const vaultInfo = VaultList.find((item) => item.symbol === pair.vault)
             const symbolInfo = SymbolList.find((item) => item.tokenSymbol === pair.symbol)
             const direction = pair.direction
@@ -115,7 +114,6 @@ export class CampaignService {
 
                     }
                 })
-                console.log("🚀 ~ CampaignService ~ syncOnChainEvents ~ result:", result)
 
                 if (result && result.length > 0) {
                     for (const item of result) {
