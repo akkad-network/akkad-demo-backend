@@ -232,6 +232,7 @@ model CampaignSocialRecords {
   address         String   @unique
   isTwitterFollow Boolean  @default(false)
   isDiscordJoined Boolean  @default(false)
+  isTwitterRepost Boolean  @default(false)
   createAt        DateTime @default(now())
 }
 

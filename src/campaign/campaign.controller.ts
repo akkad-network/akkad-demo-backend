@@ -8,9 +8,15 @@ export class CampaignController {
     constructor(private readonly campaignService: CampaignService) { }
 
     // Endpoint for Twitter follow action
-    @Post('twitter-follow')
+    @Post('x-follow')
     async twitterFollow(@Body('address') address: string) {
         const result = await this.campaignService.twitterFollow(address);
+        return result
+    }
+
+    @Post('x-repost')
+    async twitterRepost(@Body('address') address: string) {
+        const result = await this.campaignService.twitterRepost(address);
         return result
     }
 

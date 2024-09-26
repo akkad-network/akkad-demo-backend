@@ -16,7 +16,7 @@ export class CampaignService {
 
     private isSyncRankInProcess = false
 
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    @Cron(CronExpression.EVERY_30_MINUTES)
     async handleSyncSymbolConfig() {
         if (this.isFunctionOn(this.SYNC_CAMPAIGN_EVENTS)) {
             if (this.isSyncRankInProcess) return
@@ -195,6 +195,32 @@ export class CampaignService {
                 where: { address },
                 data: {
                     isTwitterFollow: true,
+                },
+            });
+        }
+
+        return record;
+    }
+
+    async twitterRepost(address: string) {
+        let record = await this.prisma.campaignSocialRecords.findUnique({
+            where: { address },
+        });
+
+        if (!record) {
+            // Create a new record if it doesn't exist
+            record = await this.prisma.campaignSocialRecords.create({
+                data: {
+                    address,
+                    isTwitterRepost: true,
+                },
+            });
+        } else {
+            // Update the existing record
+            record = await this.prisma.campaignSocialRecords.update({
+                where: { address },
+                data: {
+                    isTwitterRepost: true,
                 },
             });
         }
