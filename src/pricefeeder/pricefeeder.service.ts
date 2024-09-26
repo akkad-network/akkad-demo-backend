@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 dotenv.config()
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AptFeeder, aptos, AvaxFeeder, BnbFeeder, BtcFeeder, DogeFeeder, EthFeeder, executerSigner, FEERDER_ADDRESS, MODULE_ADDRESS, PepeFeeder, priceFeederSyncerSigner, SolFeeder, UsdcFeeder, UsdtFeeder } from 'src/main';
+import { AptFeeder, aptos, AvaxFeeder, BnbFeeder, BtcFeeder, DogeFeeder, EthFeeder, executerSigner, FEERDER_ADDRESS, MODULE_ADDRESS, PepeFeeder, priceFeederSyncerSigner, SolFeeder, StAptFeeder, UsdcFeeder, UsdtFeeder } from 'src/main';
 import axios from 'axios';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ScannerService } from 'src/scanner/scanner.service';
@@ -32,6 +32,7 @@ export class PricefeederService {
         { name: "AVAX", address: AvaxFeeder, priceDecimal: 8 },
         { name: "PEPE", address: PepeFeeder, priceDecimal: 10 },
         { name: "DOGE", address: DogeFeeder, priceDecimal: 8 },
+        { name: "stAPT", address: StAptFeeder, priceDecimal: 8 },
     ];
 
     private vasBytes: number[][] = []

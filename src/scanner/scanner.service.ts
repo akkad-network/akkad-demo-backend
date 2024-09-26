@@ -21,6 +21,7 @@ export class ScannerService {
     private readonly VAULT_USDT = process.env.VAULT_USDT
     private readonly VAULT_BTC = process.env.VAULT_BTC
     private readonly VAULT_ETH = process.env.VAULT_ETH
+    private readonly VAULT_STAPT = process.env.VAULT_STAPT
 
     private FUNC_PAIRS: any[] = []
 
@@ -60,6 +61,12 @@ export class ScannerService {
                     this.FUNC_PAIRS.push(pair)
                 }
             }
+            if (this.isFunctionOn(this.VAULT_STAPT)) {
+                if (pair.vault === 'stAPT') {
+                    this.FUNC_PAIRS.push(pair)
+                }
+            }
+
         })
     }
 

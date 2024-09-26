@@ -16,6 +16,8 @@ export class SynchronizerService {
     private readonly VAULT_USDT = process.env.VAULT_USDT
     private readonly VAULT_BTC = process.env.VAULT_BTC
     private readonly VAULT_ETH = process.env.VAULT_ETH
+    private readonly VAULT_STAPT = process.env.VAULT_STAPT
+
     private FUNC_PAIRS: any[] = []
 
     private readonly SYNC_POSITIONS = process.env.SYNC_POSITIONS
@@ -58,6 +60,11 @@ export class SynchronizerService {
             }
             if (this.isFunctionOn(this.VAULT_ETH)) {
                 if (pair.vault === 'ETH') {
+                    this.FUNC_PAIRS.push(pair)
+                }
+            }
+            if (this.isFunctionOn(this.VAULT_STAPT)) {
+                if (pair.vault === 'stAPT') {
                     this.FUNC_PAIRS.push(pair)
                 }
             }
@@ -584,28 +591,6 @@ export class SynchronizerService {
             }
         }
     }
-
-
-    // async syncOnChainLpTokenPrice() {
-    //     try {
-    //         const result = await aptos.view({
-    //             payload: {
-    //                 function: `${MODULE_ADDRESS}::market::to_lp_amount`,
-    //                 typeArguments: [`${COIN_ADDRESS}::usdt::USDT`],
-    //                 functionArguments: [1000000000],
-    //             },
-    //         })
-    //         const price = Number(result?.[0]).toString()
-    //         const price_formatted = (1 / parseAptosDecimal((Number(result?.[0]) / 1000) || 0, 6)).toFixed(8)
-    //         await this.prisma.lPTokenPriceRecords.create({
-    //             data: {
-    //                 price, price_formatted
-    //             }
-    //         })
-    //     } catch (error) {
-    //         this.logger.error(`Error fetching LP Token`);
-    //     } finally { }
-    // }
 
     async fetchReferrerVolAndRebate(accountAddress: string) {
         return await this.prisma.referrerInfoRecords.findMany({

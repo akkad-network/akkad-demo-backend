@@ -5,6 +5,8 @@ import { AppModule } from './app.module';
 import { Account, Aptos, AptosConfig, Ed25519PrivateKey, Network } from '@aptos-labs/ts-sdk';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
+import * as session from 'express-session';
+import * as passport from 'passport';
 
 const aptosConfig = new AptosConfig({ network: Network.TESTNET });
 
@@ -27,6 +29,7 @@ export const SolFeeder = process.env.SOL_FEEDER_ADDRESS
 export const AvaxFeeder = process.env.AVAX_FEEDER_ADDRESS
 export const PepeFeeder = process.env.PEPE_FEEDER_ADDRESS
 export const DogeFeeder = process.env.DOGE_FEEDER_ADDRESS
+export const StAptFeeder = process.env.STAPT_FEEDER_ADDRESS
 
 export const MODULE_ADDRESS = process.env.MODULE_ADDRESS
 export const FEERDER_ADDRESS = process.env.PRICE_FEEDER_ADDRESS
@@ -41,6 +44,17 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  app.use(passport.initialize());
+  app.use(
+    session({
+      secret: 'Agdex',
+      resave: false,
+      saveUninitialized: true,
+    }),
+  );
+  app.use(passport.session());
+
 
   await app.listen(PORT);
 }

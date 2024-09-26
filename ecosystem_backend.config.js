@@ -15,6 +15,7 @@ const {
   AVAX_FEEDER_ADDRESS,
   PEPE_FEEDER_ADDRESS,
   DOGE_FEEDER_ADDRESS,
+  STAPT_FEEDER_ADDRESS,
   EXECUTER_PK_1,
   LIQUIDATOR_PK,
 } = require("./ecosystem_base");
@@ -42,6 +43,7 @@ module.exports = {
         AVAX_FEEDER_ADDRESS: AVAX_FEEDER_ADDRESS,
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
+        STAPT_FEEDER_ADDRESS: STAPT_FEEDER_ADDRESS,
 
         //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
@@ -70,6 +72,7 @@ module.exports = {
         VAULT_USDT: "OFF",
         VAULT_BTC: "ON",
         VAULT_ETH: "ON",
+        VAULT_STAPT: "ON",
 
         //clear
         CLEAR_PRICE_DATA: "ON",
@@ -100,6 +103,7 @@ module.exports = {
         AVAX_FEEDER_ADDRESS: AVAX_FEEDER_ADDRESS,
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
+        STAPT_FEEDER_ADDRESS: STAPT_FEEDER_ADDRESS,
 
         //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
@@ -128,7 +132,7 @@ module.exports = {
         VAULT_USDT: "ON",
         VAULT_BTC: "OFF",
         VAULT_ETH: "OFF",
-
+        VAULT_STAPT: "OFF",
         //clear
         CLEAR_PRICE_DATA: "OFF",
 

@@ -16,6 +16,7 @@ export const MOCK_USDC_COIN_STORE = `0x1::coin::CoinStore<${COIN_ADDRESS}::usdc:
 export const MOCK_USDT_COIN_STORE = `0x1::coin::CoinStore<${COIN_ADDRESS}::usdt::USDT>`
 export const MOCK_BTC_COIN_STORE = `0x1::coin::CoinStore<${COIN_ADDRESS}::btc::BTC>`
 export const MOCK_ETH_COIN_STORE = `0x1::coin::CoinStore<${COIN_ADDRESS}::ETH::ETH>`
+export const MOCK_STAPT_COIN_STORE = `0x1::coin::CoinStore<${COIN_ADDRESS}::st_apt::ST_APT>`
 
 export const CHECK_LIQUIDATION_FUNC_PATH = `${MODULE_ADDRESS}::positions::check_liquidation`
 
@@ -72,6 +73,13 @@ export const VaultList: VaultInfo[] = [
         tokenAddress: APTOS_COIN,
         tokenStore: APTOS_COIN_STORE,
         decimal: 8,
+    },
+    {
+        name: 'stAPT',
+        symbol: 'stAPT',
+        tokenAddress: `${COIN_ADDRESS}::st_apt::ST_APT`,
+        tokenStore: MOCK_STAPT_COIN_STORE,
+        decimal: 8
     },
     {
         name: 'USDT',
@@ -190,6 +198,23 @@ export const PAIRS = [
     { vault: 'APT', symbol: 'PEPE', direction: 'SHORT' },
     { vault: 'APT', symbol: 'DOGE', direction: 'LONG' },
     { vault: 'APT', symbol: 'DOGE', direction: 'SHORT' },
+
+    { vault: 'stAPT', symbol: 'APT', direction: 'LONG' },
+    { vault: 'stAPT', symbol: 'APT', direction: 'SHORT' },
+    { vault: 'stAPT', symbol: 'ETH', direction: 'LONG' },
+    { vault: 'stAPT', symbol: 'ETH', direction: 'SHORT' },
+    { vault: 'stAPT', symbol: 'BTC', direction: 'LONG' },
+    { vault: 'stAPT', symbol: 'BTC', direction: 'SHORT' },
+    { vault: 'stAPT', symbol: 'BNB', direction: 'LONG' },
+    { vault: 'stAPT', symbol: 'BNB', direction: 'SHORT' },
+    { vault: 'stAPT', symbol: 'SOL', direction: 'LONG' },
+    { vault: 'stAPT', symbol: 'SOL', direction: 'SHORT' },
+    { vault: 'stAPT', symbol: 'AVAX', direction: 'LONG' },
+    { vault: 'stAPT', symbol: 'AVAX', direction: 'SHORT' },
+    { vault: 'stAPT', symbol: 'PEPE', direction: 'LONG' },
+    { vault: 'stAPT', symbol: 'PEPE', direction: 'SHORT' },
+    { vault: 'stAPT', symbol: 'DOGE', direction: 'LONG' },
+    { vault: 'stAPT', symbol: 'DOGE', direction: 'SHORT' },
 
     { vault: 'USDC', symbol: 'APT', direction: 'LONG' },
     { vault: 'USDC', symbol: 'APT', direction: 'SHORT' },
