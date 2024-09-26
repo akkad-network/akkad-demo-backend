@@ -9,17 +9,21 @@ import { Decimal } from '@prisma/client/runtime/library';
 export class CampaignService {
     private readonly logger = new Logger(CampaignService.name)
 
+    private readonly SYNC_CAMPAIGN_EVENTS = process.env.SYNC_CAMPAIGN_EVENTS
+
     constructor(private readonly prisma: PrismaService,
     ) { }
 
     private isSyncRankInProcess = false
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncSymbolConfig() {
-        if (this.isSyncRankInProcess) return
-        this.isSyncRankInProcess = true
-        await this.syncOnChainEvents();
-        this.isSyncRankInProcess = false
+        if (this.isFunctionOn(this.SYNC_CAMPAIGN_EVENTS)) {
+            if (this.isSyncRankInProcess) return
+            this.isSyncRankInProcess = true
+            await this.syncOnChainEvents();
+            this.isSyncRankInProcess = false
+        }
     }
 
 
@@ -91,6 +95,7 @@ export class CampaignService {
             })
         }
         for (const pair of PAIRS) {
+            console.log("🚀 ~ CampaignService ~ syncOnChainEvents ~ pair:", pair)
             const vaultInfo = VaultList.find((item) => item.symbol === pair.vault)
             const symbolInfo = SymbolList.find((item) => item.tokenSymbol === pair.symbol)
             const direction = pair.direction
@@ -110,6 +115,7 @@ export class CampaignService {
 
                     }
                 })
+                console.log("🚀 ~ CampaignService ~ syncOnChainEvents ~ result:", result)
 
                 if (result && result.length > 0) {
                     for (const item of result) {
@@ -247,5 +253,9 @@ export class CampaignService {
             where: { address }
         });
         return result;
+    }
+
+    private isFunctionOn(flag: string): boolean {
+        return flag === 'ON'
     }
 }

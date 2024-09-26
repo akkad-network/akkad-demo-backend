@@ -56,6 +56,8 @@ module.exports = {
         //new feature
         SYNC_SIMULATE_LP: "ON",
         SYNC_REFERRER: "ON",
+        //campaign events
+        SYNC_CAMPAIGN_EVENTS: "OFF",
 
         //onchain func
         UPDATE_PRICE_FEED: "ON",
@@ -112,6 +114,8 @@ module.exports = {
         //new feature
         SYNC_SIMULATE_LP: "OFF",
         SYNC_REFERRER: "ON",
+        //campaign events
+        SYNC_CAMPAIGN_EVENTS: "ON",
 
         //onchain func
         UPDATE_PRICE_FEED: "OFF",

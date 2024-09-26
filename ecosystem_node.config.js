@@ -56,6 +56,11 @@ module.exports = {
         SYNC_ORDERS: "OFF",
         SYNC_VAULT_CONFIG: "OFF",
         SYNC_LP_TOKEN_PRICE: "OFF",
+        //new feature
+        SYNC_SIMULATE_LP: "OFF",
+        SYNC_REFERRER: "OFF",
+        //campaign events
+        SYNC_CAMPAIGN_EVENTS: "OFF",
 
         //onchain func
         UPDATE_PRICE_FEED: "OFF",
@@ -112,6 +117,8 @@ module.exports = {
         //new feature
         SYNC_SIMULATE_LP: "OFF",
         SYNC_REFERRER: "OFF",
+        //campaign events
+        SYNC_CAMPAIGN_EVENTS: "OFF",
 
         //onchain func
         UPDATE_PRICE_FEED: "OFF",
@@ -168,6 +175,8 @@ module.exports = {
         //new feature
         SYNC_SIMULATE_LP: "OFF",
         SYNC_REFERRER: "OFF",
+        //campaign events
+        SYNC_CAMPAIGN_EVENTS: "OFF",
 
         //onchain func
         UPDATE_PRICE_FEED: "OFF",
@@ -224,6 +233,8 @@ module.exports = {
         //new feature
         SYNC_SIMULATE_LP: "OFF",
         SYNC_REFERRER: "OFF",
+        //campaign events
+        SYNC_CAMPAIGN_EVENTS: "OFF",
 
         //onchain func
         UPDATE_PRICE_FEED: "OFF",
