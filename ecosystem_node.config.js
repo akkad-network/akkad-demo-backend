@@ -20,6 +20,7 @@ const {
   EXECUTER_PK_2,
   EXECUTER_PK_3,
   LIQUIDATOR_PK,
+  TELEGRAM_TOKEN,
 } = require("./ecosystem_base");
 
 module.exports = {
@@ -47,6 +48,7 @@ module.exports = {
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
         STAPT_FEEDER_ADDRESS: STAPT_FEEDER_ADDRESS,
+        TELEGRAM_TOKEN: TELEGRAM_TOKEN,
 
         //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
@@ -82,6 +84,9 @@ module.exports = {
 
         //test
         BATCH_TEST: "OFF",
+
+        //telegram
+        TELEGRAM_BOT: "OFF",
       },
     },
     {
@@ -107,6 +112,7 @@ module.exports = {
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
         STAPT_FEEDER_ADDRESS: STAPT_FEEDER_ADDRESS,
+        TELEGRAM_TOKEN: TELEGRAM_TOKEN,
 
         //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
@@ -142,6 +148,9 @@ module.exports = {
 
         //test
         BATCH_TEST: "OFF",
+
+        //telegram
+        TELEGRAM_BOT: "OFF",
       },
     },
     {
@@ -167,6 +176,7 @@ module.exports = {
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
         STAPT_FEEDER_ADDRESS: STAPT_FEEDER_ADDRESS,
+        TELEGRAM_TOKEN: TELEGRAM_TOKEN,
 
         //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
@@ -202,6 +212,9 @@ module.exports = {
 
         //test
         BATCH_TEST: "OFF",
+
+        //telegram
+        TELEGRAM_BOT: "OFF",
       },
     },
     {
@@ -227,6 +240,7 @@ module.exports = {
         PEPE_FEEDER_ADDRESS: PEPE_FEEDER_ADDRESS,
         DOGE_FEEDER_ADDRESS: DOGE_FEEDER_ADDRESS,
         STAPT_FEEDER_ADDRESS: STAPT_FEEDER_ADDRESS,
+        TELEGRAM_TOKEN: TELEGRAM_TOKEN,
 
         //private keys
         PRICE_FEED_AND_SYNCER_PK: PRICE_FEED_AND_SYNCER_PK,
@@ -262,6 +276,9 @@ module.exports = {
 
         //test
         BATCH_TEST: "OFF",
+
+        //telegram
+        TELEGRAM_BOT: "OFF",
       },
     },
   ],

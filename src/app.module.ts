@@ -16,9 +16,11 @@ import { BatchtestService } from './batchtest/batchtest.service';
 import { BatchtestModule } from './batchtest/batchtest.module';
 import { CampaignModule } from './campaign/campaign.module';
 import { PassportModule } from '@nestjs/passport';
+import { TelegramController } from './telegram/telegram.controller';
+import { TelegramModule } from './telegram/telegram.module';
 
 @Module({
-  controllers: [AppController, BatchtestController],
+  controllers: [AppController, BatchtestController, TelegramController],
   providers: [AppService, BatchtestService],
   imports: [
     ConfigModule.forRoot({
@@ -34,7 +36,8 @@ import { PassportModule } from '@nestjs/passport';
     SynchronizerModule,
     LiquidatorModule,
     BatchtestModule,
-    CampaignModule
+    CampaignModule,
+    TelegramModule
   ],
 })
 export class AppModule { }

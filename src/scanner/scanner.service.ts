@@ -211,11 +211,15 @@ export class ScannerService {
 
             const explodingPositions = positions.filter(position => {
                 const collateralPrice = pricesList.find((priceInfo) => priceInfo.name === position.vault).price;
+                if (!collateralPrice) return false
                 const vaultInfo = VaultList.find((vault) => vault.name === position.vault)
+
                 const collateralValue = convertBackDecimal(position.collateral, vaultInfo.decimal) * convertBackDecimal(collateralPrice, 18);
                 const collVauleMulRate = collateralValue * 98 / 100
 
-                const deltaSize = Number(convertBackDecimal(symbolPrice, 18)) * Number(convertBackDecimal(position.position_amount, symbol.decimal)) - Number(convertBackDecimal(position.position_size, 18));
+                const deltaSize = Number(convertBackDecimal(symbolPrice, 18))
+                    * Number(convertBackDecimal(position.position_amount, symbol.decimal))
+                    - Number(convertBackDecimal(position.position_size, 18));
 
                 if (position.direction === 'LONG') {
                     return collVauleMulRate + deltaSize < 0
