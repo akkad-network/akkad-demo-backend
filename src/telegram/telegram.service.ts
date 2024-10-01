@@ -23,7 +23,6 @@ export class TelegramService implements OnModuleInit {
     }
 
     private initializeBotHandlers() {
-        console.log("🚀 ~ TelegramService ~ initializeBotHandlers ~ initializeBotHandlers:")
         this.bot.onText(/\/start(?: (.+))?/, (msg: any, match: any) => {
             // if (match && match[1]) {
             // this.handleStartCommandWithParmas(msg, match);
@@ -38,7 +37,6 @@ export class TelegramService implements OnModuleInit {
     //     this.bot.on('new_chat_members', (msg: any) => this.handleNewMember(msg));
     // }
     private async handleStartCommand(msg: TelegramBot.Message) {
-        console.log("🚀 ~ TelegramService ~ handleStartCommand ~ msg:", msg)
         const chatID = msg.chat.id;
         await this.sendPhotoLink(chatID, msg.from?.username || msg.chat?.username);
     }

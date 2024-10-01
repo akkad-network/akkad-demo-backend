@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { PricefeederService } from './pricefeeder.service';
 
 @Controller('pricefeeder')
@@ -16,9 +16,9 @@ export class PricefeederController {
         return this.pricefeederService.getHourlyPriceRecords();
     }
 
-    @Get('lpDaily')
-    async getDailyPrices() {
-        return this.pricefeederService.getDailyPriceRecords();
+    @Get('getLpPricesByInterval')
+    async getLpPricesByInterval(@Query('interval') interval: '30m' | '1h' | '4h' | '1d' | '3d') {
+        return this.pricefeederService.getPriceRecordsByInterval(interval);
     }
 
 }

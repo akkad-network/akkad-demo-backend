@@ -273,31 +273,45 @@ export class PricefeederService {
         return records;
     }
 
-    async getDailyPriceRecords() {
-        const records: any[] = await this.prisma.$queryRaw`
-          WITH RECURSIVE days AS (
-            SELECT DATE(MIN(createAt)) AS day
-            FROM LPSimulatePriceRecords
-            UNION ALL
-            SELECT DATE_ADD(day, INTERVAL 1 DAY)
-            FROM days
-            WHERE day < (SELECT DATE(MAX(createAt)) FROM LPSimulatePriceRecords)
-          )
+    async getPriceRecordsByInterval(interval: '30m' | '1h' | '4h' | '1d' | '3d') {
+        let timeCondition: string;
+
+        switch (interval) {
+            case '30m':
+                timeCondition = "MINUTE(createAt) IN (0, 30)";
+                break;
+            case '1h':
+                timeCondition = "MINUTE(createAt) = 0";
+                break;
+            case '4h':
+                timeCondition = "HOUR(createAt) IN (0, 4, 8, 12, 16, 20) AND MINUTE(createAt) = 0";
+                break;
+            case '1d':
+                timeCondition = "HOUR(createAt) = 0 AND MINUTE(createAt) = 0";
+                break;
+            case '3d':
+                timeCondition = "HOUR(createAt) = 0 AND MINUTE(createAt) = 0 AND DAYOFYEAR(createAt) MOD 3 = 0";
+                break;
+            default:
+                throw new Error('Unsupported interval');
+        }
+
+        const rawQuery = `
           SELECT 
-            UNIX_TIMESTAMP(d.day) as time, 
-            COALESCE(
-              (SELECT lpOutPrice FROM LPSimulatePriceRecords WHERE DATE(createAt) = d.day LIMIT 1), 
-              (SELECT lpOutPrice FROM LPSimulatePriceRecords WHERE createAt > d.day ORDER BY createAt ASC LIMIT 1)
-            ) as value 
-          FROM days d
-          ORDER BY d.day ASC;
+            UNIX_TIMESTAMP(createAt) as time, 
+            lpOutPrice
+          FROM LPSimulatePriceRecords
+          WHERE ${timeCondition}
+          ORDER BY createAt ASC;
         `;
-        if (!records || records.length === 0) return []
-        // Convert BigInt fields to string or number
+
+        const records: any[] = await this.prisma.$queryRawUnsafe(rawQuery);
+
+        if (!records || records.length === 0) return [];
+
         return records.map(record => ({
-            ...record,
-            time: Number(record.time)  // or record.time.toString() if you prefer
+            time: Number(record.time),
+            value: parseFloat(record.lpOutPrice)
         }));
     }
-
 }

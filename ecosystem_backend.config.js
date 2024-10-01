@@ -122,7 +122,7 @@ module.exports = {
         SYNC_LP_TOKEN_PRICE: "ON",
         //new feature
         SYNC_SIMULATE_LP: "OFF",
-        SYNC_REFERRER: "ON",
+        SYNC_REFERRER: "OFF",
         //campaign events
         SYNC_CAMPAIGN_EVENTS: "ON",
 
