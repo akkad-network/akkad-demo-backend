@@ -595,7 +595,7 @@ export class SynchronizerService {
     async fetchReferrerVolAndRebate(accountAddress: string) {
         return await this.prisma.referrerInfoRecords.findMany({
             where: {
-                userAccount: accountAddress
+                referrer: accountAddress
             }
         })
     }
