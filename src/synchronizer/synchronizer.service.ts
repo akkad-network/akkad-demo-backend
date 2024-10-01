@@ -1,4 +1,4 @@
-import { formatAptosDecimalForParams, SymbolInfo } from './../utils/helper';
+import { APTOS_ADDRESS, formatAptosDecimalForParams, SymbolInfo } from './../utils/helper';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { COIN_ADDRESS, convertBackDecimal, DIRECTION, PAIRS, parseAptosDecimal, SymbolList, VaultList } from 'src/utils/helper';
@@ -117,7 +117,7 @@ export class SynchronizerService {
         }
     }
 
-    @Cron(CronExpression.EVERY_5_MINUTES)
+    @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncReferrerinfo() {
         if (this.isFunctionOn(this.SYNC_REFERRER)) {
             if (this.isSyncReferrerInProcess) return
@@ -247,9 +247,13 @@ export class SynchronizerService {
             const vaultAddress = VaultList.find((vault) => vault.symbol === pair.vault).tokenAddress
             const symbolAddress = SymbolList.find((symbol) => symbol.tokenSymbol === pair.symbol).tokenAddress
             try {
-                const events: any = await aptos.getModuleEventsByEventType({
-                    // options: { where: { type: { _eq: `${MODULE_ADDRESS}::market::ReferrerProfitExecute<${vaultAddress}, ${symbolAddress}>` } } }
-                    eventType: `${MODULE_ADDRESS}::market::ReferrerProfitExecute<${vaultAddress}, ${symbolAddress}>`
+                const events: any = await aptos.getEvents({
+                    options: {
+                        where: {
+                            type: { _eq: `${MODULE_ADDRESS}::market::ReferrerProfitExecute<${vaultAddress}, ${symbolAddress}>` },
+                            transaction_version: { _gt: 6067662862 }
+                        }
+                    }
                 })
                 if (!events || events.length === 0) continue
                 for (const event of events) {
