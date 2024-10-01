@@ -117,7 +117,7 @@ export class SynchronizerService {
         }
     }
 
-    @Cron(CronExpression.EVERY_10_MINUTES)
+    @Cron(CronExpression.EVERY_10_SECONDS)
     async handleSyncReferrerinfo() {
         if (this.isFunctionOn(this.SYNC_REFERRER)) {
             if (this.isSyncReferrerInProcess) return
