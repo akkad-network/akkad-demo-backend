@@ -87,6 +87,7 @@ export class PricefeederService {
                 if (result) {
                     vaas.push(result)
                 }
+
             }
 
             const validVaas = vaas.filter(vaa => vaa !== null && vaa !== undefined);

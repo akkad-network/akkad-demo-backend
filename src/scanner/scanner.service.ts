@@ -131,9 +131,9 @@ export class ScannerService {
                     symbol: symbolName,
                     direction: direction,
                     executed: false,
-                    status: { not: null }
+                    status: 'NORMAL'
                 }
-            });
+            })
 
             const validOrdersIncrease = allOrdersIncrease.filter(order => {
                 const limitedIndexPriceBigInt = BigInt(order.limited_index_price);
