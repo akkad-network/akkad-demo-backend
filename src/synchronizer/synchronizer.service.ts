@@ -251,7 +251,7 @@ export class SynchronizerService {
                     options: {
                         where: {
                             type: { _eq: `${MODULE_ADDRESS}::market::ReferrerProfitExecute<${vaultAddress}, ${symbolAddress}>` },
-                            transaction_version: { _gt: 6067662862 }
+                            transaction_version: { _gt: rHeight }
                         }
                     }
                 })
@@ -612,10 +612,5 @@ export class SynchronizerService {
     private isFunctionOn(flag: string): boolean {
         return flag === 'ON'
     }
-
-
-
-
-
 
 }
