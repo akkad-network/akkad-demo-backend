@@ -16,12 +16,12 @@ export class CampaignService {
 
     private isSyncRankInProcess = false
 
-    @Cron(CronExpression.EVERY_30_MINUTES)
     async handleSyncSymbolConfig() {
         if (this.isFunctionOn(this.SYNC_CAMPAIGN_EVENTS)) {
+            return
             if (this.isSyncRankInProcess) return
             this.isSyncRankInProcess = true
-            await this.syncOnChainEvents();
+            // await this.syncOnChainEvents();
             this.isSyncRankInProcess = false
         }
     }
