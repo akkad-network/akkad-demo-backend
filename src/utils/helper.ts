@@ -74,13 +74,13 @@ export const VaultList: VaultInfo[] = [
         tokenStore: APTOS_COIN_STORE,
         decimal: 8,
     },
-    {
-        name: 'stAPT',
-        symbol: 'stAPT',
-        tokenAddress: `${COIN_ADDRESS}::st_apt::ST_APT`,
-        tokenStore: MOCK_STAPT_COIN_STORE,
-        decimal: 8
-    },
+    // {
+    //     name: 'stAPT',
+    //     symbol: 'stAPT',
+    //     tokenAddress: `${COIN_ADDRESS}::st_apt::ST_APT`,
+    //     tokenStore: MOCK_STAPT_COIN_STORE,
+    //     decimal: 8
+    // },
     {
         name: 'USDT',
         symbol: 'USDT',
@@ -198,23 +198,6 @@ export const PAIRS = [
     { vault: 'APT', symbol: 'PEPE', direction: 'SHORT' },
     { vault: 'APT', symbol: 'DOGE', direction: 'LONG' },
     { vault: 'APT', symbol: 'DOGE', direction: 'SHORT' },
-
-    { vault: 'stAPT', symbol: 'APT', direction: 'LONG' },
-    { vault: 'stAPT', symbol: 'APT', direction: 'SHORT' },
-    { vault: 'stAPT', symbol: 'ETH', direction: 'LONG' },
-    { vault: 'stAPT', symbol: 'ETH', direction: 'SHORT' },
-    { vault: 'stAPT', symbol: 'BTC', direction: 'LONG' },
-    { vault: 'stAPT', symbol: 'BTC', direction: 'SHORT' },
-    { vault: 'stAPT', symbol: 'BNB', direction: 'LONG' },
-    { vault: 'stAPT', symbol: 'BNB', direction: 'SHORT' },
-    { vault: 'stAPT', symbol: 'SOL', direction: 'LONG' },
-    { vault: 'stAPT', symbol: 'SOL', direction: 'SHORT' },
-    { vault: 'stAPT', symbol: 'AVAX', direction: 'LONG' },
-    { vault: 'stAPT', symbol: 'AVAX', direction: 'SHORT' },
-    { vault: 'stAPT', symbol: 'PEPE', direction: 'LONG' },
-    { vault: 'stAPT', symbol: 'PEPE', direction: 'SHORT' },
-    { vault: 'stAPT', symbol: 'DOGE', direction: 'LONG' },
-    { vault: 'stAPT', symbol: 'DOGE', direction: 'SHORT' },
 
     { vault: 'USDC', symbol: 'APT', direction: 'LONG' },
     { vault: 'USDC', symbol: 'APT', direction: 'SHORT' },
