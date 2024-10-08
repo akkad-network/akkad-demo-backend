@@ -194,7 +194,6 @@ export class ScannerService {
 
     async scanPositions() {
         const prices = this.priceFeederService.getParsedPrices()
-        console.log("🚀 ~ ScannerService ~ scanPositions ~ prices:", prices)
         if (!prices || prices.length === 0) return
         const pricesList = prices.map((price) => {
             return { name: price.name, price: convertDecimal(Number(price.parsed), price.priceDecimal) }
@@ -202,7 +201,9 @@ export class ScannerService {
         console.log("🚀 ~ ScannerService ~ pricesList ~ pricesList:", pricesList)
         for (const symbol of SymbolList) {
             const symbolName = symbol.tokenName
+            console.log("🚀 ~ ScannerService ~ scanPositions ~ symbolName:", symbolName)
             const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName).price
+            console.log("🚀 ~ ScannerService ~ scanPositions ~ symbolPrice:", symbolPrice)
             if (!symbolPrice) continue
             const positions = await this.prisma.positionRecord.findMany({
                 where: {
