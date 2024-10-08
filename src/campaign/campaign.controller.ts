@@ -52,7 +52,7 @@ export class CampaignController {
         return result
     }
 
-    @Post('referraCountlRank')
+    @Post('referralCountRank')
     async getReferralCountAggregates() {
         return this.campaignService.getReferralCountAggregates();
     }
