@@ -51,4 +51,9 @@ export class CampaignController {
         const result = await this.campaignService.campaignRank();
         return result
     }
+
+    @Post('referralRank')
+    async getUserAccountAggregates() {
+        return this.campaignService.getAggregatedReferrerInfo();
+    }
 }

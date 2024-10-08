@@ -27,6 +27,48 @@ export class CampaignService {
     }
 
 
+    async getAggregatedReferrerInfo() {
+        const groupedData = await this.prisma.referrerInfoRecords.groupBy({
+            by: ['referrer', 'vault', 'symbol'],
+            _sum: {
+                amount: true,
+                rebate_user_amount: true,
+                rebate_referrer_amount: true,
+            },
+        });
+
+        return this.transformData(groupedData);
+    }
+
+    transformData(data: any) {
+        const result = [];
+
+        const userAccountMap = new Map();
+
+        data.forEach((item: any) => {
+            const userAccount = item.referrer;
+            const record = {
+                userAccount: userAccount,
+                vault: item.vault,
+                symbol: item.symbol,
+                _sum: item._sum
+            };
+
+            if (!userAccountMap.has(userAccount)) {
+                userAccountMap.set(userAccount, {
+                    userAccount: userAccount,
+                    records: []
+                });
+            }
+
+            userAccountMap.get(userAccount).records.push(record);
+        });
+
+        userAccountMap.forEach(value => result.push(value));
+
+        return result;
+    }
+
     async campaignRank() {
         const totals = await this.prisma.campaignRank.groupBy({
             by: ['userAddress', 'vault', 'eventType'],

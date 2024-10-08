@@ -208,10 +208,10 @@ model ReferrerInfoRecords {
   vault                  String
   symbol                 String
   userAccount            String
-  amount                 String
+  amount                 Decimal
   referrer               String
-  rebate_user_amount     String
-  rebate_referrer_amount String
+  rebate_user_amount     Decimal
+  rebate_referrer_amount Decimal
   transaction_version    String
   createAt               DateTime @default(now())
 }
