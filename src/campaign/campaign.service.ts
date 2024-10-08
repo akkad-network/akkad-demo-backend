@@ -25,7 +25,26 @@ export class CampaignService {
             this.isSyncRankInProcess = false
         }
     }
+    async getReferralCountAggregates() {
+        const referrerCounts = await this.prisma.referrerInfoRecords.groupBy({
+            by: ['referrer', 'userAccount'],
+            _count: {
+                userAccount: true,
+            },
+        });
 
+        const referrerMap = new Map();
+
+        referrerCounts.forEach(record => {
+            const { referrer } = record;
+            if (!referrerMap.has(referrer)) {
+                referrerMap.set(referrer, { referrer, userAccountCount: 0 });
+            }
+            referrerMap.get(referrer).userAccountCount += 1;
+        });
+
+        return Array.from(referrerMap.values());
+    }
 
     async getAggregatedReferrerInfo() {
         const groupedData = await this.prisma.referrerInfoRecords.groupBy({
