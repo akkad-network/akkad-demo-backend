@@ -98,15 +98,18 @@ export class ScannerService {
         const pricesList = prices.map((price) => {
             return { name: price.name, price: convertDecimal(Number(price.parsed), price.priceDecimal) }
         })
+        console.log("🚀 ~ ScannerService ~ pricesList ~ pricesList:", pricesList)
         for (const pair of this.FUNC_PAIRS) {
             const vaultName = pair.vault
             const symbolName = pair.symbol
             const direction = pair.direction
             const vaultPrice = pricesList.find((priceInfo) => priceInfo.name === vaultName).price
+            console.log("🚀 ~ ScannerService ~ scanOrderBook ~ vaultPrice:", pricesList.find((priceInfo) => priceInfo.name === vaultName))
             if (!vaultPrice) continue
             const vaultPriceToBigInt = BigInt(vaultPrice)
             const vaultPriceToString = BigInt(vaultPrice).toString();
             const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName).price
+            console.log("🚀 ~ ScannerService ~ scanOrderBook ~ symbolPrice:", pricesList.find((priceInfo) => priceInfo.name === symbolName))
             if (!symbolPrice) continue
 
             const symbolPriceToBigInt = BigInt(symbolPrice)
