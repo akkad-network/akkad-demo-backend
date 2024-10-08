@@ -32,7 +32,6 @@ export class PricefeederService {
         { name: "AVAX", address: AvaxFeeder, priceDecimal: 8 },
         { name: "PEPE", address: PepeFeeder, priceDecimal: 10 },
         { name: "DOGE", address: DogeFeeder, priceDecimal: 8 },
-        { name: "stAPT", address: StAptFeeder, priceDecimal: 8 },
     ];
 
     private vasBytes: number[][] = []
