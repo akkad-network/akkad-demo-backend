@@ -176,7 +176,6 @@ export const SymbolList: SymbolInfo[] = [
         pythFeederAddress: DOGE_FEEDER_ADDRESS,
         decimal: 8,
     },
-
 ]
 
 export type APTOS_ADDRESS = `${string}::${string}::${string}`

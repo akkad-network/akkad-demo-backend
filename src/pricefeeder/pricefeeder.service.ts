@@ -39,6 +39,7 @@ export class PricefeederService {
 
     private isFetchPriceInProcess = false
     private isUpdateAptosInProcess = false
+    private isPriceSetting = false
 
     constructor(
         private readonly prisma: PrismaService,
@@ -75,7 +76,11 @@ export class PricefeederService {
         return this.vasBytes
     }
     getParsedPrices() {
-        return this.parsedPrices
+        if (this.isPriceSetting) {
+            return []
+        } else {
+            return this.parsedPrices
+        }
     }
 
     async fetchPythPrices(): Promise<void> {
@@ -89,16 +94,19 @@ export class PricefeederService {
             }
 
             const validVaas = vaas.filter(vaa => vaa !== null && vaa !== undefined);
-
-            this.vasBytes = validVaas.map(vaa => Array.from(Buffer.from(vaa.binary, 'hex')));
-            this.parsedPrices = validVaas.map(item => {
-                return {
-                    name: item.name,
-                    symbol: item.symbol,
-                    parsed: item?.parsed,
-                    priceDecimal: item?.priceDecimal
-                };
-            });
+            if (!this.isPriceSetting) {
+                this.isPriceSetting = true
+                this.vasBytes = validVaas.map(vaa => Array.from(Buffer.from(vaa.binary, 'hex')));
+                this.parsedPrices = validVaas.map(item => {
+                    return {
+                        name: item.name,
+                        symbol: item.symbol,
+                        parsed: item?.parsed,
+                        priceDecimal: item?.priceDecimal
+                    };
+                });
+                this.isPriceSetting = false
+            }
         } catch (error) {
             this.logger.warn(`Error Fetching Pyth Price Failed`);
         }
