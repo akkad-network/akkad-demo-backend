@@ -199,6 +199,7 @@ export class ScannerService {
         const pricesList = prices.map((price) => {
             return { name: price.name, price: convertDecimal(Number(price.parsed), price.priceDecimal) }
         })
+        console.log("🚀 ~ ScannerService ~ pricesList ~ pricesList:", pricesList)
         for (const symbol of SymbolList) {
             const symbolName = symbol.tokenName
             const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName).price
