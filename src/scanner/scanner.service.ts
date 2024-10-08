@@ -102,11 +102,11 @@ export class ScannerService {
             const vaultName = pair.vault
             const symbolName = pair.symbol
             const direction = pair.direction
-            const vaultPrice = pricesList.find((priceInfo) => priceInfo.name === vaultName).price
+            const vaultPrice = pricesList.find((priceInfo) => priceInfo.name === vaultName)?.price
             if (!vaultPrice) continue
             const vaultPriceToBigInt = BigInt(vaultPrice)
             const vaultPriceToString = BigInt(vaultPrice).toString();
-            const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName).price
+            const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName)?.price
             if (!symbolPrice) continue
 
             const symbolPriceToBigInt = BigInt(symbolPrice)
@@ -198,22 +198,20 @@ export class ScannerService {
         const pricesList = prices.map((price) => {
             return { name: price.name, price: convertDecimal(Number(price.parsed), price.priceDecimal) }
         })
-        console.log("🚀 ~ ScannerService ~ pricesList ~ pricesList:", pricesList)
         for (const symbol of SymbolList) {
             const symbolName = symbol.tokenName
-            console.log("🚀 ~ ScannerService ~ scanPositions ~ symbolName:", symbolName)
-            const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName).price
-            console.log("🚀 ~ ScannerService ~ scanPositions ~ symbolPrice:", symbolPrice)
+            const symbolPrice = pricesList.find((priceInfo) => priceInfo.name === symbolName)?.price
             if (!symbolPrice) continue
             const positions = await this.prisma.positionRecord.findMany({
                 where: {
                     closed: false,
                     symbol: symbolName,
+                    vault: { not: 'stAPT' }
                 },
             });
 
             const explodingPositions = positions.filter(position => {
-                const collateralPrice = pricesList.find((priceInfo) => priceInfo.name === position.vault).price;
+                const collateralPrice = pricesList.find((priceInfo) => priceInfo.name === position.vault)?.price;
                 if (!collateralPrice) return false
                 const vaultInfo = VaultList.find((vault) => vault.name === position.vault)
 
