@@ -82,12 +82,10 @@ export class PricefeederService {
         try {
             let vaas: any[] = []
             for (const item of this.priceIds) {
-                console.log("🚀 ~ PricefeederService ~ fetchPythPrices ~ item:", item)
                 const result = await this.fetchPythPricesData(item)
                 if (result) {
                     vaas.push(result)
                 }
-                console.log("🚀 ~ PricefeederService ~ fetchPythPrices ~ result:", result)
             }
 
             const validVaas = vaas.filter(vaa => vaa !== null && vaa !== undefined);

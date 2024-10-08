@@ -194,6 +194,7 @@ export class ScannerService {
 
     async scanPositions() {
         const prices = this.priceFeederService.getParsedPrices()
+        console.log("🚀 ~ ScannerService ~ scanPositions ~ prices:", prices)
         if (!prices || prices.length === 0) return
         const pricesList = prices.map((price) => {
             return { name: price.name, price: convertDecimal(Number(price.parsed), price.priceDecimal) }
