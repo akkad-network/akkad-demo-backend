@@ -3,41 +3,29 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ScannerModule } from './scanner/scanner.module';
-import { ReferralModule } from './referral/referral.module';
-import { OrderOrPositionModule } from './order-or-position/order-or-position.module';
-import { PricefeederModule } from './pricefeeder/pricefeeder.module';
-import { ExecutorModule } from './executor/executor.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { SynchronizerModule } from './synchronizer/synchronizer.module';
-import { LiquidatorModule } from './liquidator/liquidator.module';
-import { BatchtestController } from './batchtest/batchtest.controller';
-import { BatchtestService } from './batchtest/batchtest.service';
-import { BatchtestModule } from './batchtest/batchtest.module';
-import { CampaignModule } from './campaign/campaign.module';
-import { PassportModule } from '@nestjs/passport';
-import { TelegramController } from './telegram/telegram.controller';
-import { TelegramModule } from './telegram/telegram.module';
+import { ListenerModule } from './listener/listener.module';
+import { ListenerController } from './listener/listener.controller';
+import { ListenerService } from './listener/listener.service';
+import { EnforcerController } from './enforcer/enforcer.controller';
+import { EnforcerService } from './enforcer/enforcer.service';
+import { EnforcerModule } from './enforcer/enforcer.module';
+import { SentinelController } from './sentinel/sentinel.controller';
+import { SentinelService } from './sentinel/sentinel.service';
+import { SentinelModule } from './sentinel/sentinel.module';
 
 @Module({
-  controllers: [AppController, BatchtestController, TelegramController],
-  providers: [AppService, BatchtestService],
+  controllers: [AppController, ListenerController, EnforcerController, SentinelController],
+  providers: [AppService, ListenerService, EnforcerService, SentinelService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
-    ScannerModule,
-    ReferralModule,
-    OrderOrPositionModule,
-    PricefeederModule,
-    ExecutorModule,
     PrismaModule,
-    SynchronizerModule,
-    LiquidatorModule,
-    BatchtestModule,
-    CampaignModule,
-    TelegramModule
+    ListenerModule,
+    EnforcerModule,
+    SentinelModule,
   ],
 })
 export class AppModule { }
