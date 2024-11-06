@@ -7,12 +7,12 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ListenerModule } from './listener/listener.module';
 import { ListenerController } from './listener/listener.controller';
 import { ListenerService } from './listener/listener.service';
-import { EnforcerController } from './enforcer/enforcer.controller';
-import { EnforcerService } from './enforcer/enforcer.service';
-import { EnforcerModule } from './enforcer/enforcer.module';
-import { SentinelController } from './sentinel/sentinel.controller';
-import { SentinelService } from './sentinel/sentinel.service';
-import { SentinelModule } from './sentinel/sentinel.module';
+import { EnforcerController } from './executor/executor.controller';
+import { EnforcerService } from './executor/executor.service';
+import { EnforcerModule } from './executor/executor.module';
+import { SentinelController } from './synchronizer/synchronizer.controller';
+import { SentinelService } from './synchronizer/synchronizer.service';
+import { SentinelModule } from './synchronizer/synchronizer.module';
 
 @Module({
   controllers: [AppController, ListenerController, EnforcerController, SentinelController],

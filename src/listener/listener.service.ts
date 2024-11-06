@@ -1,79 +1,126 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
+import { ABTCVaultAbi } from 'src/abis/aBtcVaultAbi';
+import { CrossChainVaultAbi } from 'src/abis/crossChainVaultAbi';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AkkadConfig, SourceChainsList } from 'src/utils/helper';
 
 @Injectable()
 export class ListenerService implements OnModuleInit, OnModuleDestroy {
-    private provider: ethers.JsonRpcProvider;
-    private contract: ethers.Contract;
-    private readonly contractAddress = '0x9813f09b21B87ff240E8c957def24a15Cec4d32E';
-    private readonly abi = [
-        {
-            anonymous: false,
-            inputs: [
-                { indexed: true, internalType: 'address', name: 'user', type: 'address' },
-                { indexed: false, internalType: 'uint256', name: 'amount', type: 'uint256' },
-            ],
-            name: 'Deposit',
-            type: 'event',
-        },
-    ];
     private readonly logger = new Logger(ListenerService.name);
+    private mutilContracts: any[] = [];
 
+    private akkadContract: any
     constructor(private readonly prisma: PrismaService) {
         this.initializeProviderAndContract();
+        this.initialAkkadListener();
+    }
+
+    private initialAkkadListener() {
+        const provider = new ethers.JsonRpcProvider(
+            AkkadConfig.chainRpc
+        );
+        this.akkadContract = new ethers.Contract(AkkadConfig.aBTCVaultAddress, ABTCVaultAbi, provider)
     }
 
     private initializeProviderAndContract() {
-        this.provider = new ethers.JsonRpcProvider(
-            // 'https://holesky.infura.io/v3/89f6aa1d3c6e484c9aaf6c2693cdf8e5',
-            'https://eth-holesky.g.alchemy.com/v2/fE8KoOll9N-1khheGreDyFHkzMrInSnh',
-            // 'https://endpoints.omniatech.io/v1/eth/holesky/public',
-        );
+        for (const chainInfo of SourceChainsList) {
+            const provider = new ethers.JsonRpcProvider(
+                chainInfo.chainRpc
+            );
+            this.mutilContracts.push(
+                {
+                    providerInfo: provider,
+                    contractInfo: new ethers.Contract(chainInfo.crossChainVaultAddress, CrossChainVaultAbi, provider),
+                    chainInfo
 
-        this.contract = new ethers.Contract(this.contractAddress, this.abi, this.provider);
+                })
+        }
+
+    }
+
+    async listenToAkkad() {
+        this.logger.log('Listening to AKKAD events...');
+        this.akkadContract.on('Redeem', async (from: any, amount: any, chainIndex: any) => {
+            try {
+                await this.prisma.akkadRedeemEvent.create({
+                    data: {
+                        targetChainIndex: Number(chainIndex),
+                        userAddressFrom: from.toString(),
+                        userAddressTo: from.toString(),
+                        amount: amount.toString(),
+                        status: 'READY',
+                    },
+                });
+                this.logger.log(`Event stored successfully.`);
+            } catch (dbError) {
+                this.logger.error('Error storing event in the database:', dbError);
+            }
+        });
     }
 
     async listenToEvents() {
         this.logger.log('Listening to contract events...');
 
-        try {
-            this.contract.on('Deposit', async (from, value, event) => {
-                this.logger.log(`Event detected: from ${from}, value: ${value}`);
-                this.logger.log('Event details:', event.log.args);
+        this.mutilContracts.map(async (single: any) => {
+            try {
+                single.contractInfo.on('Deposit', async (from: any, tokenAddress: any, amount: any) => {
+                    try {
+                        await this.prisma.crossChainDepositEvent.create({
+                            data: {
+                                chainIndex: single.chainInfo.index,
+                                chainName: single.chainInfo.name,
+                                contractAddress: single.chainInfo.crossChainVaultAddress,
+                                userAddressFrom: from.toString(),
+                                userAddressTo: from.toString(),
+                                amount: amount.toString(),
+                                tokenAddress: tokenAddress,
+                                status: 'READY',
+                            },
+                        });
+                        this.logger.log(`Event stored successfully.`);
+                    } catch (dbError) {
+                        this.logger.error('Error storing event in the database:', dbError);
+                    }
+                });
 
-                try {
-                    await this.prisma.crossChainDepositEvent.create({
-                        data: {
-                            contractAddress: this.contractAddress,
-                            userAddressFrom: from.toString(),
-                            userAddressTo: from.toString(),
-                            amount: value.toString(),
-                            tokenAddress: '0xd44b02f1ab47750958dbdbe13489d37014c8ebd6',
-                            status: 'READY',
-                        },
-                    });
-                    this.logger.log(`Event stored successfully.`);
-                } catch (dbError) {
-                    this.logger.error('Error storing event in the database:', dbError);
-                }
-            });
+                single.contractInfo.on('CrossChainDepositEvent', async (from: any, targetChain: number, tokenAddress: any, amount: any) => {
+                    try {
+                        await this.prisma.crossChainBridgeEvent.create({
+                            data: {
+                                targetChainIndex: Number(targetChain),
+                                userAddressFrom: from.toString(),
+                                userAddressTo: from.toString(),
+                                tokenAddress: tokenAddress,
+                                amount: amount.toString(),
+                                status: 'READY',
+                            },
+                        });
+                        this.logger.log(`Event stored successfully.`);
+                    } catch (dbError) {
+                        this.logger.error('Error storing event in the database:', dbError);
+                    }
+                });
 
-            this.provider.on('error', (error) => {
-                this.logger.error('Provider error detected:', error);
-                this.restartListener();
-            });
-        } catch (error) {
-            this.logger.error('Error while listening to events:', error);
-            await this.restartListener();
-        }
+                single.providerInfo.on('error', (error) => {
+                    this.logger.error('Provider error detected:', error);
+                    this.restartListener();
+                });
+            } catch (error) {
+                this.logger.error('Error while listening to events:', error);
+                await this.restartListener();
+            }
+        })
     }
 
     private async restartListener() {
         this.logger.warn('Restarting listener...');
         try {
-            this.contract.removeAllListeners();
-            this.initializeProviderAndContract();
+            this.mutilContracts.map((contract: any) => {
+                contract.contractInfo.removeAllListeners();
+                this.initializeProviderAndContract();
+            })
+
             await this.listenToEvents();
         } catch (error) {
             this.logger.error('Failed to restart listener:', error);
@@ -83,10 +130,15 @@ export class ListenerService implements OnModuleInit, OnModuleDestroy {
 
     onModuleInit() {
         this.listenToEvents();
+        this.listenToAkkad()
     }
 
     onModuleDestroy() {
         this.logger.log('Shutting down event listener...');
-        this.contract.removeAllListeners();
+        this.mutilContracts.map((contract: any) => {
+            contract.contractInfo.removeAllListeners();
+            this.initializeProviderAndContract();
+        })
+
     }
 }

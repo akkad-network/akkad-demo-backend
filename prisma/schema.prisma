@@ -9,6 +9,8 @@ generator client {
 
 model CrossChainDepositEvent {
   id              Int      @id @default(autoincrement())
+  chainIndex      Int
+  chainName       String   @default("")
   contractAddress String
   userAddressFrom String
   userAddressTo   String
@@ -16,4 +18,25 @@ model CrossChainDepositEvent {
   tokenAddress    String
   status          String
   createAt        DateTime @default(now())
+}
+
+model CrossChainBridgeEvent {
+  id               Int      @id @default(autoincrement())
+  targetChainIndex Int
+  tokenAddress     String
+  userAddressFrom  String
+  userAddressTo    String
+  amount           String
+  status           String
+  createAt         DateTime @default(now())
+}
+
+model AkkadRedeemEvent {
+  id               Int      @id @default(autoincrement())
+  targetChainIndex Int
+  userAddressFrom  String
+  userAddressTo    String
+  amount           String
+  status           String
+  createAt         DateTime @default(now())
 }

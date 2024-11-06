@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaClient } from '@prisma/client';
 import { ethers } from 'ethers';
+import { ABTCVaultAbi } from 'src/abis/aBtcVaultAbi';
+import { AkkadConfig } from 'src/utils/helper';
 
 @Injectable()
 export class SentinelService {
@@ -12,38 +14,16 @@ export class SentinelService {
         'https://rpc-testnet.akkad.network',
     );
 
-    //0xd78F5fd4ba999A4772392EC0270641fD871f2e73
     private wallet = new ethers.Wallet('0x121a7a8a7b974a2e76252671b4330126125b9d86ed6b93305f6d2c0a3288db8b', this.provider);
+    private contract = new ethers.Contract(AkkadConfig.aBTCVaultAddress, ABTCVaultAbi, this.wallet);
 
-    private contractAddress = '0xDFbb3d60015314f7c8e16a317146B21D3ed8ebB7';
-    private abi = [
-        {
-            "inputs": [
-                {
-                    "internalType": "address payable",
-                    "name": "_to",
-                    "type": "address"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "_amount",
-                    "type": "uint256"
-                }
-            ],
-            "name": "transfer",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-    ];
-
-    @Cron(CronExpression.EVERY_10_SECONDS)
+    // @Cron(CronExpression.EVERY_10_SECONDS)
     async checkReadyEvents() {
         this.logger.log('Checking for Ready events...');
 
         try {
             const readyEvent = await this.prisma.crossChainDepositEvent.findFirst({
-                where: { status: 'Ready' },
+                where: { status: 'READY' },
             });
             if (readyEvent) {
                 await this.executeContractOperation(readyEvent);
@@ -53,8 +33,6 @@ export class SentinelService {
         }
     }
 
-
-    private contract = new ethers.Contract(this.contractAddress, this.abi, this.wallet);
 
 
     private async executeContractOperation(event: any) {
